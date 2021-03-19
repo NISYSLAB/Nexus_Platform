@@ -141,8 +141,10 @@ print_info "after finish ${DRIVER} --train_path ${train_folder}/ --test_path ${t
 rm -rf ${train_folder}
 rm -rf ${test_folder}
 
-print_info "Calling: tar -czf /cromwell_root/${outputs}.tar.gz ${outputs}"
-tar -czf /cromwell_root/${outputs}.tar.gz ${outputs}
+## print_info "Calling: tar -czf /cromwell_root/${outputs}.tar.gz ${outputs}"
+## tar -czf /cromwell_root/${outputs}.tar.gz ${outputs}
+print_info "Calling: tar -czf ${outputs}.tar.gz ${outputs}"
+tar -czf ${outputs}.tar.gz ${outputs}
 
 rtn_code=$?
 print_info "${TASK} tar command returned code=${rtn_code}"
@@ -153,5 +155,6 @@ if [[ "${rtn_code}" != "0" ]]; then
 fi
 
 print_info "${TASK} output size:"
-ls -alt /cromwell_root/${outputs}.tar.gz
+ls -alt ${outputs}.tar.gz
+##ls -alt /cromwell_root/${outputs}.tar.gz
 print_info "${TASK} ended"
