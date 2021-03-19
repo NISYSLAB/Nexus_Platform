@@ -8,5 +8,11 @@ This service is running on ```cromwell-7.priv.bmi.emory.edu```. Users must logon
 ## CloudyPipelines Public URL
 https://pipelineapi.org:9000/
 
+## Workflow Pipelines
+
+### fMRI Image Classification (Binary and Multiclass)
+
+https://github.com/NISYSLAB/fMRI_Biomarker
+
 
 
