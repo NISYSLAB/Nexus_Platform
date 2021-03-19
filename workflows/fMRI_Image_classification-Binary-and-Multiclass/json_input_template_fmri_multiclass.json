@@ -1,6 +1,0 @@
-{
-  "wf_fmri_biomarker.modelTraining.trainData": "File",
-  "wf_fmri_biomarker.modelTraining.testData": "File",
-  "wf_fmri_biomarker.modelTraining.execScript": "File",
-  "wf_fmri_biomarker.modelTraining.version": "String"
-}
