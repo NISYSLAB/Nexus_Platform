@@ -26,23 +26,26 @@ task modelTraining {
     String rootDir = "$PWD"
     File usageMonitor
     command {
+        
         mv ${usageMonitor} ./usage_monitor.sh
         chmod a+x ./usage_monitor.sh
         ./usage_monitor.sh
+        
+        echo "rootDir=${rootDir}"
         ####
         mv ${execScript}  /root/work/run_model_training.sh
         cd /root/work
         chmod a+x run_model_training.sh
         echo "./run_model_training.sh ${trainDataIn} ${testDataIn} ${version} ${outputs}"
         ./run_model_training.sh ${trainDataIn} ${testDataIn} ${version} ${outputs}
-        mv ${outputs}.tar.gz ${rootDir}/
+        ##mv ${outputs}.tar.gz ${rootDir}/
     }
     output {
         File out="${outputs}.tar.gz"
     }
     runtime {
         docker: "gcr.io/cloudypipelines-com/fmri-multiclass:1.0"
-         memory:  "28 GB"
+        memory:  "28 GB"
         cpu: "4"
         bootDiskSizeGb: 30
         disks: "local-disk 15 SSD"
@@ -65,6 +68,7 @@ task modelPredict {
         mv ${usageMonitor} ./usage_monitor.sh
         chmod a+x ./usage_monitor.sh
         ./usage_monitor.sh
+        echo "rootDir=${rootDir}"
         ####
 
         mv ${execScript}  /root/work/run_model_predict.sh
@@ -72,14 +76,14 @@ task modelPredict {
         chmod a+x run_model_predict.sh
         echo "./run_model_predict.sh ${trainedModelData} ${testDataIn} ${version} ${outputs}"
         ./run_model_predict.sh ${trainedModelData} ${testDataIn} ${version} ${outputs}
-        mv ${outputs}.tar.gz ${rootDir}/
+        ## mv ${outputs}.tar.gz ${rootDir}/
     }
     output {
         File out="${outputs}.tar.gz"
     }
     runtime {
         docker: "gcr.io/cloudypipelines-com/fmri-multiclass:1.0"
-         memory:  "28 GB"
+        memory:  "28 GB"
         cpu: "4"
         bootDiskSizeGb: 30
         disks: "local-disk 15 SSD"
@@ -102,14 +106,15 @@ task modelFeatureActivationMap {
         mv ${usageMonitor} ./usage_monitor.sh
         chmod a+x ./usage_monitor.sh
         ./usage_monitor.sh
+        echo "rootDir=${rootDir}"
         ####
-        
+
         mv ${execScript}  /root/work/run_model_feature_activation_map.sh
         cd /root/work
         chmod a+x run_model_feature_activation_map.sh
         echo "./run_model_feature_activation_map.sh ${trainedModelData} ${testDataIn} ${version} ${outputs}"
         ./run_model_feature_activation_map.sh ${trainedModelData} ${testDataIn} ${version} ${outputs}
-        mv ${outputs}.tar.gz ${rootDir}/
+        ##mv ${outputs}.tar.gz ${rootDir}/
     }
     output {
         File out="${outputs}.tar.gz"
