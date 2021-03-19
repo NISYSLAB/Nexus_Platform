@@ -1,0 +1,8 @@
+[
+  {
+    "wf_fmri_biomarker.modelTraining.trainData": "gs://cloudypipelines-com/nexus/fMRI_Image_classification-Binary-and-Multiclass/datasets/train_data.tar.gz",
+    "wf_fmri_biomarker.modelTraining.testData": "gs://cloudypipelines-com/nexus/fMRI_Image_classification-Binary-and-Multiclass/datasets/test_data.tar.gz",
+    "wf_fmri_biomarker.modelTraining.execScript": "gs://cloudypipelines-com/nexus/fMRI_Image_classification-Binary-and-Multiclass/scripts/run_model_training.sh",
+    "wf_fmri_biomarker.modelTraining.version": "1"
+  }
+]

@@ -1,0 +1,7 @@
+**/*.zip
+**/*.class
+**/*.jar
+**/*.tar.gz
+**/.idea
+**/bmicluster
+**/*.swp
