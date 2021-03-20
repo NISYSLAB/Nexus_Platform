@@ -1,8 +1,8 @@
 #!/bin/bash
 SCRIPT_NAME=$(basename -- "$0")
 
-## interval in seconds 300 seconds = 5 minutes
-interval=300
+## interval in seconds 120 seconds = 2 minutes
+interval=120
 
 monitorLog="usage_monitor.log"
 COUNTER=0
