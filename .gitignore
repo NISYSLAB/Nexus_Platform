@@ -5,3 +5,4 @@
 **/.idea
 **/bmicluster
 **/*.swp
+**/json_input_template*.json
