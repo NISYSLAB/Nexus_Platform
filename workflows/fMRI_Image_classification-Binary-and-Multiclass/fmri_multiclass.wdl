@@ -38,8 +38,8 @@ task modelTraining {
         chmod a+x run_model_training.sh
         echo "./run_model_training.sh ${trainDataIn} ${testDataIn} ${version} ${outputs}"
         ./run_model_training.sh ${trainDataIn} ${testDataIn} ${version} ${outputs}
-        echo "mv ./${outputs}.tar.gz ${rootDir}/"
-        mv ./${outputs}.tar.gz ${rootDir}/
+        ##echo "mv ./${outputs}.tar.gz ${rootDir}/"
+        ##mv ./${outputs}.tar.gz ${rootDir}/
     }
     output {
         File out="${outputs}.tar.gz"
@@ -77,8 +77,8 @@ task modelPredict {
         chmod a+x run_model_predict.sh
         echo "./run_model_predict.sh ${trainedModelData} ${testDataIn} ${version} ${outputs}"
         ./run_model_predict.sh ${trainedModelData} ${testDataIn} ${version} ${outputs}
-        echo "mv ./${outputs}.tar.gz ${rootDir}/"
-        mv ./${outputs}.tar.gz ${rootDir}/
+        ##echo "mv ./${outputs}.tar.gz ${rootDir}/"
+        ##mv ./${outputs}.tar.gz ${rootDir}/
     }
     output {
         File out="${outputs}.tar.gz"
@@ -116,8 +116,8 @@ task modelFeatureActivationMap {
         chmod a+x run_model_feature_activation_map.sh
         echo "./run_model_feature_activation_map.sh ${trainedModelData} ${testDataIn} ${version} ${outputs}"
         ./run_model_feature_activation_map.sh ${trainedModelData} ${testDataIn} ${version} ${outputs}
-        echo "mv ./${outputs}.tar.gz ${rootDir}/"
-        mv ./${outputs}.tar.gz ${rootDir}/
+        ##echo "mv ./${outputs}.tar.gz ${rootDir}/"
+        ##mv ./${outputs}.tar.gz ${rootDir}/
     }
     output {
         File out="${outputs}.tar.gz"
