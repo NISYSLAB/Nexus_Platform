@@ -45,8 +45,8 @@ task modelTraining {
     }
     runtime {
         docker: "gcr.io/cloudypipelines-com/fmri-multiclass:1.0"
-        memory:  "28 GB"
-        cpu: "4"
+        memory:  "16 GB"
+        cpu: "2"
         bootDiskSizeGb: 30
         disks: "local-disk 15 SSD"
         maxRetries: 1
@@ -84,8 +84,8 @@ task modelPredict {
     }
     runtime {
         docker: "gcr.io/cloudypipelines-com/fmri-multiclass:1.0"
-        memory:  "28 GB"
-        cpu: "4"
+        memory:  "16 GB"
+        cpu: "2"
         bootDiskSizeGb: 30
         disks: "local-disk 15 SSD"
         maxRetries: 1
@@ -123,8 +123,8 @@ task modelFeatureActivationMap {
     }
     runtime {
         docker: "gcr.io/cloudypipelines-com/fmri-multiclass:1.0"
-        memory:  "28 GB"
-        cpu: "4"
+        memory:  "16 GB"
+        cpu: "2"
         bootDiskSizeGb: 30
         disks: "local-disk 15 SSD"
         maxRetries: 1
