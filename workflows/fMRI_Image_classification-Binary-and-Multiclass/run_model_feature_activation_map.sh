@@ -126,6 +126,7 @@ rm -rf test_data.tar.gz
 print_info "Directory: ${WORK_DIR} info:"
 ls ${WORK_DIR}
 
+## python model_feature_activation_map.py --test_path /path_to/data_binary/test/ --trained_model /path_to/trained_model/ --version 1
 print_info "Calling: time ${DRIVER} --test_path ${test_folder}/ --trained_model ${train_folder}/ --version ${version}"
 time ${DRIVER} --test_path ${test_folder}/ --trained_model ${train_folder}/ --version ${version}
 

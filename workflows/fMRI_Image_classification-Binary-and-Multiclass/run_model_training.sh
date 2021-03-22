@@ -126,6 +126,7 @@ rm -rf test_data.tar.gz
 print_info "Directory: ${WORK_DIR} info:"
 ls ${WORK_DIR}
 
+## python model_train.py --train_path /path_to/data_binary/train/ --test_path /path_to/data_binary/test/ --trained_model /path_to/trained_model/ --version 1
 print_info "Calling: time ${DRIVER} --train_path ${train_folder}/ --test_path ${test_folder}/ --trained_model ${outputs}/ --version ${version}"
 time ${DRIVER} --train_path ${train_folder}/ --test_path ${test_folder}/ --trained_model ${outputs}/ --version ${version}
 

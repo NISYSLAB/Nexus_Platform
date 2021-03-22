@@ -49,7 +49,7 @@ task modelTraining {
         cpu: "2"
         bootDiskSizeGb: 30
         disks: "local-disk 15 SSD"
-        maxRetries: 1
+        maxRetries: 0
         preemptible: 1
         zones: "us-west4-a us-west4-b us-west4-c us-west3-a us-west3-b us-west3-c us-west2-a us-west2-b us-west2-c us-west1-a us-west1-b us-west1-c us-east4-a us-east4-b us-east4-c us-east1-a us-east1-b us-east1-c us-central1-a us-central1-b us-central1-c us-central1-f"
         ##zones: "us-east1-b us-east1-c us-east1-d us-central1-a us-central1-b us-central1-c us-central1-f us-east4-a us-east4-b us-east4-c us-west1-a us-west1-b us-west1-c us-west2-a us-west2-b us-west2-c"
@@ -61,7 +61,7 @@ task modelPredict {
     File testDataIn
     String version
     File execScript
-    String outputs = "trained_model"
+    String outputs = "predict_trained_model"
     File usageMonitor
     command {
         mv ${usageMonitor} ./usage_monitor.sh
@@ -88,7 +88,7 @@ task modelPredict {
         cpu: "2"
         bootDiskSizeGb: 30
         disks: "local-disk 15 SSD"
-        maxRetries: 1
+        maxRetries: 0
         preemptible: 1
         zones: "us-west4-a us-west4-b us-west4-c us-west3-a us-west3-b us-west3-c us-west2-a us-west2-b us-west2-c us-west1-a us-west1-b us-west1-c us-east4-a us-east4-b us-east4-c us-east1-a us-east1-b us-east1-c us-central1-a us-central1-b us-central1-c us-central1-f"
         ##zones: "us-east1-b us-east1-c us-east1-d us-central1-a us-central1-b us-central1-c us-central1-f us-east4-a us-east4-b us-east4-c us-west1-a us-west1-b us-west1-c us-west2-a us-west2-b us-west2-c"
@@ -100,7 +100,7 @@ task modelFeatureActivationMap {
     File testDataIn
     String version
     File execScript
-    String outputs = "trained_model"
+    String outputs = "feature_act_map_predict_trained_model"
     File usageMonitor
     command {
         mv ${usageMonitor} ./usage_monitor.sh
@@ -127,7 +127,7 @@ task modelFeatureActivationMap {
         cpu: "2"
         bootDiskSizeGb: 30
         disks: "local-disk 15 SSD"
-        maxRetries: 1
+        maxRetries: 0
         preemptible: 1
         zones: "us-west4-a us-west4-b us-west4-c us-west3-a us-west3-b us-west3-c us-west2-a us-west2-b us-west2-c us-west1-a us-west1-b us-west1-c us-east4-a us-east4-b us-east4-c us-east1-a us-east1-b us-east1-c us-central1-a us-central1-b us-central1-c us-central1-f"
         ##zones: "us-east1-b us-east1-c us-east1-d us-central1-a us-central1-b us-central1-c us-central1-f us-east4-a us-east4-b us-east4-c us-west1-a us-west1-b us-west1-c us-west2-a us-west2-b us-west2-c"
