@@ -127,8 +127,8 @@ print_info "Directory: ${WORK_DIR} info:"
 ls ${WORK_DIR}
 
 ## python model_train.py --train_path /path_to/data_binary/train/ --test_path /path_to/data_binary/test/ --trained_model /path_to/trained_model/ --version 1
-print_info "Calling: time ${DRIVER} --train_path ${train_folder}/ --test_path ${test_folder}/ --trained_model ${outputs}/ --version ${version}"
-time ${DRIVER} --train_path ${train_folder}/ --test_path ${test_folder}/ --trained_model ${outputs}/ --version ${version}
+print_info "Calling: time ${DRIVER} --train_path $PWD/${train_folder}/ --test_path $PWD/${test_folder}/ --trained_model $PWD/${outputs}/ --version ${version}"
+time ${DRIVER} --train_path $PWD/${train_folder}/ --test_path $PWD/${test_folder}/ --trained_model $PWD/${outputs}/ --version ${version}
 
 rtn_code=$?
 print_info "${TASK} command returned code=${rtn_code}"
@@ -138,7 +138,7 @@ if [[ "${rtn_code}" != "0" ]]; then
     exit 25
 fi
 
-print_info "after finish ${DRIVER} --train_path ${train_folder}/ --test_path ${test_folder}/ --trained_model ${outputs}/ --version ${version}"
+print_info "after finish ${DRIVER} --train_path $PWD/${train_folder}/ --test_path $PWD/${test_folder}/ --trained_model $PWD/${outputs}/ --version ${version}"
 rm -rf ${train_folder}
 rm -rf ${test_folder}
 

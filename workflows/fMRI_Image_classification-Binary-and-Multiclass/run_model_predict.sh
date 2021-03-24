@@ -127,8 +127,8 @@ print_info "Directory: ${WORK_DIR} info:"
 ls ${WORK_DIR}
 
 ## python model_predict.py --test_path /path_to/data_binary/test/ --trained_model /path_to/trained_model/ --version 1
-print_info "Calling: time ${DRIVER} --test_path ${test_folder}/ --trained_model ${train_folder}/ --version ${version}"
-time ${DRIVER} --test_path ${test_folder}/ --trained_model ${train_folder}/ --version ${version}
+print_info "Calling: time ${DRIVER} --test_path $PWD/${test_folder}/ --trained_model $PWD/${train_folder}/ --version ${version}"
+time ${DRIVER} --test_path $PWD/${test_folder}/ --trained_model $PWD/${train_folder}/ --version ${version}
 
 rtn_code=$?
 print_info "${TASK} command returned code=${rtn_code}"
@@ -138,7 +138,7 @@ if [[ "${rtn_code}" != "0" ]]; then
     exit 25
 fi
 
-print_info "after finish ${DRIVER} --test_path ${test_folder}/ --trained_model ${train_folder}/ --version ${version}"
+print_info "after finish ${DRIVER} --test_path $PWD/${test_folder}/ --trained_model $PWD/${train_folder}/ --version ${version}"
 rm -rf ${test_folder}
 
 print_info "Calling: tar -czf ${outputs}.tar.gz ${outputs}"
