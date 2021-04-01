@@ -1,7 +1,7 @@
 # Nexus_Platform
 
 ## Cromwell Workflow Engine URL at BMI Cluster
-http://cloudypipeline.bmi.emory.edu:9000/
+http://cloudypipeline.bmi.emory.edu:9005/
 
 
 ## CloudyPipelines BMI Cluster URL
