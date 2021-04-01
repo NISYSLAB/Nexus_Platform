@@ -2,7 +2,6 @@
 
 ## Cromwell Workflow Engine URL at BMI Cluster
 https://cloudypipeline.bmi.emory.edu
-http://cloudypipeline.bmi.emory.edu:9005/
 
 
 ## CloudyPipelines BMI Cluster URL
