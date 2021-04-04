@@ -1,11 +1,12 @@
 # Nexus_Platform
 
-## Cromwell Workflow Engine URL at BMI Cluster
-https://cloudypipeline.bmi.emory.edu
 
+## CloudyPipelines URL at BMI Cluster
+https://cloudypipeline.bmi.emory.edu/web/
 
-## CloudyPipelines BMI Cluster URL
-http://cloudypipeline.bmi.emory.edu:9000/swagger-ui.html
+## Docs/File Server URL at BMI Cluster
+https://cloudypipeline.bmi.emory.edu/docs/
+
 
 This service is running on ```cromwell-7.priv.bmi.emory.edu```. Users must logon on to Emory network to access
 
