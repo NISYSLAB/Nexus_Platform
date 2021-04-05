@@ -37,4 +37,9 @@ https://pipelineapi.org:9000/
 https://github.com/NISYSLAB/fMRI_Biomarker
 
 
+## Google Docs
+https://docs.google.com/document/d/1Rxk-Dr8IdXZ-7Ab-kcu36gYc0MGIR3np1YN6-Qqe13Q/edit?ts=604719fd
+
+
+
 
