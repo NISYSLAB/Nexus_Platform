@@ -7,6 +7,12 @@ https://cloudypipeline.bmi.emory.edu/web/
 ## Docs/File Server URL at BMI Cluster
 https://cloudypipeline.bmi.emory.edu/docs/
 
+## Cromwell Server URL at BMI Cluster
+https://cloudypipeline.bmi.emory.edu/
+
+It only allows authorized IP or IP range to access, unautorized IP will get 
+```403 Forbidden```
+
 ## Cromwell Server URL at localhost
 http://127.0.0.1:9055/swagger/index.html?url=/swagger/cromwell.yaml
 
