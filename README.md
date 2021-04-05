@@ -2,7 +2,8 @@
 
 
 ## CloudyPipelines URL at BMI Cluster
-https://cloudypipeline.bmi.emory.edu/web/
+https://cloudypipeline.bmi.emory.edu:9000/
+
 
 ## Docs/File Server URL at BMI Cluster
 https://cloudypipeline.bmi.emory.edu/docs/
