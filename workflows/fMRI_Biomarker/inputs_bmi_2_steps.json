@@ -1,7 +1,7 @@
 [
   {
-    "wf_fmri_biomarker.testData": "/labs/sharmalab/cloudypipelines/datasets/fmri_biomarker/data_binary/test_data.tar.gz",
-    "wf_fmri_biomarker.trainData": "/labs/sharmalab/cloudypipelines/datasets/fmri_biomarker/data_binary/train_data.tar.gz",
+    "wf_fmri_biomarker.testData": "/labs/mahmoudilab/data_binary/test_data.tar.gz",
+    "wf_fmri_biomarker.trainData": "/labs/mahmoudilab/data_binary/train_data.tar.gz",
     "wf_fmri_biomarker.monitorScript": "/labs/sharmalab/cloudypipelines/scripts/fmri_biomarker/usage_monitor.sh",
     "wf_fmri_biomarker.modelTraining.execScript": "/labs/sharmalab/cloudypipelines/scripts/fmri_biomarker/run_model_training.sh",
     "wf_fmri_biomarker.modelTraining.version": "1",
