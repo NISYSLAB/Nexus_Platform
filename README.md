@@ -4,12 +4,22 @@
 ## CloudyPipelines URL at BMI Cluster
 https://cloudypipeline.bmi.emory.edu/web/
 
+### Health Check URL
+https://cloudypipeline.bmi.emory.edu/web/health/
+
 
 ## Docs/File Server URL at BMI Cluster
 https://cloudypipeline.bmi.emory.edu/docs/
 
+### Health Check URL
+https://cloudypipeline.bmi.emory.edu/docs/
+
+
 ## Scheduler Server URL at BMI Cluster
 https://cloudypipeline.bmi.emory.edu/scheduler/
+
+### Health Check URL
+https://cloudypipeline.bmi.emory.edu/scheduler/health
 
 
 ## Cromwell Server URL at BMI Cluster
@@ -30,14 +40,17 @@ This service is running on ```cromwell-7.priv.bmi.emory.edu```. Users must logon
 ## CloudyPipelines Public URL
 https://pipelineapi.org:9000/
 
+### Health Check URL
+https://pipelineapi.org:9000/health
+
 ## Workflow Pipelines
 
-### fMRI Image Classification (Binary and Multiclass)
+### fMRI Image Classification (Binary and Multiclass) Github Repo
 
 https://github.com/NISYSLAB/fMRI_Biomarker
 
 
-## Google Docs
+## Google Docs for Archiecture, Design, and Requirements
 https://docs.google.com/document/d/1Rxk-Dr8IdXZ-7Ab-kcu36gYc0MGIR3np1YN6-Qqe13Q/edit?ts=604719fd
 
 
