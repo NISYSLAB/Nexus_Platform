@@ -3,11 +3,12 @@ SCRIPT_NAME=$(basename -- "$0")
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 ########## Predefined variables ##########
-TASK=modelTraining
+TASK=modelFeatureActivationMap
 WORK_DIR="/root/work"
-DRIVER="python model_train.py"
+DRIVER="python model_feature_activation_map.py"
 
 ######## Inputs from GCP buckets #########
+## ./run_model_feature_activation_map.sh ${trainedModelData} ${testData} ${version} ${outputs}
 trainData=""
 testData=""
 version=""
@@ -82,14 +83,14 @@ if [[ "$#" -ne 4 ]]; then
 fi
 
 ########## Collect inputs ##########
-## ./run_model_training.sh ${trainData} ${testData} ${version} ${outputs}
+## ./run_model_predict.sh ${trainedModelData} ${testData} ${version} ${outputs}
 trainData="$1"
 testData="$2"
 version="$3"
 outputs="$4"
 
 print_args
-
+## ./run_model_feature_activation_map.sh ${trainedModelData} ${testData} ${version} ${outputs}
 ########## check if work folder exist or not ######
 if [[ ! -d "${WORK_DIR}" ]] ; then
   print_error "${WORK_DIR} does not exist"
@@ -106,7 +107,6 @@ cp ${testData} ${WORK_DIR}/test_data.tar.gz
 print_info "after copy, run: rm -rf ${testData}"
 rm -rf ${testData}
 
-mkdir -p ${WORK_DIR}/${outputs}
 cd ${WORK_DIR}
 
 ########## get folder name from tar ##########
@@ -126,8 +126,9 @@ rm -rf test_data.tar.gz
 print_info "Directory: ${WORK_DIR} info:"
 ls ${WORK_DIR}
 
-print_info "Calling: time ${DRIVER} --train_path ${train_folder}/ --test_path ${test_folder}/ --trained_model ${outputs}/ --version ${version}"
-time ${DRIVER} --train_path ${train_folder}/ --test_path ${test_folder}/ --trained_model ${outputs}/ --version ${version}
+## python model_feature_activation_map.py --test_path /path_to/data_binary/test/ --trained_model /path_to/trained_model/ --version 1
+print_info "Calling: time ${DRIVER} --test_path $PWD/${test_folder}/ --trained_model $PWD/${train_folder}/ --version ${version}"
+time ${DRIVER} --test_path $PWD/${test_folder}/ --trained_model $PWD/${train_folder}/ --version ${version}
 
 rtn_code=$?
 print_info "${TASK} command returned code=${rtn_code}"
@@ -137,8 +138,7 @@ if [[ "${rtn_code}" != "0" ]]; then
     exit 25
 fi
 
-print_info "after finish ${DRIVER} --train_path ${train_folder}/ --test_path ${test_folder}/ --trained_model ${outputs}/ --version ${version}"
-rm -rf ${train_folder}
+print_info "after finish ${DRIVER} --test_path $PWD/${test_folder}/ --trained_model $PWD/${train_folder}/ --version ${version}"
 rm -rf ${test_folder}
 
 print_info "Calling: tar -czf ${outputs}.tar.gz ${outputs}"
