@@ -44,7 +44,7 @@ task modelTraining {
         File out="${outputs}.tar.gz"
     }
     runtime {
-        docker: "gcr.io/cloudypipelines-com/fMRI_Biomarker:1.0"
+        docker: "gcr.io/cloudypipelines-com/fmri_biomarker:1.0"
         memory:  "16 GB"
         cpu: "2"
         bootDiskSizeGb: 30
@@ -83,7 +83,7 @@ task modelPredict {
         File out="${outputs}.tar.gz"
     }
     runtime {
-        docker: "gcr.io/cloudypipelines-com/fMRI_Biomarker:1.0"
+        docker: "gcr.io/cloudypipelines-com/fmri_biomarker:1.0"
         memory:  "16 GB"
         cpu: "2"
         bootDiskSizeGb: 30
@@ -122,7 +122,7 @@ task modelFeatureActivationMap {
         File out="${outputs}.tar.gz"
     }
     runtime {
-        docker: "gcr.io/cloudypipelines-com/fMRI_Biomarker:1.0"
+        docker: "gcr.io/cloudypipelines-com/fmri_biomarker:1.0"
         memory:  "16 GB"
         cpu: "2"
         bootDiskSizeGb: 30
