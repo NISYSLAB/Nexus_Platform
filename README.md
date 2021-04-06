@@ -46,9 +46,7 @@ https://pipelineapi.org:9000/health
 ## Workflow Pipelines
 
 ### fMRI Image Classification (Binary and Multiclass) Github Repo
-
 https://github.com/NISYSLAB/fMRI_Biomarker
-
 
 ## Google Docs for Archiecture, Design, and Requirements
 https://docs.google.com/document/d/1Rxk-Dr8IdXZ-7Ab-kcu36gYc0MGIR3np1YN6-Qqe13Q/edit?ts=604719fd
