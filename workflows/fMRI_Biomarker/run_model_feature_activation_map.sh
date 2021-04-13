@@ -141,8 +141,8 @@ fi
 print_info "after finish ${DRIVER} --test_path $PWD/${test_folder}/ --trained_model $PWD/${train_folder}/ --version ${version}"
 rm -rf ${test_folder}
 
-print_info "Calling: tar -czf ${outputs}.tar.gz ${outputs}"
-tar -czf ${outputs}.tar.gz ${outputs}
+print_info "Calling: tar -czf ${outputs}.tar.gz ${train_folder}"
+tar -czf ${outputs}.tar.gz ${train_folder}
 
 rtn_code=$?
 print_info "${TASK} tar command returned code=${rtn_code}"
