@@ -129,8 +129,8 @@ rm -rf test_data.tar.gz
 print_info "Directory: ${WORK_DIR} info:"
 ls ${WORK_DIR}
 
-## python model_train.py --train_path /path_to/data_binary/train/ --test_path /path_to/data_binary/test/ --trained_model /path_to/trained_model/ --version 1
-print_info "Calling: time ${DRIVER} --train_path $PWD/${train_folder}/ --test_path $PWD/${test_folder}/ --trained_model $PWD/${outputs}/ --save_dir $PWD/${savedResults}/ --version ${version}"
+## python model_train.py --train_path /path_to/data_binary/train/ --test_path /path_to/data_binary/test/ --trained_model /path_to_SAVE_trained_model/ --save_dir /path_to_SAVE_save_results/ --version 1
+print_info "time ${DRIVER} --train_path $PWD/${train_folder}/ --test_path $PWD/${test_folder}/ --trained_model $PWD/${outputs}/ --save_dir $PWD/${savedResults}/ --version ${version}"
 time ${DRIVER} --train_path $PWD/${train_folder}/ --test_path $PWD/${test_folder}/ --trained_model $PWD/${outputs}/ --save_dir $PWD/${savedResults}/ --version ${version}
 
 rtn_code=$?
@@ -142,10 +142,10 @@ if [[ "${rtn_code}" != "0" ]]; then
 fi
 
 print_info "after finish ${DRIVER} --train_path $PWD/${train_folder}/ --test_path $PWD/${test_folder}/ --trained_model $PWD/${outputs}/ --save_dir $PWD/${savedResults}/ --version ${version}"
-rm -rf ${train_folder}
-rm -rf ${test_folder}
+print_info "rm -rf ${train_folder} ${test_folder}"
+rm -rf ${train_folder} ${test_folder}
 
-print_info "Calling: tar -czf ${outputs}.tar.gz ${outputs}"
+print_info "tar -czf ${outputs}.tar.gz ${outputs}"
 tar -czf ${outputs}.tar.gz ${outputs}
 
 rtn_code=$?
@@ -156,7 +156,10 @@ if [[ "${rtn_code}" != "0" ]]; then
     exit 25
 fi
 
-print_info "Calling: tar -czf ${savedResults}.tar.gz ${savedResults}"
+print_info "Delete ${outputs}"
+rm -rf ${outputs}
+
+print_info "tar -czf ${savedResults}.tar.gz ${savedResults}"
 tar -czf ${savedResults}.tar.gz ${savedResults}
 
 rtn_code=$?
@@ -166,6 +169,9 @@ if [[ "${rtn_code}" != "0" ]]; then
     print_info "${TASK} ended"
     exit 25
 fi
+
+print_info "Delete ${savedResults}"
+rm -rf ${savedResults}
 
 print_info "${TASK} output size:"
 ls -alt *.tar.gz

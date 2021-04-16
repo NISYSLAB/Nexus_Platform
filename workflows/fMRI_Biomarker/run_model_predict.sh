@@ -129,8 +129,8 @@ rm -rf test_data.tar.gz
 print_info "Directory: ${WORK_DIR} info:"
 ls ${WORK_DIR}
 
-## python model_predict.py --test_path /path_to/data_binary/test/ --trained_model /path_to/trained_model/ --version 1
-print_info "Calling: time ${DRIVER} --test_path $PWD/${test_folder}/ --trained_model $PWD/${train_folder}/ --save_predict $PWD/${savedResults}/ --version ${version}"
+## python model_predict.py --test_path /path_to/data_binary/test/ --trained_model /path_to/trained_model/ --save_predict /path_to_SAVE_prediction_results/ --version 1
+print_info "time ${DRIVER} --test_path $PWD/${test_folder}/ --trained_model $PWD/${train_folder}/ --save_predict $PWD/${savedResults}/ --version ${version}"
 time ${DRIVER} --test_path $PWD/${test_folder}/ --trained_model $PWD/${train_folder}/ --save_predict $PWD/${savedResults}/ --version ${version}
 
 rtn_code=$?
@@ -142,9 +142,10 @@ if [[ "${rtn_code}" != "0" ]]; then
 fi
 
 print_info "after finish ${DRIVER} --test_path $PWD/${test_folder}/ --trained_model $PWD/${train_folder}/ --save_predict $PWD/${savedResults}/ --version ${version}"
-rm -rf ${test_folder}
+print_info "rm -rf ${test_folder} ${train_folder}"
+rm -rf ${test_folder} ${train_folder}
 
-print_info "Calling: tar -czf ${savedResults}.tar.gz ${savedResults}"
+print_info "tar -czf ${savedResults}.tar.gz ${savedResults}"
 tar -czf ${savedResults}.tar.gz ${savedResults}
 
 rtn_code=$?
@@ -154,6 +155,9 @@ if [[ "${rtn_code}" != "0" ]]; then
     print_info "${TASK} ended"
     exit 25
 fi
+
+print_info "Delete ${savedResults}"
+rm -rf ${savedResults}
 
 print_info "${TASK} output size:"
 ls -alt *.tar.gz

@@ -142,10 +142,10 @@ if [[ "${rtn_code}" != "0" ]]; then
 fi
 
 print_info "after finish ${DRIVER} --test_path $PWD/${test_folder}/ --trained_model $PWD/${train_folder}/ --save_activation $PWD/${savedResults}/ --version ${version}"
-rm -rf ${test_folder}
+print_info "rm -rf ${test_folder} ${train_folder}"
+rm -rf ${test_folder} ${train_folder}
 
-
-print_info "Calling: tar -czf ${savedResults}.tar.gz ${savedResults}"
+print_info "tar -czf ${savedResults}.tar.gz ${savedResults}"
 tar -czf ${savedResults}.tar.gz ${savedResults}
 
 rtn_code=$?
@@ -155,6 +155,9 @@ if [[ "${rtn_code}" != "0" ]]; then
     print_info "${TASK} ended"
     exit 25
 fi
+
+print_info "Delete ${savedResults}"
+rm -rf ${savedResults}
 
 print_info "${TASK} output size:"
 ls -alt *.tar.gz

@@ -44,7 +44,7 @@ task modelTraining {
     String version
     File execScript
     String trainedModelOutputs = "trained_model"
-    String savedResults = "trained_saved_results"
+    String savedResults = "trained_model_saved_results"
     File usageMonitor
     String dockerInUse
     command {
@@ -104,11 +104,9 @@ task modelPredict {
         ./run_model_predict.sh ${trainedModelData} ${testDataIn} ${version} ${trainedModelOutputs} ${savedResults}
 
         cd -
-        ## mv /root/work/${trainedModelOutputs}.tar.gz .
         mv /root/work/${savedResults}.tar.gz .
     }
     output {
-        ## File out = "${trainedModelOutputs}.tar.gz"
         File results = "${savedResults}.tar.gz"
     }
     runtime {
@@ -130,7 +128,7 @@ task modelFeatureActivationMap {
     String version
     File execScript
     String trainedModelOutputs = "trained_model"
-    String savedResults = "act_saved_results"
+    String savedResults = "activation_saved_results"
     File usageMonitor
     String dockerInUse
     command {
@@ -147,11 +145,9 @@ task modelFeatureActivationMap {
         ./run_model_feature_activation_map.sh ${trainedModelData} ${testDataIn} ${version} ${trainedModelOutputs} ${savedResults}
 
         cd -
-        ##mv /root/work/${trainedModelOutputs}.tar.gz .
         mv /root/work/${savedResults}.tar.gz .
     }
     output {
-        ##File out = "${trainedModelOutputs}.tar.gz"
         File results = "${savedResults}.tar.gz"
     }
     runtime {
@@ -172,17 +168,19 @@ task merge {
     File trainedSavedResults
     File predictSavedResults
     File actSavedResults
-    String outputs = "fmri_biomarker_outputs.tar.gz"
+    String outputs = "fmri_biomarker_outputs"
 
     command {
         echo "Start compressing files:"
-        echo "tar -cvzf ${outputs} ${trainedModelData} ${trainedSavedResults} ${predictSavedResults} ${actSavedResults}"
-        tar -cvzf ${outputs} ${trainedModelData} ${trainedSavedResults} ${predictSavedResults} ${actSavedResults}
-        echo "ls -alt ${outputs}"
-        ls -alt ${outputs}
+        echo "tar -cvzf ${outputs}.tar.gz ${trainedModelData} ${trainedSavedResults} ${predictSavedResults} ${actSavedResults}"
+        tar -cvzf ${outputs}.tar.gz ${trainedModelData} ${trainedSavedResults} ${predictSavedResults} ${actSavedResults}
+        echo "rm -rf ${trainedModelData} ${trainedSavedResults} ${predictSavedResults} ${actSavedResults}"
+        rm -rf ${trainedModelData} ${trainedSavedResults} ${predictSavedResults} ${actSavedResults}
+        echo "ls -alt *.tar.gz"
+        ls -alt *..tar.gz
     }
     output {
-        File out = "${outputs}"
+        File out = "${outputs}.tar.gz"
     }
     runtime {
         docker: "alpine:3.13"
