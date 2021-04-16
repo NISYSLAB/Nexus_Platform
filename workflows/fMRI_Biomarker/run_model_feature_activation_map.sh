@@ -129,9 +129,10 @@ rm -rf test_data.tar.gz
 print_info "Directory: ${WORK_DIR} info:"
 ls ${WORK_DIR}
 
+CMD="${DRIVER} --test_path $PWD/${test_folder}/ --trained_model $PWD/${train_folder}/trained_model/ --save_activation $PWD/${savedResults}/ --version ${version}"
 ## python model_feature_activation_map.py --test_path /path_to/data_binary/test/ --trained_model /path_to/trained_model/ --version 1
-print_info "Calling: time ${DRIVER} --test_path $PWD/${test_folder}/ --trained_model $PWD/${train_folder}/ --save_activation $PWD/${savedResults}/ --version ${version}"
-time ${DRIVER} --test_path $PWD/${test_folder}/ --trained_model $PWD/${train_folder}/ --save_activation $PWD/${savedResults}/ --version ${version}
+print_info "Calling: time ${CMD}"
+time ${CMD}
 
 rtn_code=$?
 print_info "${TASK} command returned code=${rtn_code}"
@@ -141,12 +142,14 @@ if [[ "${rtn_code}" != "0" ]]; then
     exit 25
 fi
 
-print_info "after finish ${DRIVER} --test_path $PWD/${test_folder}/ --trained_model $PWD/${train_folder}/ --save_activation $PWD/${savedResults}/ --version ${version}"
+ls
+
+print_info "after finish ${CMD}"
 print_info "rm -rf ${test_folder} ${train_folder}"
 rm -rf ${test_folder} ${train_folder}
 
-print_info "tar -czf ${savedResults}.tar.gz ${savedResults}"
-tar -czf ${savedResults}.tar.gz ${savedResults}
+print_info "tar -czf ${savedResults}.tar.gz ${savedResults} || tar -czf ${savedResults}.tar.gz save_activation"
+tar -czf ${savedResults}.tar.gz ${savedResults} || tar -czf ${savedResults}.tar.gz save_activation
 
 rtn_code=$?
 print_info "${TASK} tar command returned code=${rtn_code}"

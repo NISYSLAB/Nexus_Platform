@@ -183,7 +183,7 @@ task merge {
         File out = "${outputs}.tar.gz"
     }
     runtime {
-        docker: "alpine:3.13"
+        docker: "ubuntu:20.04"
         memory:  "4 GB"
         cpu: "2"
         bootDiskSizeGb: 30
