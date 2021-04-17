@@ -172,12 +172,21 @@ task merge {
 
     command {
         echo "Start compressing files:"
-        echo "tar -cvzf ${outputs}.tar.gz ${trainedModelData} ${trainedSavedResults} ${predictSavedResults} ${actSavedResults}"
-        tar -cvzf ${outputs}.tar.gz ${trainedModelData} ${trainedSavedResults} ${predictSavedResults} ${actSavedResults}
-        echo "rm -rf ${trainedModelData} ${trainedSavedResults} ${predictSavedResults} ${actSavedResults}"
-        rm -rf ${trainedModelData} ${trainedSavedResults} ${predictSavedResults} ${actSavedResults}
-        echo "ls -alt *.tar.gz"
-        ls -alt *..tar.gz
+        mkdir -p /app
+        mv ${trainedModelData} /app/trainedModelData.tar.gz || echo "Failed: mv ${trainedModelData} /app/trainedModelData.tar.gz, OK to move on"
+        mv ${trainedSavedResults} /app/trainedSavedResults.tar.gz || echo "Failed: mv ${trainedSavedResults} /app/trainedSavedResults.tar.gz, OK to move on"
+        mv ${predictSavedResults} /app/predictSavedResults.tar.gz || echo "Failed: mv ${predictSavedResults} /app/predictSavedResults.tar.gz, OK to move on"
+        mv ${actSavedResults} /app/actSavedResults.tar.gz || echo "Failed: mv ${actSavedResults} /app/actSavedResults.tar.gz, OK to move on"
+        cd /app
+        ls
+        echo "tar -cvzf ${outputs}.tar.gz ./*.tar.gz"
+        tar -cvzf ${outputs}.tar.gz ./*.tar.gz || echo "Failed: tar -cvzf ${outputs}.tar.gz ./*.tar.gz"
+        echo "rm -rf trainedModelData.tar.gz trainedSavedResults.tar.gz predictSavedResults.tar.gz actSavedResults.tar.gz"
+        rm -rf trainedModelData.tar.gz trainedSavedResults.tar.gz predictSavedResults.tar.gz actSavedResults.tar.gz || echo "Failed: rm -rf trainedModelData.tar.gz trainedSavedResults.tar.gz predictSavedResults.tar.gz actSavedResults.tar.gz"
+        echo "ls -alt"
+        ls -alt
+        cd -
+        mv /app/${outputs}.tar.gz .
     }
     output {
         File out = "${outputs}.tar.gz"
