@@ -79,8 +79,9 @@ print_sys_info
 msg="Calling: ${SCRIPT_NAME} $@"
 print_info "${msg}"
 
-if [[ "$#" -ne 5 ]]; then
-    print_error "Invalid arguments"
+argCount=5
+if [[ "$#" -ne ${argCount} ]]; then
+    print_error "Invalid arguments: expecting ${argCount}, actually passing: $#"
     exit 1
 fi
 
