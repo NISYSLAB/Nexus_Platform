@@ -2,7 +2,7 @@ workflow wf_fmri_biomarker {
     File trainData
     File testData
     File monitorScript
-    String dockerRef = "gcr.io/cloudypipelines-com/fmri_biomarker:1.2"
+    String dockerRef = "gcr.io/cloudypipelines-com/fmri_biomarker:1.3"
     call modelTraining {
         input:
             trainDataIn = trainData,
