@@ -10,8 +10,8 @@ COUNTER=0
 function print_usage() {
     now=$(date -u +"%m/%d/%Y:%H:%M:%S")
     COUNTER=$((COUNTER+1))
-    echo "+++++++++++ counter ${COUNTER}: ${now} exec: vmstat ++++++++++++++++"
-    vmstat || echo "vmstat not found"
+    ## echo "+++++++++++ counter ${COUNTER}: ${now} exec: vmstat ++++++++++++++++"
+    ##vmstat || echo "vmstat not found"
     echo ""
     echo "+++++++++++ counter ${COUNTER}: ${now} exec: free ++++++++++++++++++"
     free || echo "free not found"

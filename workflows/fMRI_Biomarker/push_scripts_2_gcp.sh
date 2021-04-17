@@ -1,5 +1,4 @@
 
-
 bucket_url=gs://cloudypipelines-com/nexus/fMRI_Image_classification-Binary-and-Multiclass/scripts
 ########
 
@@ -15,6 +14,6 @@ push_to_bucket run_model_predict.sh
 push_to_bucket run_model_feature_activation_map.sh
 push_to_bucket usage_monitor.sh
 
-gsutil ls ${bucket_url}/*.*
+gsutil ls -l ${bucket_url}/*.*
 
 ##gsutil cp run_model_training.sh gs://cloudypipelines-com/nexus/fMRI_Image_classification-Binary-and-Multiclass/scripts/run_model_training.sh

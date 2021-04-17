@@ -12,6 +12,7 @@ trainData=""
 testData=""
 version=""
 outputs=""
+savedResults=""
 
 ########## function definitions##########
 function filenameonly() {
@@ -45,6 +46,7 @@ function print_args() {
     print_info "testData=${testData}"
     print_info "version=${version}"
     print_info "outputs=${outputs}"
+    print_info "savedResults=${savedResults}"
 
     print_info "size of $( filenameonly ${trainData} ):"
     ls -alt ${trainData}
@@ -76,8 +78,9 @@ print_sys_info
 msg="Calling: ${SCRIPT_NAME} $@"
 print_info "${msg}"
 
-if [[ "$#" -ne 4 ]]; then
-    print_error "Invalid arguments"
+argCount=5
+if [[ "$#" -ne ${argCount} ]]; then
+    print_error "Invalid arguments: expecting ${argCount}, actually passing: $#"
     exit 1
 fi
 
@@ -87,6 +90,7 @@ trainData="$1"
 testData="$2"
 version="$3"
 outputs="$4"
+savedResults="$5"
 
 print_args
 
@@ -126,9 +130,10 @@ rm -rf test_data.tar.gz
 print_info "Directory: ${WORK_DIR} info:"
 ls ${WORK_DIR}
 
-## python model_train.py --train_path /path_to/data_binary/train/ --test_path /path_to/data_binary/test/ --trained_model /path_to/trained_model/ --version 1
-print_info "Calling: time ${DRIVER} --train_path $PWD/${train_folder}/ --test_path $PWD/${test_folder}/ --trained_model $PWD/${outputs}/ --version ${version}"
-time ${DRIVER} --train_path $PWD/${train_folder}/ --test_path $PWD/${test_folder}/ --trained_model $PWD/${outputs}/ --version ${version}
+CMD="${DRIVER} --train_path $PWD/${train_folder}/ --test_path $PWD/${test_folder}/ --trained_model $PWD/${outputs}/ --save_dir $PWD/${savedResults}/ --version ${version}"
+## python model_train.py --train_path /path_to/data_binary/train/ --test_path /path_to/data_binary/test/ --trained_model /path_to_SAVE_trained_model/ --save_dir /path_to_SAVE_save_results/ --version 1
+print_info "time ${CMD}"
+time ${CMD}
 
 rtn_code=$?
 print_info "${TASK} command returned code=${rtn_code}"
@@ -138,12 +143,14 @@ if [[ "${rtn_code}" != "0" ]]; then
     exit 25
 fi
 
-print_info "after finish ${DRIVER} --train_path $PWD/${train_folder}/ --test_path $PWD/${test_folder}/ --trained_model $PWD/${outputs}/ --version ${version}"
-rm -rf ${train_folder}
-rm -rf ${test_folder}
+ls
 
-print_info "Calling: tar -czf ${outputs}.tar.gz ${outputs}"
-tar -czf ${outputs}.tar.gz ${outputs}
+print_info "after finish ${CMD}"
+print_info "rm -rf ${train_folder} ${test_folder}"
+rm -rf ${train_folder} ${test_folder}
+
+print_info "tar -czf ${outputs}.tar.gz ${outputs} || tar -czf ${outputs}.tar.gz save_results"
+tar -czf ${outputs}.tar.gz ${outputs} || tar -czf ${outputs}.tar.gz save_results
 
 rtn_code=$?
 print_info "${TASK} tar command returned code=${rtn_code}"
@@ -153,6 +160,23 @@ if [[ "${rtn_code}" != "0" ]]; then
     exit 25
 fi
 
+print_info "Delete ${outputs}"
+rm -rf ${outputs}
+
+print_info "tar -czf ${savedResults}.tar.gz ${savedResults}"
+tar -czf ${savedResults}.tar.gz ${savedResults}
+
+rtn_code=$?
+print_info "${TASK} tar command returned code=${rtn_code}"
+if [[ "${rtn_code}" != "0" ]]; then
+    print_error "${TASK} tar command threw errors, exit with code 25"
+    print_info "${TASK} ended"
+    exit 25
+fi
+
+print_info "Delete ${savedResults}"
+rm -rf ${savedResults}
+
 print_info "${TASK} output size:"
-ls -alt ${outputs}.tar.gz
+ls -alt *.tar.gz
 print_info "${TASK} ended"

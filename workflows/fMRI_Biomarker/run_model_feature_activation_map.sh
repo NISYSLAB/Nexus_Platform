@@ -13,6 +13,7 @@ trainData=""
 testData=""
 version=""
 outputs=""
+savedResults=""
 
 ########## function definitions##########
 function filenameonly() {
@@ -46,6 +47,7 @@ function print_args() {
     print_info "testData=${testData}"
     print_info "version=${version}"
     print_info "outputs=${outputs}"
+    print_info "savedResults=${savedResults}"
 
     print_info "size of $( filenameonly ${trainData} ):"
     ls -alt ${trainData}
@@ -77,8 +79,9 @@ print_sys_info
 msg="Calling: ${SCRIPT_NAME} $@"
 print_info "${msg}"
 
-if [[ "$#" -ne 4 ]]; then
-    print_error "Invalid arguments"
+argCount=5
+if [[ "$#" -ne ${argCount} ]]; then
+    print_error "Invalid arguments: expecting ${argCount}, actually passing: $#"
     exit 1
 fi
 
@@ -88,6 +91,7 @@ trainData="$1"
 testData="$2"
 version="$3"
 outputs="$4"
+savedResults="$5"
 
 print_args
 ## ./run_model_feature_activation_map.sh ${trainedModelData} ${testData} ${version} ${outputs}
@@ -126,9 +130,10 @@ rm -rf test_data.tar.gz
 print_info "Directory: ${WORK_DIR} info:"
 ls ${WORK_DIR}
 
+CMD="${DRIVER} --test_path $PWD/${test_folder}/ --trained_model $PWD/${train_folder}/trained_model/ --save_activation $PWD/${savedResults}/ --version ${version}"
 ## python model_feature_activation_map.py --test_path /path_to/data_binary/test/ --trained_model /path_to/trained_model/ --version 1
-print_info "Calling: time ${DRIVER} --test_path $PWD/${test_folder}/ --trained_model $PWD/${train_folder}/ --version ${version}"
-time ${DRIVER} --test_path $PWD/${test_folder}/ --trained_model $PWD/${train_folder}/ --version ${version}
+print_info "Calling: time ${CMD}"
+time ${CMD}
 
 rtn_code=$?
 print_info "${TASK} command returned code=${rtn_code}"
@@ -138,11 +143,14 @@ if [[ "${rtn_code}" != "0" ]]; then
     exit 25
 fi
 
-print_info "after finish ${DRIVER} --test_path $PWD/${test_folder}/ --trained_model $PWD/${train_folder}/ --version ${version}"
-rm -rf ${test_folder}
+ls
 
-print_info "Calling: tar -czf ${outputs}.tar.gz ${train_folder}"
-tar -czf ${outputs}.tar.gz ${train_folder}
+print_info "after finish ${CMD}"
+print_info "rm -rf ${test_folder} ${train_folder}"
+rm -rf ${test_folder} ${train_folder}
+
+print_info "tar -czf ${savedResults}.tar.gz ${savedResults} || tar -czf ${savedResults}.tar.gz save_activation"
+tar -czf ${savedResults}.tar.gz ${savedResults} || tar -czf ${savedResults}.tar.gz save_activation
 
 rtn_code=$?
 print_info "${TASK} tar command returned code=${rtn_code}"
@@ -152,6 +160,9 @@ if [[ "${rtn_code}" != "0" ]]; then
     exit 25
 fi
 
+print_info "Delete ${savedResults}"
+rm -rf ${savedResults}
+
 print_info "${TASK} output size:"
-ls -alt ${outputs}.tar.gz
+ls -alt *.tar.gz
 print_info "${TASK} ended"
