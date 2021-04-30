@@ -15,6 +15,7 @@ function push_to_bmi() {
   local dest=$2
   echo "scp -o ProxyCommand="ssh -W %h:%p ${USER}@${JUMPBOX}" "${from}" ${USER}@${BMI_VM}:${dest}"
   scp -o ProxyCommand="ssh -W %h:%p ${USER}@${JUMPBOX}" "${from}" ${USER}@${BMI_VM}:${dest}
+  ##scp -o ProxyCommand="ssh -W %h:%p ${USER}@${JUMPBOX}" "${from}" ${USER}@${BMI_VM}:${to}
 }
 
 push_to_bmi "run_model_training.sh" ${bucket_url}/run_model_training.sh
