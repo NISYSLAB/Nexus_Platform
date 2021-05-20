@@ -1,7 +1,13 @@
 # Nexus_Platform
 
 
-## Docs/File Server URL at BMI Cluster
+## CloudyPipelines Public URL
+https://pipelineapi.org:9000/
+
+### Health Check URL
+https://pipelineapi.org:9000/health
+
+## File Download Server URL at BMI Cluster
 https://cloudypipeline.bmi.emory.edu/docs/
 
 
@@ -19,12 +25,6 @@ or
 http://localhost:9033/swagger/index.html?url=/swagger/cromwell.yaml
 
 This service is running on ```cromwell-7.priv.bmi.emory.edu```. Users must logon on to Emory network to access
-
-## CloudyPipelines Public URL
-https://pipelineapi.org:9000/
-
-### Health Check URL
-https://pipelineapi.org:9000/health
 
 ## Workflow Pipelines
 
