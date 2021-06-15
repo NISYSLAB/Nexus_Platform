@@ -1,0 +1,9 @@
+[
+  {
+    "wf_fmri_biomarker_training.testData": "/labs/mahmoudilab/data_binary/test_data.tar.gz",
+    "wf_fmri_biomarker_training.trainData": "/labs/mahmoudilab/data_binary/train_data.tar.gz",
+    "wf_fmri_biomarker_training.monitorScript": "/labs/sharmalab/cloudypipelines/scripts/fmri_biomarker/usage_monitor.sh",
+    "wf_fmri_biomarker_training.modelTraining.execScript": "/labs/sharmalab/cloudypipelines/scripts/fmri_biomarker/run_model_training.sh",
+    "wf_fmri_biomarker_training.modelTraining.version": "1"
+  }
+]
