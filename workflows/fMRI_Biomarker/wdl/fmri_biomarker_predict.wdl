@@ -1,5 +1,4 @@
 workflow wf_fmri_biomarker_predict {
-    File trainData
     File testData
     File monitorScript
     String dockerRef = "gcr.io/cloudypipelines-com/fmri_biomarker:1.3"
