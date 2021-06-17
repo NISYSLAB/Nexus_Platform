@@ -1,0 +1,9 @@
+[
+  {
+    "wf_fmri_biomarker_featuremap.testData": "/labs/mahmoudilab/data_binary/test_data.tar.gz",
+    "wf_fmri_biomarker_featuremap.monitorScript": "/labs/sharmalab/cloudypipelines/scripts/fmri_biomarker/usage_monitor.sh",
+    "wf_fmri_biomarker_featuremap.modelFeatureActivationMap.trainedModelData": "/labs/mahmoudilab/data_binary/trained_model_data/trainedModelData.tar.gz",
+    "wf_fmri_biomarker_featuremap.modelFeatureActivationMap.execScript": "/labs/sharmalab/cloudypipelines/scripts/fmri_biomarker/run_model_feature_activation_map.sh",
+    "wf_fmri_biomarker_featuremap.modelFeatureActivationMap.version": "1"
+  }
+]

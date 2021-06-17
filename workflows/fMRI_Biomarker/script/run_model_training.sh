@@ -48,6 +48,12 @@ function print_args() {
     print_info "outputs=${outputs}"
     print_info "savedResults=${savedResults}"
 
+    print_info "ENV: WORKFLOW_ID=${WORKFLOW_ID}"
+    print_info "ENV: TASK_CALL_NAME=${TASK_CALL_NAME}"
+    print_info "ENV: TASK_CALL_ATTEMPT=${TASK_CALL_ATTEMPT}"
+    print_info "ENV: DISK_MOUNTS=${DISK_MOUNTS}"
+    print_info "ENV: COPY_RESULTS=${COPY_RESULTS}"
+
     print_info "size of $( filenameonly ${trainData} ):"
     ls -alt ${trainData}
     print_info "checksum of $( filenameonly ${trainData} ):"
@@ -180,3 +186,13 @@ rm -rf ${savedResults}
 print_info "${TASK} output size:"
 ls -alt *.tar.gz
 print_info "${TASK} ended"
+
+if [[ "${COPY_RESULTS}" == "Y" ]]; then
+  print_info "mv /root/work/${outputs}.tar.gz ${DISK_MOUNTS}/"
+  mv /root/work/${outputs}.tar.gz ${DISK_MOUNTS}/
+
+  print_info "mv /root/work/${savedResults}.tar.gz ${DISK_MOUNTS}/"
+  mv /root/work/${savedResults}.tar.gz ${DISK_MOUNTS}/
+
+  ls -alt ${DISK_MOUNTS}/
+fi
