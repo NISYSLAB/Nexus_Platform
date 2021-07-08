@@ -4,7 +4,8 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 ########## Predefined variables ##########
 WORK_DIR="/app"
-OUTPUT_DIR=result_nifti
+output_directory=output_directory
+input_directory=input_directory
 DRIVER="dicom2nifti"
 
 ######## Inputs from GCP buckets #########
@@ -58,7 +59,8 @@ print_info "SCRIPT_NAME=${SCRIPT_NAME} "
 print_info "SCRIPT_DIR=${SCRIPT_DIR}"
 print_info "LOCAL_USER=$(whoami)"
 print_info "WORK_DIR=${WORK_DIR}"
-print_info "OUTPUT_DIR=${OUTPUT_DIR}"
+print_info "output_directory=${output_directory}"
+print_info "input_directory=${input_directory}"
 print_info "DRIVER=${DRIVER}"
 print_sys_info
 print_info "${SCRIPT_NAME} started at [$(date -u +"%m/%d/%Y:%H:%M:%S")]"
@@ -72,7 +74,7 @@ echo "[$(date -u +"%m/%d/%Y:%H:%M:%S")]: user process started"
 echo "[$(date -u +"%m/%d/%Y:%H:%M:%S")]: user process started" >> /dev/stderr
 
 if [[ "$#" -ne 3 ]]; then
-    print_error "Invalid arguments"
+    print_error "Invalid arguments, expecting 3 args"
     exit 1
 fi
 
@@ -90,51 +92,58 @@ fi
 
 print_info "WORK_DIR exist: ${WORK_DIR}"
 
-cp ${input} ${WORK_DIR}/input_dicom_images.tar.gz
+mkdir -p ${WORK_DIR}/${input_directory}
+mkdir -p ${WORK_DIR}/${output_directory}
+
+cp ${input} ${WORK_DIR}/${input_directory}/input_dicom_images.tar.gz
 
 print_info "after copy, run: rm -rf ${input}"
 rm -rf ${input}
 
-mkdir -p ${WORK_DIR}/${OUTPUT_DIR}
-cd ${WORK_DIR}
+cd ${WORK_DIR}/${input_directory}
 ########## get folder name from tar ##########
-input_folder=$( extract_folder_name input_dicom_images.tar.gz )
-print_info "input_dicom_images.tar.gz input_folder: ${input_folder}"
+expanded_folder=$( extract_folder_name input_dicom_images.tar.gz )
+print_info "input_dicom_images.tar.gz expanded_folder: ${expanded_folder}"
 
-tar -xf input_dicom_images.tar.gz
+## compress: tar -czvf siemens_fmri_classic_001.tar.gz 001
+tar -xzvf input_dicom_images.tar.gz
 rm -rf input_dicom_images.tar.gz
 
 print_info "Current directory: $(pwd) info:"
 ls
 
-print_info "Calling: time ${DRIVER} ${cmd_options} ${input_folder} ${OUTPUT_DIR}"
-time ${DRIVER} ${cmd_options} ${input_folder} ${OUTPUT_DIR}
+cd ${WORK_DIR}
+print_info "Current directory: $(pwd) info:"
+ls
+
+print_info "Calling: time ${DRIVER} ${cmd_options} ${input_directory} ${output_directory}"
+time ${DRIVER} "${cmd_options}" "${input_directory}" "${output_directory}"
 
 rtn_code=$?
-print_info "${DRIVER} command returned code=${rtn_code} from command: ${DRIVER} ${cmd_options} ${input_folder} ${OUTPUT_DIR} "
+print_info "${DRIVER} command returned code=${rtn_code} from command: ${DRIVER} ${cmd_options} ${input_directory} ${output_directory}"
 if [[ "${rtn_code}" != "0" ]]; then
     print_error "${DRIVER} user's coding threw errors, exit with code 25"
     print_info "${DRIVER} ended at $(date +"%m/%d/%Y:%R")"
     exit 25
 fi
 
-print_info "after command: ${DRIVER}, run: rm -rf ${input_folder}"
-rm -rf ${input_folder}
+print_info "after command: ${DRIVER}, run: rm -rf ${input_directory}"
+rm -rf ${input_directory}
 
-print_info "Calling: tar -czf ${result}.tar.gz ${OUTPUT_DIR}"
-tar -czf ${result}.tar.gz ${OUTPUT_DIR}
+print_info "Calling: tar -czf ${result}.tar.gz ${output_directory}"
+tar -czf ${result}.tar.gz ${output_directory}
 
 rtn_code=$?
-print_info "tar command returned code=${rtn_code} from command: tar -czf ${result}.tar.gz ${OUTPUT_DIR}"
+print_info "tar command returned code=${rtn_code} from command: tar -czf ${result}.tar.gz ${output_directory}"
 if [[ "${rtn_code}" != "0" ]]; then
     print_error "tar result threw errors, exit with code 25"
     print_info "${SCRIPT_NAME} ended at [$(date -u +"%m/%d/%Y:%H:%M:%S")]"
     exit 25
 fi
 
-[[ $(ls -A ${OUTPUT_DIR}) ]] || print_warning "result directory=${OUTPUT_DIR} is empty"
-print_info "${OUTPUT_DIR}:"
-ls -alt ${${OUTPUT_DIR}}
+[[ $(ls -A ${output_directory}) ]] || print_warning "result directory=${output_directory} is empty"
+print_info "${output_directory}:"
+ls -alt ${output_directory}
 
 print_info "${PWD} info:"
 ls
