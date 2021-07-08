@@ -1,0 +1,6 @@
+[
+  {
+    "wf_dicom2nifti.convert.inputTar": "/labs/mahmoudilab/dicom2nifti/input_dicom/siemens_fmri_classic_001.tar.gz",
+    "wf_dicom2nifti.convert.cmdOptions": ""
+  }
+]
