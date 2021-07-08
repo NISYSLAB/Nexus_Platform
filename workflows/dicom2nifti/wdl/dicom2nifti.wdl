@@ -8,13 +8,13 @@ workflow wf_dicom2nifti {
 task convert {
     String dockerRef = "us.gcr.io/cloudypipelines-com/dicom2nifti_python:1.1"
     File inputTar
-    String result = "nifti_output"
+    String result = "output_nifti"
     String cmdOptions
    
     command {
         cd /app
         chmod a+x run_dicom2nifti_convertion.sh
-        ./run_dicom2nifti_convertion.sh ${inputTar} ${result} ${cmdOptions}
+        ./run_dicom2nifti_convertion.sh "${inputTar}" "${result}" "${cmdOptions}"
 
         cd -
         mv /app/${result}.tar.gz .
