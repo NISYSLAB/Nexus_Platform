@@ -9,7 +9,9 @@ function push_to_bucket() {
 
 }
 #### starts
+echo "cp /Users/anniegu/workspace/dicom2nifti/dicom2nifti_python/run_dicom2nifti_convertion.sh ."
 cp /Users/anniegu/workspace/dicom2nifti/dicom2nifti_python/run_dicom2nifti_convertion.sh .
+
 push_to_bucket run_dicom2nifti_convertion.sh
 push_to_bucket siemens_fmri_classic_001.tar.gz
 

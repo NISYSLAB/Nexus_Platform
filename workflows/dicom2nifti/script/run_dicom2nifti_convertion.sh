@@ -106,6 +106,7 @@ expanded_folder=$( extract_folder_name input_dicom_images.tar.gz )
 print_info "input_dicom_images.tar.gz expanded_folder: ${expanded_folder}"
 
 ## compress: tar -czvf siemens_fmri_classic_001.tar.gz 001
+## tar -czvf siemens_fmri_classic_001.tar.gz *.dcm
 tar -xzvf input_dicom_images.tar.gz
 rm -rf input_dicom_images.tar.gz
 
@@ -116,11 +117,21 @@ cd ${WORK_DIR}
 print_info "Current directory: $(pwd) info:"
 ls
 
-print_info "Calling: time ${DRIVER} ${cmd_options} ${input_directory} ${output_directory}"
-time ${DRIVER} "${cmd_options}" "${input_directory}" "${output_directory}"
+cmd_line="${DRIVER} ${cmd_options} ${input_directory} ${output_directory}"
+cmd_options=$(echo "$cmd_options" | xargs)
+if [ -z "$cmd_options" ]
+then
+      print_info "\$cmd_options is empty"
+      cmd_line="${DRIVER} ${input_directory} ${output_directory}"
+else
+      print_info "\$cmd_options is NOT empty"
+fi
+
+print_info "Calling: time ${cmd_line}"
+time ${cmd_line}
 
 rtn_code=$?
-print_info "${DRIVER} command returned code=${rtn_code} from command: ${DRIVER} ${cmd_options} ${input_directory} ${output_directory}"
+print_info "${DRIVER} command returned code=${rtn_code} from command: ${cmd_line}"
 if [[ "${rtn_code}" != "0" ]]; then
     print_error "${DRIVER} user's coding threw errors, exit with code 25"
     print_info "${DRIVER} ended at $(date +"%m/%d/%Y:%R")"
