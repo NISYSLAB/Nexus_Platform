@@ -1,4 +1,5 @@
 **/*.zip
+**/*.iml
 **/*.class
 **/*.jar
 **/*.tar.gz
@@ -7,3 +8,6 @@
 **/*.swp
 **/json_input_template*.json
 **/*.dcm
+**/nexus-web/target
+**/nexus-web/*.orig*
+**/nexus-web/*.backup*
