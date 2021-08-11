@@ -8,6 +8,7 @@ export docker_image_tag=${RELEASE_TAG}
 export dockerfile=Dockerfile.web
 export docker_container_name=nexus-web
 export web_jar="target/nexusweb-0.0.1-SNAPSHOT.jar"
+export SERVER_SERVLET_CONTEXT_PATH=/nexus
 
 #### postgres local year 2021
 export db_project=physionetchallenge2021

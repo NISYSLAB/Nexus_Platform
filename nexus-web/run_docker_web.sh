@@ -17,6 +17,7 @@ function start_container() {
     --name "${docker_container_name}"  \
     -e AUTH_TOKEN="${AUTH_TOKEN}"  \
     -e server.port="${SWAGGER_PORT}"  \
+    -e SERVER_SERVLET_CONTEXT_PATH="${SERVER_SERVLET_CONTEXT_PATH}" \
     -e SWAGGER_HOST="${SWAGGER_HOST}"  \
     -e CONFIG_EDITOR="${CONFIG_EDITOR}"  \
     -e APP_ENV="${APP_ENV}"  \
@@ -62,5 +63,8 @@ docker images
 ## echo "start container connnecting to Cloud Postgresql" && start_container
 start_container
 sleep 3
-docker logs "${docker_container_name}" -f
+tmp_url="http://localhost:${SWAGGER_PORT}/${SERVER_SERVLET_CONTEXT_PATH}/greeting"
+echo "     To test: curl ${tmp_url}"
+echo "To view logs: docker logs ${docker_container_name} -f "
+
 

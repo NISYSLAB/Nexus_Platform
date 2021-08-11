@@ -16,6 +16,8 @@ function build_image() {
    local image_name=$1
    local image_tag=$2
    local docker_file=$3
+   echo "docker rmi -f ${image_name}:${image_tag}"
+   docker rmi -f "${image_name}":"${image_tag}" || echo "${image_name}:${image_tag} not existing, build it!"
    echo "Build ${image_name}:${image_tag} docker image ..."
    docker build  -f "${docker_file}" -t "${image_name}":"${image_tag}" . || { echo "${image_name}:${image_tag} docker image build failed" ; exit 1; }
    docker images |grep "${image_name}"
