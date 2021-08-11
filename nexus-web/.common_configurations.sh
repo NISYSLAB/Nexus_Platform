@@ -1,6 +1,15 @@
 #!/bin/bash
 
 RELEASE_TAG=1.0
+#### functions
+function set_java_env() {
+  /usr/libexec/java_home -V
+  export JAVA_HOME=$(/usr/libexec/java_home -v 11.0.12)
+  echo "JAVA_HOME=$JAVA_HOME"
+  export PATH=$JAVA_HOME/bin:$PATH
+  java -version
+}
+####
 
 #### docker image/container
 export docker_image_name="us.gcr.io/cloudypipelines-com/nexus-web"

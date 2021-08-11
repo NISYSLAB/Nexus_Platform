@@ -58,11 +58,19 @@ function start_container_with_db_docker() {
 }
 #########################################################################################
 clear
-time ./build_push_docker.sh || exit 1;
+## confirm rebuild docker?
+read -p "Re build docker image? (y/n): " build_docker
+echo "You answer: ${build_docker}"
+[[ ${build_docker} == [yY] ]] && (time ./build_push_docker.sh || exit 1;)
+## end of confirm rebuild docker?
+
+##time ./build_push_docker.sh || exit 1;
+
 docker images
 ## echo "start container connnecting to Cloud Postgresql" && start_container
 start_container
 sleep 3
+docker ps
 tmp_url="http://localhost:${SWAGGER_PORT}/${SERVER_SERVLET_CONTEXT_PATH}/greeting"
 echo "     To test: curl ${tmp_url}"
 echo "To view logs: docker logs ${docker_container_name} -f "
