@@ -71,8 +71,9 @@ docker images
 start_container
 sleep 3
 docker ps
-tmp_url="http://localhost:${SWAGGER_PORT}/${SERVER_SERVLET_CONTEXT_PATH}/greeting"
-echo "     To test: curl ${tmp_url}"
+tmp_url="http://${SWAGGER_HOST}:${SWAGGER_PORT}/${SERVER_SERVLET_CONTEXT_PATH}"
+echo "     To test: curl ${tmp_url}/greeting"
+echo "     OpenAPI: ${tmp_url}/v3/api-docs/"
 echo "To view logs: docker logs ${docker_container_name} -f "
 
 
