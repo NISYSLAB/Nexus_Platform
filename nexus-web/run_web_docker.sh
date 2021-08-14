@@ -72,8 +72,15 @@ start_container
 sleep 3
 docker ps
 tmp_url="http://${SWAGGER_HOST}:${SWAGGER_PORT}/${SERVER_SERVLET_CONTEXT_PATH}"
+echo "   Spring OpenAPI Docs: https://github.com/springdoc/springdoc-openapi"
+echo "Spring OpenAPI UI Docs: https://search.maven.org/search?q=g:org.springdoc%20AND%20a:springdoc-openapi-ui&core=gav"
+echo " Swagger UI Properties: https://springdoc.org/#swagger-ui-properties"
+echo "Swagger-ui configuration: https://swagger.io/docs/open-source-tools/swagger-ui/usage/configuration/"
 echo "     To test: curl ${tmp_url}/greeting"
 echo "     OpenAPI: ${tmp_url}/v3/api-docs/"
+echo "    SwaggerUI: ${tmp_url}/swagger-ui.html"
 echo "To view logs: docker logs ${docker_container_name} -f "
+
+docker logs "${docker_container_name}" -f
 
 
