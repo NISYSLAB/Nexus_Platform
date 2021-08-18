@@ -13,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/workflows")
-@Api(tags = "Common APIs to submit, query, abort workflow pipeline")
+@Api(tags = "Common Workflow Pipeline APIs", value = "testValue", description = "submit, query, abort workflow pipeline")
 public class CommonWorkflowController {
     public static final String VERSION_V1 = "v1";
     public static final String VERSION_V11 = "v1.1";
@@ -21,7 +21,7 @@ public class CommonWorkflowController {
     @Autowired
     CloudyPipelinesHttpClient cloudyPipelinesHttpClient;
 
-    @ApiOperation(value = "Submit workflow pipeline with WDL File, inputs JSON File and optional Options File, the inputs JSON will be an array of objects ")
+    @ApiOperation(value = "Submit workflow pipeline with WDL File, inputs JSON File, the inputs JSON will be an array of objects ")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Ok", response = RequestJobsResponseMsg.class),
             @ApiResponse(code = 400, message = "Bad request", response = String.class)})
     @PostMapping("/submission/" + VERSION_V1)

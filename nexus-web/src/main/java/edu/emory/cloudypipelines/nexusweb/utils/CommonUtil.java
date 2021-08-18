@@ -37,7 +37,7 @@ public class CommonUtil {
 
     public static String makeDestDirWithTimestamp(String parentDir) {
         DateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
-        String destDir = String.format("%s/%s_%s", parentDir, getTimeStamps(dateFormat), getRandomString(12));
+        String destDir = String.format("%s/%s_%s", parentDir, getTimeStamps(dateFormat), getRandomNumericString(12));
         File file = new File(destDir);
         file.mkdirs();
         return destDir;
@@ -48,17 +48,23 @@ public class CommonUtil {
     }
 
     public static String getRandomString(int length) {
-        return RandomStringUtils.random(length);
+        return RandomStringUtils.randomAlphanumeric(length);
+    }
+
+    public static String getRandomNumericString(int length) {
+        return RandomStringUtils.randomNumeric(length);
     }
 
     public static String saveUploadedFile(MultipartFile multipartFile, String uploadFolder) {
         final String methodName = "saveUploadedFile(): ";
-        File newFolder = new File(uploadFolder);
-        newFolder.mkdirs();
-        if (multipartFile == null || multipartFile.isEmpty()) {
-            LOGGER.info("{} {} is blank, skip it", methodName, multipartFile.getName());
+        if (multipartFile == null) {
+            LOGGER.info("{} multipartFile is null, unable to process it, return", methodName);
             return "";
         }
+        LOGGER.info("{} uploadFolder={}", methodName, uploadFolder);
+        File newFolder = new File(uploadFolder);
+        newFolder.mkdirs();
+
         byte[] bytes = new byte[0];
         try {
             bytes = multipartFile.getBytes();
@@ -66,7 +72,7 @@ public class CommonUtil {
             LOGGER.error("{} IOException: {}", methodName, e.getMessage());
             return "";
         }
-        String fullPath = uploadFolder +  "/" + multipartFile.getOriginalFilename();
+        String fullPath = uploadFolder + "/" + multipartFile.getOriginalFilename();
         Path path = Paths.get(fullPath);
         try {
             Files.write(path, bytes);

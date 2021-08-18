@@ -9,7 +9,7 @@ cd "${SCRIPT_DIR}" && source ./.common_configurations.sh
 function build_web_jar() {
     ##export GOOGLE_APPLICATION_CREDENTIALS="${PWD}/ssl/physionet-challenge-12lead-ecg-d875b52d05f9.json"
     rm -rf "${web_jar}"
-    mvn clean && mvn package
+    mvn clean && mvn package || exit 1
     ls -alt "${web_jar}"
 }
 

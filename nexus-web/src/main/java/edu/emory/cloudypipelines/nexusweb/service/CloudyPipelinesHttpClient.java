@@ -33,8 +33,8 @@ public class CloudyPipelinesHttpClient {
     private String AUTH_TOKEN;
     @Value("${cloudypipelines_url}")
     private String API_HOST;
-    private final String SUBMISSION_V1_URL = String.format("%s/api/workflows/%s", API_HOST, VERSION_V1);
-    private final String SUBMISSION_V11_URL = String.format("%s/api/workflows/%s", API_HOST, VERSION_V11);
+    private String SUBMISSION_V1_URL = String.format("%s/api/workflows/%s", API_HOST, VERSION_V1);
+    private String SUBMISSION_V11_URL = String.format("%s/api/workflows/%s", API_HOST, VERSION_V11);
 
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder) {
@@ -44,27 +44,32 @@ public class CloudyPipelinesHttpClient {
     @PostConstruct
     void init() {
         final String methodName = "init():";
+
+        SUBMISSION_V1_URL = String.format("%s/api/workflows/%s", API_HOST, VERSION_V1);
+        SUBMISSION_V11_URL = String.format("%s/api/workflows/%s", API_HOST, VERSION_V11);
         LOGGER.info("{} cloudypipelines_url={}", methodName, API_HOST);
+        LOGGER.info("{} SUBMISSION_V1_URL={}", methodName, SUBMISSION_V1_URL);
+        LOGGER.info("{} SUBMISSION_V11_URL={}", methodName, SUBMISSION_V11_URL);
 
         // testing
         String cromwellId = "2208acca-9e69-4f33-84fa-e6ca90e550bf";
-        LOGGER.info("{} getLogsUrlsById={}", methodName, cromwellId);
+        //LOGGER.info("{} getLogsUrlsById={}", methodName, cromwellId);
         //LOGGER.info("{} {}", methodName, getLogStringByCromwellId(cromwellId));
-       // LOGGER.info("{} {}", methodName, getStatusStringByCromwellId(cromwellId));
+        // LOGGER.info("{} {}", methodName, getStatusStringByCromwellId(cromwellId));
         //LOGGER.info("{} {}", methodName, getOutputStringlByCromwellId(cromwellId));
-       // LOGGER.info("{} {}", methodName, getMetadataStringByCromwellId(cromwellId));
+        // LOGGER.info("{} {}", methodName, getMetadataStringByCromwellId(cromwellId));
     }
 
     public ResponseEntity<RequestJobsResponseMsg> submitV1(CommonRequest commonRequest,
-                                                    MultipartFile workflowSource,
-                                                    MultipartFile workflowInputs) {
+                                                           MultipartFile workflowSource,
+                                                           MultipartFile workflowInputs) {
         return submit(commonRequest, workflowSource, workflowInputs, null);
     }
 
     public ResponseEntity<RequestJobsResponseMsg> submitV11(CommonRequest commonRequest,
-                                                     MultipartFile workflowSource,
-                                                     MultipartFile workflowInputs,
-                                                     MultipartFile workflowOptions) {
+                                                            MultipartFile workflowSource,
+                                                            MultipartFile workflowInputs,
+                                                            MultipartFile workflowOptions) {
         return submit(commonRequest, workflowSource, workflowInputs, workflowOptions);
     }
 
@@ -109,10 +114,10 @@ public class CloudyPipelinesHttpClient {
 
         map.add("email", commonRequest.getEmail());
         map.add("label", commonRequest.getLabel());
-        map.add("preemptibleOption", commonRequest.getPreemptibleOption());
+        map.add("preemptibleOption", commonRequest.getPreemptibleOption().toString());
         map.add("project", commonRequest.getProject());
         map.add("runningHoursAllowed", commonRequest.getRunningHoursAllowed());
-        map.add("workflowType", commonRequest.getWorkflowType());
+        map.add("workflowType", commonRequest.getWorkflowType().toString());
 
         HttpHeaders headers = getAuthHeaders(authToken);
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
