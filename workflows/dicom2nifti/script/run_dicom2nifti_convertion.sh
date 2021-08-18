@@ -63,6 +63,11 @@ print_info "output_directory=${output_directory}"
 print_info "input_directory=${input_directory}"
 print_info "DRIVER=${DRIVER}"
 print_sys_info
+print_info "ENV: WORKFLOW_ID=${WORKFLOW_ID}"
+print_info "ENV: TASK_CALL_NAME=${TASK_CALL_NAME}"
+print_info "ENV: TASK_CALL_ATTEMPT=${TASK_CALL_ATTEMPT}"
+print_info "ENV: DISK_MOUNTS=${DISK_MOUNTS}"
+print_info "ENV: COPY_RESULTS=${COPY_RESULTS}"
 print_info "${SCRIPT_NAME} started at [$(date -u +"%m/%d/%Y:%H:%M:%S")]"
 
 
