@@ -49,19 +49,19 @@ public class CloudyPipelinesHttpClient {
         // testing
         String cromwellId = "2208acca-9e69-4f33-84fa-e6ca90e550bf";
         LOGGER.info("{} getLogsUrlsById={}", methodName, cromwellId);
-        LOGGER.info("{} {}", methodName, getLogStringByCromwellId(cromwellId));
-        LOGGER.info("{} {}", methodName, getStatusStringByCromwellId(cromwellId));
-        LOGGER.info("{} {}", methodName, getOutputStringlByCromwellId(cromwellId));
-        LOGGER.info("{} {}", methodName, getMetadataStringByCromwellId(cromwellId));
+        //LOGGER.info("{} {}", methodName, getLogStringByCromwellId(cromwellId));
+       // LOGGER.info("{} {}", methodName, getStatusStringByCromwellId(cromwellId));
+        //LOGGER.info("{} {}", methodName, getOutputStringlByCromwellId(cromwellId));
+       // LOGGER.info("{} {}", methodName, getMetadataStringByCromwellId(cromwellId));
     }
 
-    ResponseEntity<RequestJobsResponseMsg> submitV1(CommonRequest commonRequest,
+    public ResponseEntity<RequestJobsResponseMsg> submitV1(CommonRequest commonRequest,
                                                     MultipartFile workflowSource,
                                                     MultipartFile workflowInputs) {
         return submit(commonRequest, workflowSource, workflowInputs, null);
     }
 
-    ResponseEntity<RequestJobsResponseMsg> submitV11(CommonRequest commonRequest,
+    public ResponseEntity<RequestJobsResponseMsg> submitV11(CommonRequest commonRequest,
                                                      MultipartFile workflowSource,
                                                      MultipartFile workflowInputs,
                                                      MultipartFile workflowOptions) {

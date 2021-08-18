@@ -25,4 +25,4 @@ The following guides illustrate how to use some features concretely:
 * [Accessing Relational Data using JDBC with Spring](https://spring.io/guides/gs/relational-data-access/)
 * [Managing Transactions](https://spring.io/guides/gs/managing-transactions/)
 * [Using Spring Data JDBC](https://github.com/spring-projects/spring-data-examples/tree/master/jdbc/basics)
-
+* [SpringFox Migration to 3.0.0](https://stackoverflow.com/questions/63275134/springfox-swagger-ui-3-0-0-does-not-bring-up-swagger-ui-html-page)
