@@ -124,7 +124,7 @@ public class CloudyPipelinesHttpClient {
         return new HttpEntity<>(map, headers);
     }
 
-    ResponseEntity<?> abortByCromwellId(String cromwellId) {
+    public ResponseEntity<?> abortByCromwellId(String cromwellId) {
         //curl -k -H "Authorization: OAuth ${TOKEN}"  "${API_HOST}/api/workflows/v1/{cromwellId}/abort"
         String apiUrl = String.format("%s/api/workflows/v1/%s/abort", API_HOST, cromwellId);
         return restTemplate.exchange(apiUrl,
@@ -134,60 +134,40 @@ public class CloudyPipelinesHttpClient {
                 });
     }
 
-    public String getLogStringByCromwellId(String cromwellId) {
-        final String methodName = "getLogStringByCromwellId():";
-        if (CommonUtil.isNullOrEmpty(cromwellId)) {
-            LOGGER.info("{} cromwellId is null or empty, unable to call API", methodName);
-            return "";
-        }
+    public ResponseEntity<?> getWorkflowLogs(String cromwellId) {
+        final String methodName = "getWorkflowLogs():";
+
         LOGGER.info("{} call CloudyPipelines for cromwellId={}", methodName, cromwellId);
         //curl -k -H "Authorization: OAuth ${TOKEN}"  "${API_HOST}/api/workflows/VERSION/{cromwellId}/logs"
         String apiUrl = String.format("%s/api/workflows/%s/%s/logs", API_HOST, VERSION_V1, cromwellId);
         return getHttpString(apiUrl);
     }
 
-    public String getStatusStringByCromwellId(String cromwellId) {
+    public ResponseEntity<?> getStatusStringByCromwellId(String cromwellId) {
         final String methodName = "getStatusStringByCromwellId():";
-        if (CommonUtil.isNullOrEmpty(cromwellId)) {
-            LOGGER.error("{} cromwellId is null or empty, unable to call API", methodName);
-            return "";
-        }
         LOGGER.info("{} call CloudyPipelines for cromwellId={}", methodName, cromwellId);
         //curl -k -H "Authorization: OAuth ${TOKEN}"  "${API_HOST}/api/workflows/VERSION/{cromwellId}/status"
         String apiUrl = String.format("%s/api/workflows/%s/%s/status", API_HOST, VERSION_V1, cromwellId);
         return getHttpString(apiUrl);
     }
 
-    public String getOutputStringlByCromwellId(String cromwellId) {
+    public ResponseEntity<?> getOutputStringlByCromwellId(String cromwellId) {
         final String methodName = "getOutputStringlByCromwellId():";
-        if (CommonUtil.isNullOrEmpty(cromwellId)) {
-            LOGGER.info("{} cromwellId is null or empty, unable to call API", methodName);
-            return "";
-        }
         LOGGER.info("{} call cloudyPipelines for cromwellId={}", methodName, cromwellId);
         //curl -k -H "Authorization: OAuth ${TOKEN}"  "${API_HOST}/api/workflows/VERSION/{cromwellId}/outputs"
         String apiUrl = String.format("%s/api/workflows/%s/%s/outputs", API_HOST, VERSION_V1, cromwellId);
         return getHttpString(apiUrl);
     }
 
-    public String getMetadataStringByCromwellId(String cromwellId) {
+    public ResponseEntity<?> getMetadataStringByCromwellId(String cromwellId) {
         final String methodName = "getMetadataStringByCromwellId():";
-        if (CommonUtil.isNullOrEmpty(cromwellId)) {
-            LOGGER.error("{} unable to process null/empty workflowId", methodName);
-            return "";
-        }
         //curl -k -H "Authorization: OAuth ${TOKEN}"  "${API_HOST}/api/workflows/version/{cromwellId}/metadata"
         String apiUrl = String.format("%s/api/workflows/%s/%s/metadata", API_HOST, VERSION_V1, cromwellId);
         return getHttpString(apiUrl);
     }
 
-    public String getHttpString(String apiUrl) {
-        ResponseEntity<String> responseEntity = callGetHttp(apiUrl);
-        if (!CommonUtil.isHttpRequestSuccessful(responseEntity)) {
-            LOGGER.error("getHttpString(): Error from http request for apiUrl={}: {}", apiUrl, responseEntity);
-            return "";
-        }
-        return CommonUtil.getTrimOrDefault(responseEntity.getBody(), "");
+    public ResponseEntity<String> getHttpString(String apiUrl) {
+        return callGetHttp(apiUrl);
     }
 
     public ResponseEntity<String> callGetHttp(String apiUrl) {
