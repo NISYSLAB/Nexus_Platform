@@ -103,11 +103,44 @@ public class CloudyPipelinesHttpClient {
         });
     }
 
+    ResponseEntity<RequestJobsResponseMsg> submitRegisteredWorkflow(CommonRequest commonRequest,
+                                                                    String wfName,
+                                                                    String wfVersion,
+                                                                    MultipartFile workflowInputs,
+                                                                    MultipartFile workflowOptions) {
+        final String methodName = "submitRegisteredWorkflow():";
+        String submitDir = CommonUtil.makeDestDirWithTimestamp(submissionRootDir);
+        String inputsFilePath = CommonUtil.saveUploadedFile(workflowInputs, submitDir);
+        String optionsFilePath = CommonUtil.saveUploadedFile(workflowOptions, submitDir);
+        LOGGER.info("{} submitDir={}, wfName={}, wfVersion={},inputsFilePath={}, optionsFilePath={}", methodName, submitDir, wfName, wfVersion, inputsFilePath, optionsFilePath);
+
+        //TODO: toke should be replaced with individual
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = buildSubmissionHttpEntity(
+                "",
+                inputsFilePath,
+                optionsFilePath,
+                commonRequest,
+                AUTH_TOKEN
+        );
+
+        String whichUri = String.format("%s/api/registered/workflowpipelines/%s/%s/", API_HOST, wfName, wfVersion);
+        LOGGER.info("{} requestEntity={}", methodName, requestEntity);
+        LOGGER.info("{} whichUri={}", methodName, whichUri);
+        return restTemplate.exchange(whichUri, HttpMethod.POST, requestEntity, new ParameterizedTypeReference<RequestJobsResponseMsg>() {
+        });
+    }
+
     private HttpEntity<LinkedMultiValueMap<String, Object>>
     buildSubmissionHttpEntity(String wdlFilePath, String inputsFilePath, String optionsFilePath, CommonRequest commonRequest, String authToken) {
         LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
-        map.add("workflowSource", new FileSystemResource(new File(wdlFilePath)));
-        map.add("workflowInputs", new FileSystemResource(new File(inputsFilePath)));
+
+        if (StringUtils.isNoneEmpty(wdlFilePath)) {
+            map.add("workflowSource", new FileSystemResource(new File(wdlFilePath)));
+        }
+        if (StringUtils.isNoneEmpty(inputsFilePath)) {
+            map.add("workflowInputs", new FileSystemResource(new File(inputsFilePath)));
+            map.add("jsonInputFile", new FileSystemResource(new File(inputsFilePath)));
+        }
         if (StringUtils.isNoneEmpty(optionsFilePath)) {
             map.add("workflowOptions", new FileSystemResource(new File(optionsFilePath)));
         }
@@ -116,6 +149,7 @@ public class CloudyPipelinesHttpClient {
         map.add("label", commonRequest.getLabel());
         map.add("preemptibleOption", commonRequest.getPreemptibleOption().toString());
         map.add("project", commonRequest.getProject());
+        map.add("projectName", commonRequest.getProject());
         map.add("runningHoursAllowed", commonRequest.getRunningHoursAllowed());
         map.add("workflowType", commonRequest.getWorkflowType().toString());
 
@@ -166,6 +200,10 @@ public class CloudyPipelinesHttpClient {
         return getHttpString(apiUrl);
     }
 
+    public ResponseEntity<?> submitRegisteredWorkflow(CommonRequest commonRequest, String wfName, String wfVersion, MultipartFile jsonInputFile) {
+        return submitRegisteredWorkflow(commonRequest, wfName, wfVersion, jsonInputFile, null);
+    }
+
     public ResponseEntity<String> getHttpString(String apiUrl) {
         return callGetHttp(apiUrl);
     }
@@ -196,4 +234,5 @@ public class CloudyPipelinesHttpClient {
         headers.add("Authorization", oAuth);
         return headers;
     }
+
 }
