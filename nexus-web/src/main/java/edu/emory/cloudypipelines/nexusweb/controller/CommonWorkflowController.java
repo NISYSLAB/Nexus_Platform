@@ -27,8 +27,8 @@ public class CommonWorkflowController {
     @PostMapping("/submission/" + VERSION_V1)
     public ResponseEntity<RequestJobsResponseMsg> submitV1(
             @ModelAttribute("commonRequest") CommonRequest commonRequest,
-            @ApiParam(name = "workflowSource", value = "WDL or CWL file", required = true) @RequestPart(value = "workflowSource", required = true) MultipartFile workflowSource,
-            @ApiParam(name = "workflowInputs", value = "JSON or YAML file containing inputs as an array of objects", required = true) @RequestPart(value = "workflowInputs") MultipartFile workflowInputs) {
+            @ApiParam(name = "workflowSource", value = "WDL or CWL file", required = true) @RequestParam(value = "workflowSource", required = true) MultipartFile workflowSource,
+            @ApiParam(name = "workflowInputs", value = "JSON or YAML file containing inputs as an array of objects", required = true) @RequestParam(value = "workflowInputs") MultipartFile workflowInputs) {
 
         return cloudyPipelinesHttpClient.submitV1(commonRequest, workflowSource, workflowInputs);
     }
