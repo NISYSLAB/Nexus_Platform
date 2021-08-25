@@ -73,16 +73,24 @@ public class CloudyPipelinesHttpClient {
         return submit(commonRequest, workflowSource, workflowInputs, workflowOptions);
     }
 
-    ResponseEntity<RequestJobsResponseMsg> submit(CommonRequest commonRequest,
-                                                  MultipartFile workflowSource,
-                                                  MultipartFile workflowInputs,
-                                                  MultipartFile workflowOptions) {
+    public ResponseEntity<RequestJobsResponseMsg> submit(CommonRequest commonRequest,
+                                                         MultipartFile workflowSource,
+                                                         MultipartFile workflowInputs,
+                                                         MultipartFile workflowOptions) {
         final String methodName = "submit():";
         String submitDir = CommonUtil.makeDestDirWithTimestamp(submissionRootDir);
         String wdlFilePath = CommonUtil.saveUploadedFile(workflowSource, submitDir);
         String inputsFilePath = CommonUtil.saveUploadedFile(workflowInputs, submitDir);
         String optionsFilePath = CommonUtil.saveUploadedFile(workflowOptions, submitDir);
         LOGGER.info("{} submitDir={}, inputsFilePath={}, wdfFilePath={}, optionsFilePath={}", methodName, submitDir, inputsFilePath, wdlFilePath, optionsFilePath);
+        return submitByFilePath(commonRequest, wdlFilePath, inputsFilePath, optionsFilePath);
+    }
+
+    public ResponseEntity<RequestJobsResponseMsg> submitByFilePath(CommonRequest commonRequest,
+                                                                   String wdlFilePath,
+                                                                   String inputsFilePath,
+                                                                   String optionsFilePath) {
+        final String methodName = "submitByFilePath():";
 
         //TODO: toke should be replaced with individual
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = buildSubmissionHttpEntity(

@@ -26,8 +26,8 @@ public class Dicom2nifti {
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Ok", response = String.class),
             @ApiResponse(code = 404, message = "Not found", response = String.class)})
     public ResponseEntity<?> submitAndRun(
-            @ModelAttribute("commonRequest") CommonRequest commonRequest
-            , @ApiParam(name = "jsonInputFile", value = "input json file", required = true) @RequestParam(value = "jsonInputFile", required = true) MultipartFile jsonInputFile) {
+            @ModelAttribute("commonRequest") CommonRequest commonRequest,
+            @ApiParam(name = "jsonInputFile", value = "input json file", required = true) @RequestParam(value = "jsonInputFile", required = true) MultipartFile jsonInputFile) {
         LOGGER.info("submitAndRun(): received workflowRunRequest={}", commonRequest);
         return cloudyPipelinesHttpClient.submitRegisteredWorkflow(commonRequest, WF_NAME, WF_VERSION_1, jsonInputFile);
     }

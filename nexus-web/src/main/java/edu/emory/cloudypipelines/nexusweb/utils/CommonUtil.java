@@ -1,5 +1,8 @@
 package edu.emory.cloudypipelines.nexusweb.utils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.emory.cloudypipelines.nexusweb.bean.generated.TaskAInputDTO;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,5 +85,32 @@ public class CommonUtil {
         }
         LOGGER.info("{} Saved to {}", methodName, path.toAbsolutePath());
         return fullPath.replaceAll("//", "/");
+    }
+
+    public static String copyFileToDirectory(String srcFilePath, String directoryPath) {
+        final String methodName = "copyFileToDirectory():";
+        String destFilePath = "";
+        File srcFile = new File(srcFilePath);
+        try {
+            FileUtils.copyFileToDirectory(srcFile, new File(directoryPath));
+            destFilePath = String.format("%s/%s", directoryPath, srcFile.getName());
+        } catch (IOException e) {
+            destFilePath = "";
+            LOGGER.error("{} Exception: ", methodName, e);
+        }
+        return destFilePath;
+    }
+
+    public static String writePOJO2File(Object object, String destFilePath) {
+        final String methodName = "writePOJO2File():";
+        String finalFilePath = destFilePath;
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(destFilePath), object);
+        } catch (IOException e) {
+            destFilePath = "";
+            LOGGER.error("{} Exception: ", methodName, e);
+        }
+        return destFilePath;
     }
 }
