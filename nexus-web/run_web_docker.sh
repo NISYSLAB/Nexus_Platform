@@ -15,6 +15,7 @@ function start_container() {
     docker run -d \
     -p "${SWAGGER_PORT}":"${SWAGGER_PORT}" \
     --name "${docker_container_name}"  \
+    -v `pwd`/poc_workflow/:`pwd`/poc_workflow/ \
     -e AUTH_TOKEN="${AUTH_TOKEN}"  \
     -e server.port="${SWAGGER_PORT}"  \
     -e SERVER_SERVLET_CONTEXT_PATH="${SERVER_SERVLET_CONTEXT_PATH}" \
@@ -36,6 +37,7 @@ function start_container_with_db_docker() {
     --name ${docker_container_name}  \
     --link ${db_container_name}:${db_container_name} \
     -v `pwd`/.ssl/:`pwd`/.ssl/ \
+    -v `pwd`/poc_workflow/:`pwd`/poc_workflow/ \
     -e BUILD_VM_NAME="${BUILD_VM_NAME}" \
     -e GOOGLE_APPLICATION_CREDENTIALS="${GOOGLE_APPLICATION_CREDENTIALS}" \
     -e GITHUBREPO_PULL_CMD="${GITHUBREPO_PULL_CMD}" \
@@ -61,10 +63,8 @@ clear
 ## confirm rebuild docker?
 read -p "Re build docker image? (y/n): " build_docker
 echo "You answer: ${build_docker}"
-[[ ${build_docker} == [yY] ]] && (time ./build_push_docker.sh || exit 1;)
+[[ ${build_docker} == [yY] ]] && (time ./build_push_web_docker.sh || exit 1;)
 ## end of confirm rebuild docker?
-
-##time ./build_push_docker.sh || exit 1;
 
 docker images
 ## echo "start container connnecting to Cloud Postgresql" && start_container

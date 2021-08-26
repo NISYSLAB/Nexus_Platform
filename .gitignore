@@ -14,3 +14,6 @@
 **/nexus-web/*.backup*
 **/bmicluster
 **/csiccluster
+**/.ssl
+**/ssl
+**/volum*

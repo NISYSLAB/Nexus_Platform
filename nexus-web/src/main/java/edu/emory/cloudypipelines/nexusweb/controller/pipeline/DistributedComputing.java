@@ -65,7 +65,7 @@ public class DistributedComputing {
         return CommonUtil.writePOJO2File(taskAInputDTO, submissionDir + "/" + "taskAInput.json");
     }
 
-    @Scheduled(fixedRate = 2000)
+    @Scheduled(fixedRate = 10000)
     public void monitoring() {
         final String methodName = "monitoring():";
         LOGGER.info("{} started at {}", methodName, CommonUtil.getTimeStamps(new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")));

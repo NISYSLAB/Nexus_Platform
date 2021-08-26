@@ -9,6 +9,32 @@ function set_java_env() {
   export PATH=$JAVA_HOME/bin:$PATH
   java -version
 }
+
+function build_image() {
+   local image_name=$1
+   local image_tag=$2
+   local docker_file=$3
+   echo "docker rmi -f ${image_name}:${image_tag}"
+   docker rmi -f "${image_name}":"${image_tag}" || echo "${image_name}:${image_tag} not existing, build it!"
+   echo "Build ${image_name}:${image_tag} docker image ..."
+   docker build  -f "${docker_file}" -t "${image_name}":"${image_tag}" . || { echo "${image_name}:${image_tag} docker image build failed" ; exit 1; }
+   docker images |grep "${image_name}"
+}
+
+function push_image() {
+   local image_name=$1
+   local image_tag=$2
+   echo "Push ${image_name}:${image_tag}  to docker hub"
+   docker push "${image_name}:${image_tag}" || { echo "Push ${image_name}:${image_tag} to Docker Hub failed" ; exit 1; }
+}
+
+function build_push_image() {
+   local image_name=$1
+   local image_tag=$2
+   local docker_file=$3
+   build_image "${image_name}" "${image_tag}" "${docker_file}"
+   push_image "${image_name}" "${image_tag}"
+}
 ####
 
 #### docker image/container
@@ -19,7 +45,7 @@ export docker_container_name=nexus-web
 export web_jar="target/nexusweb-0.0.1-SNAPSHOT.jar"
 export SERVER_SERVLET_CONTEXT_PATH=/nexus
 
-#### postgres local year 2021
+#### postgres local
 export db_project=physionetchallenge2021
 export db_ip=34.86.132.185
 export db_instance=physionetchallenge-clone-20210304
@@ -32,9 +58,15 @@ export db_user=postgres
 ## cloud
 ##export db_url="jdbc:postgresql://google/postgres?socketFactory=com.google.cloud.sql.postgres.SocketFactory&cloudSqlInstance=${db_project}:${db_region}:${db_instance}"
 
-## local docker:
-export db_container_name=postgres-nexus
-db_url="jdbc:postgresql://localhost:5432/${db_name}"
+## postgresql local docker:
+export db_port=5489
+export POSTGRES_PORT=$db_port
+export db_version=13.2
+export db_container_name=nexus-postgres${db_version}
+export db_image_name="us.gcr.io/cloudypipelines-com/${db_container_name}"
+export db_image_tag=1.0
+export db_dockerfile=Dockerfile.postgres
+db_url="jdbc:postgresql://localhost:${db_port}/${db_name}"
 
 
 #### postgres PROD year 2021
@@ -69,4 +101,4 @@ export APP_ENV=localhost
 export SWAGGER_PORT=8899
 export SWAGGER_HOST=localhost
 
-##source ../.ssl/.ssl_settings.sh
+source ./.ssl/.settings.conf

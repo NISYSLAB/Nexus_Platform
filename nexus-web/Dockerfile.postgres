@@ -1,0 +1,9 @@
+FROM postgres:13.2-alpine
+
+ENV POSTGRES_PORT xxxxx
+
+ENV POSTGRES_USER xxxxxxxx
+ENV POSTGRES_PASSWORD xxxxxxxxxx
+ENV POSTGRES_DB postgres
+
+EXPOSE 5489
