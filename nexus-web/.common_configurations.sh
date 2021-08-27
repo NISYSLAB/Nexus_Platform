@@ -1,6 +1,7 @@
 #!/bin/bash
 
 RELEASE_TAG=1.0
+
 #### functions
 function set_java_env() {
   /usr/libexec/java_home -V
@@ -36,12 +37,13 @@ function build_push_image() {
    push_image "${image_name}" "${image_tag}"
 }
 ####
+export cloudypipelines_url=https://pipelineapi.org:9000
 
 #### docker image/container
-export docker_image_name="us.gcr.io/cloudypipelines-com/nexus-web"
-export docker_image_tag=${RELEASE_TAG}
-export dockerfile=Dockerfile.web
-export docker_container_name=nexus-web
+export web_image_name="us.gcr.io/cloudypipelines-com/nexus-web"
+export web_image_tag=${RELEASE_TAG}
+export web_dockerfile=Dockerfile.web
+export web_container_name=nexus-web
 export web_jar="target/nexusweb-0.0.1-SNAPSHOT.jar"
 export SERVER_SERVLET_CONTEXT_PATH=/nexus
 
@@ -66,7 +68,7 @@ export db_container_name=nexus-postgres${db_version}
 export db_image_name="us.gcr.io/cloudypipelines-com/${db_container_name}"
 export db_image_tag=1.0
 export db_dockerfile=Dockerfile.postgres
-db_url="jdbc:postgresql://localhost:${db_port}/${db_name}"
+export db_url="jdbc:postgresql://localhost:${db_port}/${db_name}"
 
 
 #### postgres PROD year 2021

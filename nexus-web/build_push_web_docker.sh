@@ -17,7 +17,7 @@ function build_web_jar() {
 set_java_env
 time build_web_jar
 sleep 2
-time build_push_image "${docker_image_name}" "${docker_image_tag}" "${dockerfile}"
+time build_push_image "${web_image_name}" "${web_image_tag}" "${web_dockerfile}"
 docker images
 
 
