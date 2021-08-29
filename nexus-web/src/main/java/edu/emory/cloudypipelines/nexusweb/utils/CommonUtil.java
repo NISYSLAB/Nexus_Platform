@@ -1,7 +1,10 @@
 package edu.emory.cloudypipelines.nexusweb.utils;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import edu.emory.cloudypipelines.nexusweb.bean.generated.TaskAInputDTO;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
@@ -16,7 +19,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.Iterator;
 
 public class CommonUtil {
 
@@ -108,9 +114,79 @@ public class CommonUtil {
         try {
             objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(destFilePath), object);
         } catch (IOException e) {
-            destFilePath = "";
+            finalFilePath = "";
             LOGGER.error("{} Exception: ", methodName, e);
         }
-        return destFilePath;
+        return finalFilePath;
     }
+
+    public static ZonedDateTime getUTCNow() {
+        return ZonedDateTime.now(ZoneId.of("UTC"));
+    }
+
+    public static Long getEpochMilli(ZonedDateTime zonedDateTime) {
+        return zonedDateTime.toInstant().toEpochMilli();
+    }
+
+    public static <T> T json2POJO(String json, Class<T> type) {
+        final String methodName = "json2POJO():";
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.readValue(json, type);
+
+        } catch (JsonParseException e) {
+            LOGGER.error("{} JsonParseException: {}", methodName, e.getMessage());
+        } catch (JsonMappingException e) {
+            LOGGER.error("{} JsonMappingException: {}", methodName, e.getMessage());
+        } catch (IOException e) {
+            LOGGER.error("{} IOException: {}", methodName, e.getMessage());
+        }
+        return null;
+    }
+
+    public static String POJO2Json(Object pojo) {
+        final String methodName = "POJO2Json():";
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.writeValueAsString(pojo);
+        } catch (JsonProcessingException e) {
+            LOGGER.error("{} JsonProcessingException: {}", methodName, e.getMessage());
+        }
+        return "";
+    }
+
+    public static String parseCromwellSingleOutput(String outputsJson) {
+        final String methodName = "parseCromwellSingleOutput(): ";
+        final String outputsFieldName = "outputs";
+        String output = "";
+        if (outputsJson == null || outputsJson.isEmpty()) {
+            return output;
+        }
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            JsonNode treeNode = mapper.readTree(outputsJson).get(outputsFieldName);
+            if (treeNode == null) {
+                return output;
+            }
+            String treeString = treeNode.toString();
+            if (treeString == null || treeString.isEmpty()) {
+                return output;
+            }
+
+            JsonNode outputsNode = mapper.readTree(treeString);
+            Iterator<String> fieldNames = outputsNode.fieldNames();
+            while (fieldNames.hasNext()) {
+                String fieldName = fieldNames.next();
+                output = outputsNode.get(fieldName).toString();
+            }
+        } catch (IOException e) {
+            output = "";
+            LOGGER.error("{} Exception: ", methodName, e);
+        }
+        if (output != null) {
+            output = output.replaceAll("\"", "");
+        }
+        return output;
+    }
+
 }

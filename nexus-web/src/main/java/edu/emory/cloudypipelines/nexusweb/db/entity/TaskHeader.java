@@ -8,6 +8,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.time.ZonedDateTime;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -23,7 +24,10 @@ public class TaskHeader {
             strategy = "org.hibernate.id.UUIDGenerator"
     )
     @Column(name = "task_header_id")
-    private String taskHeaderId = "";
+    private UUID taskHeaderId;
+
+    @Column(name = "input_path")
+    private String inputPath = "";
 
     @Column(name = "yaml_config")
     private String yamlConfig = "";

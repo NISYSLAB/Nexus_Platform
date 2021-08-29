@@ -8,6 +8,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.time.ZonedDateTime;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -23,16 +24,19 @@ public class Task {
             strategy = "org.hibernate.id.UUIDGenerator"
     )
     @Column(name = "task_id")
-    private String taskId = "";
-
-    @Column(name = "parent_task_id")
-    private String parentTaskId = "";
+    private UUID taskId;
 
     @Column(name = "task_header_id")
-    private String taskHeaderId = "";
+    private UUID taskHeaderId;
+
+    @Column(name = "task_index")
+    private Integer taskIndex = 0;
+
+    @Column(name = "task_name")
+    private String taskName = "";
 
     @Column(name = "cromwell_id")
-    private Integer cromwellId;
+    private String cromwellId = "";
 
     @Column(name = "request_id")
     private String requestId = "";

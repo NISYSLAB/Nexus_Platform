@@ -2,6 +2,7 @@
 CREATE TABLE task_header (
    task_header_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
    yaml_config TEXT DEFAULT '',
+   input_path VARCHAR(500) DEFAULT '',
    json_config TEXT DEFAULT '',
    completed BOOLEAN NOT NULL DEFAULT FALSE,
    process_status VARCHAR(100) DEFAULT '',
@@ -13,9 +14,9 @@ CREATE TABLE task_header (
 
 CREATE TABLE task (
     task_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    parent_task_id UUID,
     task_header_id UUID REFERENCES task_header (task_header_id),
     task_index SMALLINT,
+    task_name VARCHAR(200),
     cromwell_id VARCHAR(100),
     request_id VARCHAR(100),
     wf_wdl_file TEXT DEFAULT '',
