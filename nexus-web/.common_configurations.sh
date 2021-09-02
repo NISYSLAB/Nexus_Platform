@@ -60,6 +60,11 @@ export db_user=postgres
 ## cloud
 ##export db_url="jdbc:postgresql://google/postgres?socketFactory=com.google.cloud.sql.postgres.SocketFactory&cloudSqlInstance=${db_project}:${db_region}:${db_instance}"
 
+## filetransfer
+filetransfer_image_name="us.gcr.io/cloudypipelines-com/nexus-filetransfer"
+filetransfer_image_tag=1.0
+filetransfer_dockerfile=Dockerfile.filetransfer
+
 ## postgresql local docker:
 export db_port=5489
 export POSTGRES_PORT=$db_port

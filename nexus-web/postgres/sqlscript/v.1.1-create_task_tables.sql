@@ -4,6 +4,7 @@ CREATE TABLE task_header (
    yaml_config TEXT DEFAULT '',
    input_path VARCHAR(500) DEFAULT '',
    json_config TEXT DEFAULT '',
+   label VARCHAR(250),
    completed BOOLEAN NOT NULL DEFAULT FALSE,
    process_status VARCHAR(100) DEFAULT '',
    time_submitted TIMESTAMP WITH TIME ZONE,

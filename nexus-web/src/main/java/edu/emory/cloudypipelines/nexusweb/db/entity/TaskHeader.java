@@ -35,6 +35,9 @@ public class TaskHeader {
     @Column(name = "json_config")
     private String jsonConfig = "";
 
+    @Column(name = "label")
+    private String label = "";
+
     @Column(name = "completed")
     private boolean completed = false;
 

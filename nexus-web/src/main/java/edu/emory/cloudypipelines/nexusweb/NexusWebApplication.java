@@ -6,8 +6,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableScheduling
-public class NexuswebApplication {
-	public static void main(String[] args) {
-		SpringApplication.run(NexuswebApplication.class, args);
-	}
+public class NexusWebApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(NexusWebApplication.class, args);
+    }
 }

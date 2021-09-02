@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -27,6 +28,7 @@ import java.util.Iterator;
 public class CommonUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommonUtil.class);
+    static DateFormat dateFormat1 = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
 
     public static boolean isNullOrEmpty(String tested) {
         return (tested == null || tested.trim().isEmpty());
@@ -45,8 +47,7 @@ public class CommonUtil {
     }
 
     public static String makeDestDirWithTimestamp(String parentDir) {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
-        String destDir = String.format("%s/%s_%s", parentDir, getTimeStamps(dateFormat), getRandomNumericString(12));
+        String destDir = String.format("%s/%s_%s", parentDir, getTimeStamps(dateFormat1), getRandomNumericString(12));
         File file = new File(destDir);
         file.mkdirs();
         return destDir;
@@ -189,4 +190,13 @@ public class CommonUtil {
         return output;
     }
 
+    public static String copyTextToFile(String text, String destFilePath) {
+        try {
+            FileUtils.writeStringToFile(new File(destFilePath), text, Charset.defaultCharset());
+            return destFilePath;
+        } catch (IOException e) {
+            LOGGER.error("copyTextToFile(): IOException: {}", e.getMessage());
+            return "";
+        }
+    }
 }

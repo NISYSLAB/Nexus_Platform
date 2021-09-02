@@ -7,22 +7,22 @@ import java.io.Serializable;
 @Generated("com.robohorse.robopojogenerator")
 public class TaskCInputDTO implements Serializable {
 
-	@JsonProperty("wf_containerC.taskC.dataInput")
-	private String wfContainerCTaskCDataInput;
+	@JsonProperty("wf_containerC.taskCFileTransfer.dataInputUrl")
+	private String wfContainerCTaskCFileTransferDataInputUrl;
 
-	public void setWfContainerCTaskCDataInput(String wfContainerCTaskCDataInput){
-		this.wfContainerCTaskCDataInput = wfContainerCTaskCDataInput;
+	public void setWfContainerCTaskCFileTransferDataInputUrl(String wfContainerCTaskCFileTransferDataInputUrl){
+		this.wfContainerCTaskCFileTransferDataInputUrl = wfContainerCTaskCFileTransferDataInputUrl;
 	}
 
-	public String getWfContainerCTaskCDataInput(){
-		return wfContainerCTaskCDataInput;
+	public String getWfContainerCTaskCFileTransferDataInputUrl(){
+		return wfContainerCTaskCFileTransferDataInputUrl;
 	}
 
 	@Override
  	public String toString(){
 		return 
 			"TaskCInputDTO{" + 
-			"wf_containerC.taskC.dataInput = '" + wfContainerCTaskCDataInput + '\'' + 
+			"wf_containerC.taskCFileTransfer.dataInputUrl = '" + wfContainerCTaskCFileTransferDataInputUrl + '\'' + 
 			"}";
 		}
 }

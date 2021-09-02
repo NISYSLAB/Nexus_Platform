@@ -6,5 +6,7 @@ public enum ProcessStatus {
     Aborted,
     Failed,
     Cancel,
-    Succeeded
+    Running,
+    Succeeded,
+    Completed;
 }

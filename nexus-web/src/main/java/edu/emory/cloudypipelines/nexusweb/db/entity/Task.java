@@ -1,5 +1,7 @@
 package edu.emory.cloudypipelines.nexusweb.db.entity;
 
+import edu.emory.cloudypipelines.nexusweb.bean.CPJobStatus;
+import edu.emory.cloudypipelines.nexusweb.bean.ProcessStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -91,4 +93,42 @@ public class Task {
 
     @Column(name = "end_millis")
     private Long endMillis = null;
+
+    public static boolean isTaskFinished(String status) {
+        if (status.toLowerCase().contains(ProcessStatus.Aborted.toString().toLowerCase())) {
+            return true;
+        }
+        if (status.toLowerCase().contains(ProcessStatus.Failed.toString().toLowerCase())) {
+            return true;
+        }
+        if (status.toLowerCase().contains(ProcessStatus.Cancel.toString().toLowerCase())) {
+            return true;
+        }
+        if (status.toLowerCase().contains(ProcessStatus.Succeeded.toString().toLowerCase())) {
+            return true;
+        }
+        if (status.toLowerCase().contains(ProcessStatus.Completed.toString().toLowerCase())) {
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean isTaskFailedOrAborted(Task task) {
+        String status = task.getProcessStatus().toLowerCase();
+        if (status.contains(ProcessStatus.Failed.toString().toLowerCase())) {
+            return true;
+        }
+        if (status.contains(ProcessStatus.Aborted.toString().toLowerCase())) {
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean isTaskSucceeded(Task task) {
+        String status = task.getProcessStatus().toLowerCase();
+        if (status.contains(ProcessStatus.Succeeded.toString().toLowerCase())) {
+            return true;
+        }
+        return false;
+    }
 }

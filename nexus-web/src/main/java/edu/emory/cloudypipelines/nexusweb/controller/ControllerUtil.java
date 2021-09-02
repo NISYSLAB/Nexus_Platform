@@ -1,8 +1,6 @@
 package edu.emory.cloudypipelines.nexusweb.controller;
 
 import edu.emory.cloudypipelines.nexusweb.bean.ErrorMessage;
-import edu.emory.cloudypipelines.nexusweb.bean.RequestJobsResponseMsg;
-import edu.emory.cloudypipelines.nexusweb.bean.TaskSubmissionResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,5 +37,12 @@ public class ControllerUtil {
 
     public static ResponseEntity<?> OK(Object object) {
         return new ResponseEntity<>(object, new HttpHeaders(), HttpStatus.OK);
+    }
+
+    public static ResponseEntity<?> notFound(String message) {
+        ErrorMessage errorMessage = new ErrorMessage();
+        errorMessage.setStatus("Not Found");
+        errorMessage.setMessage(message);
+        return new ResponseEntity(errorMessage, new HttpHeaders(), HttpStatus.NOT_FOUND);
     }
 }

@@ -8,8 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.context.annotation.Bean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.*;
@@ -22,24 +20,22 @@ import javax.annotation.PostConstruct;
 import java.io.File;
 
 @Component
-public class CloudyPipelinesHttpClient {
+public class CloudyPipelinesHttpClient extends CommonHttpClient {
     public static final String VERSION_V1 = "v1";
     public static final String VERSION_V11 = "v1.1";
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudyPipelinesHttpClient.class);
-    private final String submissionRootDir = "/tmp/nexusweb/submission";
+
     @Autowired
     RestTemplate restTemplate;
+
     @Value("${AUTH_TOKEN}")
     private String AUTH_TOKEN;
+
     @Value("${cloudypipelines_url}")
     private String API_HOST;
+
     private String SUBMISSION_V1_URL = String.format("%s/api/workflows/%s", API_HOST, VERSION_V1);
     private String SUBMISSION_V11_URL = String.format("%s/api/workflows/%s", API_HOST, VERSION_V11);
-
-    @Bean
-    public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder) {
-        return restTemplateBuilder.errorHandler(new RestTemplateResponseErrorHandler()).build();
-    }
 
     @PostConstruct
     void init() {

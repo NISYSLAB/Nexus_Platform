@@ -17,5 +17,5 @@ import java.util.UUID;
 public class TaskSubmissionResponse {
     private UUID taskHeaderId;
     private String inputPath = "";
-    List<TaskMetadata> taskMetadataList = new ArrayList<>();
+    List<TaskMetadata> taskList = new ArrayList<>();
 }
