@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.*;
@@ -20,22 +22,24 @@ import javax.annotation.PostConstruct;
 import java.io.File;
 
 @Component
-public class CloudyPipelinesHttpClient extends CommonHttpClient {
+public class CloudyPipelinesHttpClient {
     public static final String VERSION_V1 = "v1";
     public static final String VERSION_V11 = "v1.1";
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudyPipelinesHttpClient.class);
 
     @Autowired
-    RestTemplate restTemplate;
-
+    RestTemplate cpRestTemplate;
     @Value("${AUTH_TOKEN}")
     private String AUTH_TOKEN;
-
     @Value("${cloudypipelines_url}")
     private String API_HOST;
-
     private String SUBMISSION_V1_URL = String.format("%s/api/workflows/%s", API_HOST, VERSION_V1);
     private String SUBMISSION_V11_URL = String.format("%s/api/workflows/%s", API_HOST, VERSION_V11);
+
+    @Bean(name = "cpRestTemplate")
+    public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder) {
+        return restTemplateBuilder.errorHandler(new RestTemplateResponseErrorHandler()).build();
+    }
 
     @PostConstruct
     void init() {
@@ -74,7 +78,7 @@ public class CloudyPipelinesHttpClient extends CommonHttpClient {
                                                          MultipartFile workflowInputs,
                                                          MultipartFile workflowOptions) {
         final String methodName = "submit():";
-        String submitDir = CommonUtil.makeDestDirWithTimestamp(submissionRootDir);
+        String submitDir = CommonUtil.makeDestDirWithTimestamp(CommonHttpClient.submissionRootDir);
         String wdlFilePath = CommonUtil.saveUploadedFile(workflowSource, submitDir);
         String inputsFilePath = CommonUtil.saveUploadedFile(workflowInputs, submitDir);
         String optionsFilePath = CommonUtil.saveUploadedFile(workflowOptions, submitDir);
@@ -103,7 +107,7 @@ public class CloudyPipelinesHttpClient extends CommonHttpClient {
         }
         LOGGER.info("{} requestEntity={}", methodName, requestEntity);
         LOGGER.info("{} whichUri={}", methodName, whichUri);
-        return restTemplate.exchange(whichUri, HttpMethod.POST, requestEntity, new ParameterizedTypeReference<RequestJobsResponseMsg>() {
+        return cpRestTemplate.exchange(whichUri, HttpMethod.POST, requestEntity, new ParameterizedTypeReference<RequestJobsResponseMsg>() {
         });
     }
 
@@ -113,7 +117,7 @@ public class CloudyPipelinesHttpClient extends CommonHttpClient {
                                                                     MultipartFile workflowInputs,
                                                                     MultipartFile workflowOptions) {
         final String methodName = "submitRegisteredWorkflow():";
-        String submitDir = CommonUtil.makeDestDirWithTimestamp(submissionRootDir);
+        String submitDir = CommonUtil.makeDestDirWithTimestamp(CommonHttpClient.submissionRootDir);
         String inputsFilePath = CommonUtil.saveUploadedFile(workflowInputs, submitDir);
         String optionsFilePath = CommonUtil.saveUploadedFile(workflowOptions, submitDir);
         LOGGER.info("{} submitDir={}, wfName={}, wfVersion={},inputsFilePath={}, optionsFilePath={}", methodName, submitDir, wfName, wfVersion, inputsFilePath, optionsFilePath);
@@ -130,7 +134,7 @@ public class CloudyPipelinesHttpClient extends CommonHttpClient {
         String whichUri = String.format("%s/api/registered/workflowpipelines/%s/%s/", API_HOST, wfName, wfVersion);
         LOGGER.info("{} requestEntity={}", methodName, requestEntity);
         LOGGER.info("{} whichUri={}", methodName, whichUri);
-        return restTemplate.exchange(whichUri, HttpMethod.POST, requestEntity, new ParameterizedTypeReference<RequestJobsResponseMsg>() {
+        return cpRestTemplate.exchange(whichUri, HttpMethod.POST, requestEntity, new ParameterizedTypeReference<RequestJobsResponseMsg>() {
         });
     }
 
@@ -165,7 +169,7 @@ public class CloudyPipelinesHttpClient extends CommonHttpClient {
     public ResponseEntity<?> abortByCromwellId(String cromwellId) {
         //curl -k -H "Authorization: OAuth ${TOKEN}"  "${API_HOST}/api/workflows/v1/{cromwellId}/abort"
         String apiUrl = String.format("%s/api/workflows/v1/%s/abort", API_HOST, cromwellId);
-        return restTemplate.exchange(apiUrl,
+        return cpRestTemplate.exchange(apiUrl,
                 HttpMethod.POST,
                 new HttpEntity<>(getHttpRequestEmptyMap(), getAuthHeaders(AUTH_TOKEN)),
                 new ParameterizedTypeReference<String>() {
@@ -214,7 +218,7 @@ public class CloudyPipelinesHttpClient extends CommonHttpClient {
 
     public ResponseEntity<String> callGetHttp(String apiUrl) {
         try {
-            return restTemplate.exchange(
+            return cpRestTemplate.exchange(
                     apiUrl,
                     HttpMethod.GET,
                     new HttpEntity<>(getHttpRequestEmptyMap(), getAuthHeaders(AUTH_TOKEN)),

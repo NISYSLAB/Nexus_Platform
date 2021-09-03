@@ -10,13 +10,14 @@ workflow wf_containerB {
 
 task taskBFileTransfer {
     String taskName = "taskBFileTransfer"
-    String taskOutput = "taskB_output.out"
+    String taskOutput = "taskBFileTransfer.out"
     String dataInputUrl
     command {
-        wget -O ${taskOutput} ${dataInputUrl}
-        //curl https://pipelineapi.org:9555/api/download/workflows/f5d9492d-e01a-4151-a756-f64abef82a7c/requests/cb378bef-96d4-4f49-ad46-8201be6a9e4a > cp.out
-        //wget -O test_ouput.out https://pipelineapi.org:9555/api/download/workflows/f5d9492d-e01a-4151-a756-f64abef82a7c/requests/cb378bef-96d4-4f49-ad46-8201be6a9e4a
-        
+        echo "wget -O ${taskOutput} ${dataInputUrl}"
+        wget -O "${taskOutput}" "${dataInputUrl}"
+        ls -alt "${taskOutput}"
+        echo "cat ${taskOutput}"
+        cat "${taskOutput}"
         echo "" >> "${taskOutput}"
         echo $(date -u +"%m/%d/%Y:%H:%M:%S") >> "${taskOutput}"
         echo "${taskName} started" >> "${taskOutput}"
@@ -35,7 +36,7 @@ task taskBFileTransfer {
 
 task taskB {
     String taskName = "taskB"
-    String taskOutput = "taskB_output.txt"
+    String taskOutput = "taskB.out"
     File dataInput
     command {
         cat ${dataInput} > "${taskOutput}"

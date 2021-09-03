@@ -15,13 +15,12 @@ import java.util.Arrays;
 
 @Component
 public class CommonHttpClient {
+    final static String submissionRootDir = "/tmp/nexusweb/submission";
     private static final Logger LOGGER = LoggerFactory.getLogger(CommonHttpClient.class);
-    final String submissionRootDir = "/tmp/nexusweb/submission";
-
     @Autowired
-    RestTemplate restTemplate;
+    RestTemplate commonRestTemplate;
 
-    @Bean
+    @Bean(name = "commonRestTemplate")
     public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder) {
         return restTemplateBuilder.errorHandler(new RestTemplateResponseErrorHandler()).build();
     }
@@ -29,7 +28,7 @@ public class CommonHttpClient {
     public <T> ResponseEntity<T> httpGet(String httpUrl, Class<T> responseType) {
         final String methodName = "httpGet():";
         LOGGER.info("{} httpUrl={}", methodName, httpUrl);
-        return restTemplate.getForEntity(httpUrl, responseType);
+        return commonRestTemplate.getForEntity(httpUrl, responseType);
     }
 
     public String httpDownload2File(String httpFileUrl, String destFilePath) {
@@ -39,7 +38,7 @@ public class CommonHttpClient {
             HttpHeaders headers = new HttpHeaders();
             headers.setAccept(Arrays.asList(MediaType.APPLICATION_OCTET_STREAM));
             HttpEntity<String> entity = new HttpEntity<>(headers);
-            ResponseEntity<byte[]> response = restTemplate.exchange(httpFileUrl, HttpMethod.GET, entity, byte[].class);
+            ResponseEntity<byte[]> response = commonRestTemplate.exchange(httpFileUrl, HttpMethod.GET, entity, byte[].class);
             Files.write(Paths.get(destFilePath), response.getBody());
             return destFilePath;
         } catch (Exception e) {

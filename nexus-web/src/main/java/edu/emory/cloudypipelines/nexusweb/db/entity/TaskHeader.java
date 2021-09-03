@@ -1,5 +1,6 @@
 package edu.emory.cloudypipelines.nexusweb.db.entity;
 
+import edu.emory.cloudypipelines.nexusweb.utils.CommonUtil;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -55,4 +56,12 @@ public class TaskHeader {
 
     @Column(name = "end_millis")
     private Long endMillis = null;
+
+    public void setCompleted(boolean completed) {
+        if (completed) {
+            this.completed = true;
+            this.setTimeCompleted(CommonUtil.getUTCNow());
+            this.setEndMillis(CommonUtil.getEpochMilli(this.getTimeCompleted()));
+        }
+    }
 }

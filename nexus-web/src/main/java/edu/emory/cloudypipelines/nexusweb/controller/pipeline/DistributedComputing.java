@@ -50,7 +50,7 @@ public class DistributedComputing {
     private boolean debug_monitoring = true;
 
     @RequestMapping(value = "/" + WF_VERSION_1, method = RequestMethod.POST)
-    @ApiOperation(value = "Run DistributedComputingPOC: " + WF_NAME + "/" + WF_VERSION_1)
+    @ApiOperation(value = "Run DistributedComputingPOC: " + "/" + WF_VERSION_1)
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Ok", response = String.class),
             @ApiResponse(code = 404, message = "Not found", response = String.class)})
     public ResponseEntity<?> submitAndRun(
@@ -61,12 +61,12 @@ public class DistributedComputing {
         return submitMultiEnv(commonRequest, inputPath);
     }
 
-    @RequestMapping(value = "/" + WF_VERSION_1, method = RequestMethod.GET)
-    @ApiOperation(value = "Get task metadata by taskHeaderId: " + WF_NAME + "/" + WF_VERSION_1 + "/{taskHeaderId}")
+    @RequestMapping(value = "/" + WF_VERSION_1 + "/{taskHeaderId}", method = RequestMethod.GET)
+    @ApiOperation(value = "Get task metadata by taskHeaderId: " + "/" + WF_VERSION_1 + "/{taskHeaderId}")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Ok", response = String.class),
             @ApiResponse(code = 404, message = "Not found", response = String.class)})
     public ResponseEntity<?> getTaskMetadataByTaskHeaderId(
-            @ApiParam(name = "taskHeaderId", value = "taskHeaderId", required = true) @PathVariable(value = "taskHeaderId", required = true) String taskHeaderId) {
+            @ApiParam(name = "taskHeaderId", value = "taskHeaderId", required = true) @PathVariable(name = "taskHeaderId", value = "taskHeaderId", required = true) String taskHeaderId) {
 
         LOGGER.info("getTaskMetadataByTaskHeaderId(): received taskHeaderId={}", taskHeaderId);
         SubmissionMetadata submissionMetadata = new SubmissionMetadata();
@@ -87,11 +87,16 @@ public class DistributedComputing {
         String wdlFilePath = CommonUtil.copyFileToDirectory(CONTAINER_A_WDL_PATH, submissionDir);
         String inputJsonFilePath = getTaskAJsonInputFilePath(inputPath, submissionDir);
 
+        TaskHeader taskHeader = saveNewTaskHeader(inputPath, commonRequest);
+        //submit the 1st task/job
+        commonRequest.setLabel(composeTaskLabel(taskHeader.getTaskHeaderId(), "taskA", 0));
+
         ResponseEntity<RequestJobsResponseMsg> responseEntity = cloudyPipelinesHttpClient.submitByFilePath(commonRequest, wdlFilePath, inputJsonFilePath, null);
         if (!ControllerUtil.isHttpOk(responseEntity.getStatusCodeValue())) {
             return ControllerUtil.badRequest("Submission to CloudyPipelines Failed!");
         }
-        TaskSubmissionResponse taskSubmissionResponse = postProcessMultiEnv(commonRequest, inputPath, responseEntity);
+
+        TaskSubmissionResponse taskSubmissionResponse = postProcessMultiEnv(taskHeader, commonRequest, inputPath, responseEntity);
         if (taskSubmissionResponse.getTaskHeaderId() == null) {
             return ControllerUtil.badRequest("No header created, submission Failed");
         }
@@ -101,8 +106,8 @@ public class DistributedComputing {
         return ControllerUtil.OK(taskSubmissionResponse);
     }
 
-    private TaskSubmissionResponse postProcessMultiEnv(CommonRequest commonRequest, String inputPath, ResponseEntity<RequestJobsResponseMsg> responseEntity) {
-        TaskHeader taskHeader = saveNewTaskHeader(inputPath, commonRequest);
+    private TaskSubmissionResponse postProcessMultiEnv(TaskHeader taskHeader, CommonRequest commonRequest, String inputPath, ResponseEntity<RequestJobsResponseMsg> responseEntity) {
+
         UUID taskHeaderId = taskHeader.getTaskHeaderId();
         //details
         TaskSubmissionResponse taskSubmissionResponse = new TaskSubmissionResponse();
@@ -220,7 +225,7 @@ public class DistributedComputing {
         task.setTaskIndex(0);
         task.setTaskName("taskA");
         task.setWfType(String.valueOf(WfType.WDL));
-        task.setProcessStatus(cpJobStatuses.get(0).getStatus());
+        task.setProcessStatus(String.valueOf(ProcessStatus.Submitted));
         task.setProject("nexus-bmi");
         task.setEmail("ping.gu@dbmi.emory.edu");
         task.setLabel(composeTaskLabel(taskHeader.getTaskHeaderId(), task.getTaskName(), task.getTaskIndex()));
@@ -241,17 +246,23 @@ public class DistributedComputing {
         RequestJobsResponseMsg requestJobsResponseMsg = responseEntity.getBody();
         if (requestJobsResponseMsg == null) {
             LOGGER.error("updateTask(): CloudyPipelines requestJobsResponseMsg is null, something wrong");
+            task.setCompleted(true);
+            task.setNote("CloudyPipelines requestJobsResponseMsg is null, something wrong");
+            task.setProcessStatus(String.valueOf(ProcessStatus.Failed));
             return false;
         }
         task.setRequestId(requestJobsResponseMsg.getRequestId());
         List<CPJobStatus> cpJobStatuses = requestJobsResponseMsg.getJobStatusList();
         if (cpJobStatuses == null || cpJobStatuses.isEmpty()) {
             LOGGER.error("updateTask(): CloudyPipelines requestJobsResponseMsg job list is null, something wrong");
+            task.setCompleted(true);
+            task.setNote("CloudyPipelines requestJobsResponseMsg job list is null, something wrong");
+            task.setProcessStatus(String.valueOf(ProcessStatus.Failed));
             return false;
         }
         // should be only one
         task.setCromwellId(cpJobStatuses.get(0).getId());
-        task.setProcessStatus(cpJobStatuses.get(0).getStatus());
+        task.setProcessStatus(String.valueOf(ProcessStatus.Submitted));
         task.setTimeSubmitted(CommonUtil.getUTCNow());
         task.setTimeCompleted(null);
         task.setStartMillis(CommonUtil.getEpochMilli(task.getTimeSubmitted()));
@@ -302,8 +313,6 @@ public class DistributedComputing {
                 continue;
             }
             header.setCompleted(true);
-            header.setTimeCompleted(CommonUtil.getUTCNow());
-            header.setEndMillis(CommonUtil.getEpochMilli(header.getTimeCompleted()));
             header.setProcessStatus(String.valueOf(ProcessStatus.Completed));
             taskHeaderRepo.save(header);
         }
@@ -312,7 +321,7 @@ public class DistributedComputing {
     private void monitorTask() {
         final String methodName = "monitorTask():";
 
-        List<Task> runningTasks = taskRepo.findDistinctByCompleted(false);
+        List<Task> runningTasks = taskRepo.findDistinctByCompletedAndProcessStatus(false, String.valueOf(ProcessStatus.Submitted));
         if (runningTasks == null || runningTasks.isEmpty()) {
             return;
         }
@@ -325,8 +334,6 @@ public class DistributedComputing {
             if (wasJobFinished(cpJobStatus)) {
                 task.setProcessStatus(cpJobStatus.getStatus());
                 task.setCompleted(true);
-                task.setTimeCompleted(CommonUtil.getUTCNow());
-                task.setEndMillis(CommonUtil.getEpochMilli(task.getTimeCompleted()));
                 task.setResultOutput(getTaskResultOutput(task));
                 taskRepo.save(task);
                 resetSubsequentTasksOnError(task);
@@ -392,9 +399,7 @@ public class DistributedComputing {
             nextTask.setCompleted(true);
             nextTask.setProcessStatus(String.valueOf(ProcessStatus.Cancel));
             nextTask.setTimeSubmitted(null);
-            nextTask.setTimeCompleted(null);
             nextTask.setStartMillis(null);
-            nextTask.setEndMillis(null);
             nextTask.setNote("Cancelled: previous task(s) failed or aborted");
             taskRepo.save(nextTask);
         }
@@ -420,16 +425,22 @@ public class DistributedComputing {
         ResponseEntity<RequestJobsResponseMsg> responseEntity = cloudyPipelinesHttpClient.submitByFilePath(commonRequest, wdlFilePath, inputJsonFilePath, null);
         if (!ControllerUtil.isHttpOk(responseEntity.getStatusCodeValue())) {
             LOGGER.error("{} Submission to CloudyPipelines Failed for taskLabel={}", methodName, commonRequest.getLabel());
+            nextTask.setCompleted(true);
+            nextTask.setProcessStatus(String.valueOf(ProcessStatus.Failed));
+            nextTask.setNote("Submission to CloudyPipelines Failed");
+            taskRepo.save(nextTask);
             return;
         }
         updateTask(nextTask, responseEntity);
+        taskRepo.save(nextTask);
+
     }
 
     private CommonRequest buildCommonRequest(Task task) {
         CommonRequest commonRequest = new CommonRequest();
         commonRequest.setRunningHoursAllowed(String.valueOf(task.getRunningHoursAllowed()));
         commonRequest.setProject(task.getProject());
-        commonRequest.setLabel(task.getTaskHeaderId().toString().substring(0, 8) + task.getTaskName());
+        commonRequest.setLabel(task.getLabel());
         commonRequest.setEmail(task.getEmail());
         commonRequest.setPreemptibleOption(PreemptibleOption.valueOf(task.getPreemptibleOption()));
         commonRequest.setWorkflowType(WorkflowType.valueOf(task.getWfType()));
@@ -450,7 +461,11 @@ public class DistributedComputing {
             LOGGER.error("{} Unable to find url for name={} in appConfig", methodName, name);
             return "";
         }
-        return appConfig.getValue();
+        String pattern = appConfig.getValue();
+        if (CommonUtil.isNullOrEmpty(pattern)) {
+            return "";
+        }
+        return pattern.replaceAll("CROMWELL_ID", task.getCromwellId()).replaceAll("REQUEST_ID", task.getRequestId());
     }
 
     private String buildJsonInputPath(Task nextTask, String inputDataUrl, String destDir) {
