@@ -9,7 +9,7 @@ import lombok.ToString;
 @Setter
 @NoArgsConstructor
 @ToString
-public class CPJob {
+public class CPJobStatus {
     private String id = "";
     private String status = "";
 }

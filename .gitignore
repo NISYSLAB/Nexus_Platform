@@ -1,3 +1,4 @@
+**/*json_input_template*.json
 **/*.zip
 **/*.iml
 **/*.class
@@ -11,3 +12,8 @@
 **/nexus-web/target
 **/nexus-web/*.orig*
 **/nexus-web/*.backup*
+**/bmicluster
+**/csiccluster
+**/.ssl
+**/ssl
+**/volum*

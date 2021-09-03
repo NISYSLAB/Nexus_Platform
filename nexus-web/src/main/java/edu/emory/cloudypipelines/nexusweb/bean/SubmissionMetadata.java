@@ -1,6 +1,8 @@
 package edu.emory.cloudypipelines.nexusweb.bean;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+
+import edu.emory.cloudypipelines.nexusweb.db.entity.Task;
+import edu.emory.cloudypipelines.nexusweb.db.entity.TaskHeader;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,9 +14,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @ToString
-public class RequestJobsResponseMsg {
-    private String requestId;
-
-    @JsonProperty("jobs")
-    private List<CPJobStatus> jobStatusList;
+public class SubmissionMetadata {
+    private TaskHeader taskHeader;
+    private List<Task> tasks;
 }

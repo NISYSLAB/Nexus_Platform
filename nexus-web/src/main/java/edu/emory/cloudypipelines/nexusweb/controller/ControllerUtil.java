@@ -26,4 +26,23 @@ public class ControllerUtil {
         errorMessage.setMessage(message);
         return new ResponseEntity(errorMessage, new HttpHeaders(), HttpStatus.UNAUTHORIZED);
     }
+
+    public static boolean isHttpOk(HttpStatus httpStatus) {
+        return httpStatus.is2xxSuccessful();
+    }
+
+    public static boolean isHttpOk(int statusCodeValue) {
+        return (statusCodeValue > 199 && statusCodeValue < 300);
+    }
+
+    public static ResponseEntity<?> OK(Object object) {
+        return new ResponseEntity<>(object, new HttpHeaders(), HttpStatus.OK);
+    }
+
+    public static ResponseEntity<?> notFound(String message) {
+        ErrorMessage errorMessage = new ErrorMessage();
+        errorMessage.setStatus("Not Found");
+        errorMessage.setMessage(message);
+        return new ResponseEntity(errorMessage, new HttpHeaders(), HttpStatus.NOT_FOUND);
+    }
 }

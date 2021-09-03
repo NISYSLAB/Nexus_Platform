@@ -3,6 +3,7 @@ package edu.emory.cloudypipelines.nexusweb.controller;
 import edu.emory.cloudypipelines.nexusweb.bean.CommonRequest;
 import edu.emory.cloudypipelines.nexusweb.bean.RequestJobsResponseMsg;
 import edu.emory.cloudypipelines.nexusweb.service.CloudyPipelinesHttpClient;
+import edu.emory.cloudypipelines.nexusweb.service.CommonHttpClient;
 import edu.emory.cloudypipelines.nexusweb.utils.CommonUtil;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
@@ -19,6 +20,10 @@ public class CommonWorkflowController {
     public static final String VERSION_V1 = "v1";
     public static final String VERSION_V11 = "v1.1";
     private static final Logger LOGGER = LoggerFactory.getLogger(CommonWorkflowController.class);
+
+    @Autowired
+    CommonHttpClient commonHttpClient;
+
     @Autowired
     CloudyPipelinesHttpClient cloudyPipelinesHttpClient;
 
