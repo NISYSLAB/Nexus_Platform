@@ -1,6 +1,8 @@
 #!/bin/bash
 
-RELEASE_TAG=1.0
+WEB_RELEASE_TAG=1.1
+FILE_RELEASE_TAG=1.0
+DB_RELEASE_TAG=13.2
 
 #### functions
 function set_java_env() {
@@ -41,7 +43,7 @@ export cloudypipelines_url=https://pipelineapi.org:9000
 
 #### docker image/container
 export web_image_name="us.gcr.io/cloudypipelines-com/nexus-web"
-export web_image_tag=${RELEASE_TAG}
+export web_image_tag=${WEB_RELEASE_TAG}
 export web_dockerfile=Dockerfile.web
 export web_container_name=nexus-web
 export web_jar="target/nexusweb-0.0.1-SNAPSHOT.jar"
@@ -62,13 +64,13 @@ export db_user=postgres
 
 ## filetransfer
 filetransfer_image_name="us.gcr.io/cloudypipelines-com/nexus-filetransfer"
-filetransfer_image_tag=1.0
+filetransfer_image_tag=${FILE_RELEASE_TAG}
 filetransfer_dockerfile=Dockerfile.filetransfer
 
 ## postgresql local docker:
 export db_port=5489
 export POSTGRES_PORT=$db_port
-export db_version=13.2
+export db_version=${DB_RELEASE_TAG}
 export db_container_name=nexus-postgres${db_version}
 export db_image_name="us.gcr.io/cloudypipelines-com/${db_container_name}"
 export db_image_tag=1.0

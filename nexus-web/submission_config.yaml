@@ -1,0 +1,29 @@
+email: ping.gu@dbmi.emory.edu
+label: nexus-distributed-workflows
+dataInput: /labs/mahmoudilab/dicom2nifti/input_dicom/poc_test_input.txt
+taskList:
+  - name: taskA
+    index: 0
+    preemptibleOption: PREEMPTIBLE_STANDARD_ATTEMPT_BOTH
+    project: nexus-bmi
+    runningHoursAllowed: 2
+    workflowType: WDL
+    wdlFilePath: /Users/anniegu/workspace/Nexus_Platform/nexus-web/poc_workflow/taskA.wdl
+    inputFilePath: /Users/anniegu/workspace/Nexus_Platform/nexus-web/poc_workflow/taskA.json
+  - name: taskB
+    index: 1
+    preemptibleOption: PREEMPTIBLE_STANDARD_ATTEMPT_BOTH
+    project: cloudypipelines
+    runningHoursAllowed: 2
+    workflowType: WDL
+    wdlFilePath: /Users/anniegu/workspace/Nexus_Platform/nexus-web/poc_workflow/taskB.wdl
+    inputFilePath: /Users/anniegu/workspace/Nexus_Platform/nexus-web/poc_workflow/taskB.json
+  - name: taskC
+    index: 2
+    preemptibleOption: PREEMPTIBLE_STANDARD_ATTEMPT_BOTH
+    project: nexus-bmi
+    runningHoursAllowed: 2
+    workflowType: WDL
+    wdlFilePath: /Users/anniegu/workspace/Nexus_Platform/nexus-web/poc_workflow/taskC.wdl
+    inputFilePath: /Users/anniegu/workspace/Nexus_Platform/nexus-web/poc_workflow/taskC.json
+

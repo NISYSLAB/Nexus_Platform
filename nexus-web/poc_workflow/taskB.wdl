@@ -1,21 +1,20 @@
-workflow wf_containerC {
-    call taskCFileTransfer
-    call taskC {
-        input: dataInput = taskCFileTransfer.out
+workflow wf_distributedComputing {
+    call taskBFileTransfer
+    call taskB {
+        input: dataInput = taskBFileTransfer.out
     }
     output {
-     taskC.out
+     taskB.out
     }
 }
-task taskCFileTransfer {
-    String taskName = "taskCFileTransfer"
-    String taskOutput = "taskCFileTransfer.out"
+
+task taskBFileTransfer {
+    String taskName = "taskBFileTransfer"
+    String taskOutput = "taskBFileTransfer.out"
     String dataInputUrl
     command {
-        ##echo "wget -O ${taskOutput} ${dataInputUrl}"
-        ##wget -O "${taskOutput}" "${dataInputUrl}"
-        echo "curl ${dataInputUrl} > ${taskOutput}"
-        curl "${dataInputUrl}/" > ${taskOutput}
+        echo "wget -O ${taskOutput} ${dataInputUrl}"
+        wget -O "${taskOutput}" "${dataInputUrl}"
         ls -alt "${taskOutput}"
         echo "cat ${taskOutput}"
         cat "${taskOutput}"
@@ -35,16 +34,16 @@ task taskCFileTransfer {
     }
 }
 
-task taskC {
-    String taskName = "taskC"
-    String taskOutput = "taskC.out"
+task taskB {
+    String taskName = "taskB"
+    String taskOutput = "taskB.out"
     File dataInput
     command {
         cat ${dataInput} > "${taskOutput}"
         echo "" >> "${taskOutput}"
         echo $(date -u +"%m/%d/%Y:%H:%M:%S") >> "${taskOutput}"
         echo "${taskName} started" >> "${taskOutput}"
-        sleep 4
+        sleep 3
         echo "${taskName} ended" >> "${taskOutput}"
         echo $(date -u +"%m/%d/%Y:%H:%M:%S") >> "${taskOutput}"
 

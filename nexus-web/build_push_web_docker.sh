@@ -15,7 +15,7 @@ function build_web_jar() {
 #### End of Function Definitions
 #### Starts
 set_java_env
-time build_web_jar
+time build_web_jar || exit 1
 sleep 2
 time build_push_image "${web_image_name}" "${web_image_tag}" "${web_dockerfile}"
 docker images

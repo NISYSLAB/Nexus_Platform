@@ -5,6 +5,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
@@ -129,8 +131,8 @@ public class CommonUtil {
         return zonedDateTime.toInstant().toEpochMilli();
     }
 
-    public static <T> T json2POJO(String json, Class<T> type) {
-        final String methodName = "json2POJO():";
+    public static <T> T json2Pojo(String json, Class<T> type) {
+        final String methodName = "json2Pojo():";
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             return objectMapper.readValue(json, type);
@@ -145,8 +147,8 @@ public class CommonUtil {
         return null;
     }
 
-    public static String POJO2Json(Object pojo) {
-        final String methodName = "POJO2Json():";
+    public static String pojo2Json(Object pojo) {
+        final String methodName = "pojo2Json():";
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             return objectMapper.writeValueAsString(pojo);
@@ -198,5 +200,48 @@ public class CommonUtil {
             LOGGER.error("copyTextToFile(): IOException: {}", e.getMessage());
             return "";
         }
+    }
+
+    public static <T> T readYaml2Pojo(String yamlFilePath, Class<T> valueType) {
+        ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
+        //We need to use the findAndRegisterModules method so that Jackson will handle our Date properly:??
+        objectMapper.findAndRegisterModules();
+        try {
+            return objectMapper.readValue(new File(yamlFilePath), valueType);
+        } catch (IOException e) {
+            LOGGER.error("readYaml2Pojo(): IOException:", e);
+        }
+        return null;
+    }
+
+    public static String pojo2Yaml(Object pojo) {
+        //By default, our file will start with three dashes.
+        //That's perfectly valid for the YAML format, but we can turn it off by disabling the feature on the YAMLFactory:
+        ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
+        try {
+            return objectMapper.writeValueAsString(pojo);
+        } catch (JsonProcessingException e) {
+            LOGGER.error("pojo2Yaml(): Exception: ", e.getMessage());
+        }
+        return "";
+    }
+
+    public static String readFile2Text(String filePath) {
+        try {
+            return FileUtils.readFileToString(new File(filePath), Charset.defaultCharset());
+        } catch (IOException e) {
+            LOGGER.error("readFile2Text(): IOException: ", e.getMessage());
+        }
+        return "";
+    }
+
+    public static String writeText2File(String text, String destFilePath) {
+        try {
+            FileUtils.writeStringToFile(new File(destFilePath), text, Charset.defaultCharset());
+            return destFilePath;
+        } catch (IOException e) {
+           LOGGER.error("writeText2File(): IOException: ", e.getMessage());
+        }
+        return "";
     }
 }

@@ -1,4 +1,4 @@
-workflow wf_containerA {
+workflow wf_distributedComputing {
     call taskA 
     output {
      taskA.out
