@@ -1,3 +1,3 @@
 {
-  "wf_distributedComputing.taskBFileTransfer.dataInputUrl": "dataInputUrl_replaced"
+  "wf_distributed_nexus.transferB.dataInput": "dataInput_replaced"
 }

@@ -193,13 +193,7 @@ public class CommonUtil {
     }
 
     public static String copyTextToFile(String text, String destFilePath) {
-        try {
-            FileUtils.writeStringToFile(new File(destFilePath), text, Charset.defaultCharset());
-            return destFilePath;
-        } catch (IOException e) {
-            LOGGER.error("copyTextToFile(): IOException: {}", e.getMessage());
-            return "";
-        }
+        return writeText2File(text, destFilePath);
     }
 
     public static <T> T readYaml2Pojo(String yamlFilePath, Class<T> valueType) {
@@ -228,7 +222,7 @@ public class CommonUtil {
 
     public static String readFile2Text(String filePath) {
         try {
-            return FileUtils.readFileToString(new File(filePath), Charset.defaultCharset());
+            return FileUtils.readFileToString(new File(filePath), Charset.defaultCharset()).trim();
         } catch (IOException e) {
             LOGGER.error("readFile2Text(): IOException: ", e.getMessage());
         }

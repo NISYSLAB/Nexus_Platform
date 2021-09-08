@@ -1,24 +1,24 @@
-workflow wf_distributedComputing {
-    call taskCFileTransfer
+workflow wf_distributed_nexus {
+    call transferC
     call taskC {
-        input: dataInput = taskCFileTransfer.out
+        input: dataInput = transferC.out
     }
     output {
      taskC.out
     }
 }
-task taskCFileTransfer {
-    String taskName = "taskCFileTransfer"
-    String taskOutput = "taskCFileTransfer.out"
-    String dataInputUrl
+task transferC {
+    String taskName = "transferC"
+    String taskOutput = "transferC.out"
+    String dataInput
     command {
-        ##echo "wget -O ${taskOutput} ${dataInputUrl}"
-        ##wget -O "${taskOutput}" "${dataInputUrl}"
-        echo "curl ${dataInputUrl} > ${taskOutput}"
-        curl "${dataInputUrl}/" > ${taskOutput}
-        ls -alt "${taskOutput}"
+        ##echo "wget -O ${taskOutput} ${dataInput}"
+        ##wget -O "${taskOutput}" "${dataInput}"
+        echo "curl ${dataInput} > ${taskOutput}"
+        curl ${dataInput} > ${taskOutput}
+        ls -alt ${taskOutput}
         echo "cat ${taskOutput}"
-        cat "${taskOutput}"
+        cat ${taskOutput}
         echo "" >> "${taskOutput}"
         echo $(date -u +"%m/%d/%Y:%H:%M:%S") >> "${taskOutput}"
         echo "${taskName} started" >> "${taskOutput}"

@@ -1,7 +1,7 @@
-workflow wf_distributedComputing {
-    call taskA 
+workflow wf_distributed_nexus {
+    call taskA
     output {
-     taskA.out
+        taskA.out
     }
 }
 
@@ -10,7 +10,7 @@ task taskA {
     String taskOutput = "taskA_output.txt"
     File dataInput
     command {
-        cat ${dataInput} > "${taskOutput}" 
+        cat ${dataInput} > "${taskOutput}"
         echo "" >> "${taskOutput}"
         echo $(date -u +"%m/%d/%Y:%H:%M:%S") >> "${taskOutput}"
         echo "${taskName} started" >> "${taskOutput}"
