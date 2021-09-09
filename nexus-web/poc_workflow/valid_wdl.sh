@@ -7,10 +7,10 @@ echo " SCRIPT_NAME=${SCRIPT_NAME} "
 echo " SCRIPT_DIR=${SCRIPT_DIR} "
 #############################################################################
 cd ${SCRIPT_DIR}
-
+WDLTOOL=/Users/anniegu/tools/womtool-59.jar
 for file in *.wdl ; do
     echo "Valid file: ${file}"
-   
+
     echo "java -jar ${WDLTOOL} validate ${file}"
     java -jar ${WDLTOOL} validate ${file} || { echo "Invalid WDL: ${file}"; return 1; }
 
@@ -18,6 +18,5 @@ for file in *.wdl ; do
     echo "java -jar ${WDLTOOL} inputs ${file} > ${json_output}"
     java -jar ${WDLTOOL} inputs ${file} > ${json_output}
     echo "json output template: ${json_output}"
+    echo ""
 done
-
-

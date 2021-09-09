@@ -1,9 +1,9 @@
 package edu.emory.cloudypipelines.nexusweb.controller.pipeline;
 
 import edu.emory.cloudypipelines.nexusweb.bean.*;
+import edu.emory.cloudypipelines.nexusweb.bean.generated.SubmissionConfig;
 import edu.emory.cloudypipelines.nexusweb.bean.generated.TaskAInputDTO;
-import edu.emory.cloudypipelines.nexusweb.bean.generated.TaskBInputDTO;
-import edu.emory.cloudypipelines.nexusweb.bean.generated.TaskCInputDTO;
+import edu.emory.cloudypipelines.nexusweb.bean.generated.TaskListItem;
 import edu.emory.cloudypipelines.nexusweb.controller.ControllerUtil;
 import edu.emory.cloudypipelines.nexusweb.db.entity.AppConfig;
 import edu.emory.cloudypipelines.nexusweb.db.entity.Task;
@@ -14,12 +14,14 @@ import edu.emory.cloudypipelines.nexusweb.db.repo.TaskRepo;
 import edu.emory.cloudypipelines.nexusweb.service.CloudyPipelinesHttpClient;
 import edu.emory.cloudypipelines.nexusweb.utils.CommonUtil;
 import io.swagger.annotations.*;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -37,6 +39,7 @@ public class DistributedComputing {
     private static final Logger LOGGER = LoggerFactory.getLogger(DistributedComputing.class);
     private static final String WF_NAME = "DistributedComputingPOC";
     private static final String WF_VERSION_1 = "v1";
+    private static final String WF_VERSION_2 = "v2";
     private final String submissionRootDir = "/tmp/nexus-web/dc";
 
     @Autowired
@@ -50,15 +53,152 @@ public class DistributedComputing {
     private boolean debug_monitoring = true;
 
     @RequestMapping(value = "/" + WF_VERSION_1, method = RequestMethod.POST)
-    @ApiOperation(value = "Run DistributedComputingPOC: " + "/" + WF_VERSION_1)
+    @ApiOperation(value = "Run DistributedComputingPOC: " + "/" + WF_VERSION_2)
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Ok", response = String.class),
             @ApiResponse(code = 404, message = "Not found", response = String.class)})
-    public ResponseEntity<?> submitAndRun(
-            @ModelAttribute("commonRequest") CommonRequest commonRequest,
-            @ApiParam(name = "inputPath", value = "full path of image(s)") @RequestParam(value = "inputPath") String inputPath) {
+    public ResponseEntity<?> submitOnlineAndRunByConfigFile(
+            @ApiParam(name = "email", value = "email", required = false) @RequestParam(value = "email") String email,
+            @ApiParam(name = "label", value = "label", required = false) @RequestParam(value = "label") String label,
+            @ApiParam(name = "inputPath", value = "inputPath", required = false) @RequestParam(value = "inputPath") String inputPath,
+            @RequestParam(value = "configurationFile", required = true) MultipartFile configurationFile) {
 
-        LOGGER.info("submitAndRun(): received workflowRunRequest={}, inputPath={}", commonRequest, inputPath);
-        return submitMultiEnv(commonRequest, inputPath);
+        final String methodName = "submitOnlineAndRunByConfigFile():";
+        LOGGER.info("submitAndRunByConfigFile(): received email={}, label={}", email, label);
+        String configFilePath = uploadUserFile(configurationFile);
+        SubmissionConfig submissionConfig = CommonUtil.readYaml2Pojo(configFilePath, SubmissionConfig.class);
+        LOGGER.info("{} submissionConfig={}", methodName, submissionConfig);
+        if (submissionConfig == null) {
+            LOGGER.error("{} bad submissionConfig", methodName);
+            return ControllerUtil.badRequest("Bad configurations");
+        }
+        // create TaskHeader
+        if (StringUtils.isNotBlank(email)) {
+            submissionConfig.setEmail(email.trim());
+        }
+        if (StringUtils.isNotBlank(label)) {
+            submissionConfig.setLabel(label);
+        }
+        if (StringUtils.isNotBlank(inputPath)) {
+            submissionConfig.setDataInput(inputPath.trim());
+        }
+
+        TaskHeader taskHeader = buildNewTaskHeader(submissionConfig);
+        if (taskHeader == null) {
+            LOGGER.error("{} unable to create taskHeader", methodName);
+            return ControllerUtil.badRequest("Unable to create taskHeader");
+        }
+
+        List<Task> taskList = buildNewTaskList(taskHeader, submissionConfig);
+        if (taskList == null || taskList.isEmpty()) {
+            LOGGER.error("{} no task list created", methodName);
+            deleteTaskHeader(taskHeader);
+            return ControllerUtil.badRequest("No tasks created, might be bad configurations");
+        }
+
+        Task task = taskList.get(0);
+        String submitDir = buildSubmissionDir();
+
+        CommonRequest commonRequest = buildCommonRequest(task);
+        String wdlFilePath = getWDLFilePath(task, submitDir + "/wf.wdl");
+        if (CommonUtil.isNullOrEmpty(wdlFilePath)) {
+            LOGGER.error("{} unable to find wdl file for taskIndex={}", methodName, 0);
+            task.setNote("Unable to find wdl file");
+            flagTaskError(taskHeader, task);
+            return ControllerUtil.badRequest("Unable to locate/create wdl file for taskIndex: " + 0);
+        }
+        String inputJsonFilePath = getInputFilePath(task, submitDir + "/input.json", submissionConfig.getDataInput());
+        if (CommonUtil.isNullOrEmpty(inputJsonFilePath)) {
+            LOGGER.error("{} unable to find input file for taskIndex={}", methodName, 0);
+            task.setNote("Unable to find input file ");
+            flagTaskError(taskHeader, task);
+            return ControllerUtil.badRequest("Unable to locate/create input file for taskIndex: " + 0);
+        }
+
+        ResponseEntity<RequestJobsResponseMsg> responseEntity = cloudyPipelinesHttpClient.submitByFilePath(commonRequest, wdlFilePath, inputJsonFilePath, null);
+        if (!ControllerUtil.isHttpOk(responseEntity.getStatusCodeValue())) {
+            task.setNote("Submission to CloudyPipelines Failed");
+            flagTaskError(taskHeader, task);
+            return ControllerUtil.badRequest("Submission to CloudyPipelines Failed!");
+        }
+
+        task = postProcessTask(task, responseEntity);
+        if (taskFailedOrAborted(task)) {
+            return ControllerUtil.badRequest("No tasks created, submission Failed!");
+        }
+        return ControllerUtil.OK(buildTaskSubmissionResponse(taskHeader, taskList));
+    }
+
+    private String buildSubmissionDir() {
+        return CommonUtil.makeDestDirWithTimestamp(submissionRootDir + "/submit");
+    }
+
+    private void flagTaskError(TaskHeader taskHeader, Task task) {
+        if (task != null) {
+            task.setProcessStatus(String.valueOf(ProcessStatus.Failed));
+            task.setCompleted(true);
+            taskRepo.save(task);
+            resetSubsequentTasksOnError(task);
+        }
+        if (taskHeader != null) {
+            taskHeader.setCompleted(true);
+            taskHeaderRepo.save(taskHeader);
+        }
+    }
+
+    private void deleteTaskHeader(TaskHeader taskHeader) {
+        taskHeaderRepo.delete(taskHeader);
+    }
+
+    private Task postProcessTask(Task task, ResponseEntity<RequestJobsResponseMsg> responseEntity) {
+        RequestJobsResponseMsg requestJobsResponseMsg = responseEntity.getBody();
+        if (requestJobsResponseMsg == null) {
+            LOGGER.error("postProcessMultiEnv(): CloudyPipelines requestJobsResponseMsg is null, something wrong");
+            task.setNote("CloudyPipelines requestJobsResponseMsg is null");
+            flagTaskError(null, task);
+            return task;
+        }
+        if (CommonUtil.isNullOrEmpty(requestJobsResponseMsg.getRequestId())) {
+            LOGGER.error("postProcessMultiEnv(): CloudyPipelines requestId is null, something wrong");
+            task.setNote("CloudyPipelines requestId is null");
+            flagTaskError(null, task);
+            return task;
+        }
+
+        List<CPJobStatus> cpJobStatuses = requestJobsResponseMsg.getJobStatusList();
+        if (cpJobStatuses == null || cpJobStatuses.isEmpty()) {
+            LOGGER.error("postProcessMultiEnv(): CloudyPipelines requestJobsResponseMsg job list is null, something wrong");
+            task.setNote("CloudyPipelines requestJobsResponseMsg job list is null");
+            flagTaskError(null, task);
+            return task;
+        }
+        // should be only one
+        task.setCromwellId(cpJobStatuses.get(0).getId());
+        if (CommonUtil.isNullOrEmpty(task.getCromwellId())) {
+            LOGGER.error("buildTask1(): CloudyPipelines cromwellId is null, something wrong");
+            task.setNote("CloudyPipelines cromwellId is null");
+            flagTaskError(null, task);
+            return null;
+        }
+        task.setRequestId(requestJobsResponseMsg.getRequestId().trim());
+        task.setProcessStatus(String.valueOf(ProcessStatus.Submitted));
+        task.setTimeSubmitted(CommonUtil.getUTCNow());
+        task.setTimeCompleted(null);
+        task.setEndMillis(null);
+        return taskRepo.save(task);
+    }
+
+
+    private TaskHeader buildNewTaskHeader(SubmissionConfig submissionConfig) {
+        TaskHeader taskHeader = new TaskHeader();
+        taskHeader.setLabel(submissionConfig.getLabel());
+        taskHeader.setInputPath(submissionConfig.getDataInput());
+        taskHeader.setCompleted(false);
+        taskHeader.setProcessStatus(String.valueOf(ProcessStatus.Submitted));
+        taskHeader.setTimeSubmitted(CommonUtil.getUTCNow());
+        taskHeader.setStartMillis(CommonUtil.getEpochMilli(taskHeader.getTimeSubmitted()));
+        taskHeader.setJsonConfig(CommonUtil.pojo2Json(submissionConfig));
+        taskHeader.setYamlConfig(CommonUtil.pojo2Yaml(submissionConfig));
+        return taskHeaderRepo.save(taskHeader);
     }
 
     @RequestMapping(value = "/" + WF_VERSION_1 + "/{taskHeaderId}", method = RequestMethod.GET)
@@ -80,40 +220,10 @@ public class DistributedComputing {
         return ControllerUtil.OK(submissionMetadata);
     }
 
-    private ResponseEntity<?> submitMultiEnv(CommonRequest commonRequest, String inputPath) {
-        final String methodName = "submitMultiEnv();";
-        //taskA: run containerA in bmicluster
-        String submissionDir = CommonUtil.makeDestDirWithTimestamp(submissionRootDir);
-        String wdlFilePath = CommonUtil.copyFileToDirectory(CONTAINER_A_WDL_PATH, submissionDir);
-        String inputJsonFilePath = getTaskAJsonInputFilePath(inputPath, submissionDir);
-
-        TaskHeader taskHeader = saveNewTaskHeader(inputPath, commonRequest);
-        //submit the 1st task/job
-        commonRequest.setLabel(composeTaskLabel(taskHeader.getTaskHeaderId(), "taskA", 0));
-
-        ResponseEntity<RequestJobsResponseMsg> responseEntity = cloudyPipelinesHttpClient.submitByFilePath(commonRequest, wdlFilePath, inputJsonFilePath, null);
-        if (!ControllerUtil.isHttpOk(responseEntity.getStatusCodeValue())) {
-            return ControllerUtil.badRequest("Submission to CloudyPipelines Failed!");
-        }
-
-        TaskSubmissionResponse taskSubmissionResponse = postProcessMultiEnv(taskHeader, commonRequest, inputPath, responseEntity);
-        if (taskSubmissionResponse.getTaskHeaderId() == null) {
-            return ControllerUtil.badRequest("No header created, submission Failed");
-        }
-        if (taskSubmissionResponse.getTaskList().isEmpty()) {
-            return ControllerUtil.badRequest("No tasks created, submission Failed!");
-        }
-        return ControllerUtil.OK(taskSubmissionResponse);
-    }
-
-    private TaskSubmissionResponse postProcessMultiEnv(TaskHeader taskHeader, CommonRequest commonRequest, String inputPath, ResponseEntity<RequestJobsResponseMsg> responseEntity) {
-
-        UUID taskHeaderId = taskHeader.getTaskHeaderId();
-        //details
+    private TaskSubmissionResponse buildTaskSubmissionResponse(TaskHeader taskHeader, List<Task> tasks) {
         TaskSubmissionResponse taskSubmissionResponse = new TaskSubmissionResponse();
-        taskSubmissionResponse.setTaskHeaderId(taskHeaderId);
-        taskSubmissionResponse.setInputPath(inputPath);
-        List<Task> tasks = saveNewTasks(taskHeader, commonRequest, inputPath, responseEntity);
+        taskSubmissionResponse.setTaskHeaderId(taskHeader.getTaskHeaderId());
+        taskSubmissionResponse.setInputPath(taskHeader.getInputPath());
         taskSubmissionResponse.setTaskList(buildTaskMetadataList(tasks));
         return taskSubmissionResponse;
     }
@@ -142,100 +252,6 @@ public class DistributedComputing {
         taskMetadata.setTimeSubmitted(task.getTimeSubmitted());
         taskMetadata.setProcessStatus(task.getProcessStatus());
         return taskMetadata;
-    }
-
-    private List<Task> saveNewTasks(TaskHeader taskHeader, CommonRequest commonRequest, String inputPath, ResponseEntity<RequestJobsResponseMsg> responseEntity) {
-        List<Task> tasks = new ArrayList<>();
-        //TODO will parse from the configuration file from user provides
-        // for POC only
-        Task task1 = buildTask1(taskHeader, responseEntity);
-        if (task1 == null) {
-            return tasks;
-        }
-
-        Task task2 = buildTask2(taskHeader);
-        Task task3 = buildTask3(taskHeader);
-        tasks.add(taskRepo.save(task1));
-        tasks.add(taskRepo.save(task2));
-        tasks.add(taskRepo.save(task3));
-        return tasks;
-
-    }
-
-    private Task buildTask3(TaskHeader taskHeader) {
-        Task task = buildTask2(taskHeader);
-        task.setWfWdlFile(CONTAINER_C_WDL_PATH);
-        task.setTaskIndex(2);
-        task.setTaskName("taskC");
-        task.setLabel(composeTaskLabel(taskHeader.getTaskHeaderId(), task.getTaskName(), task.getTaskIndex()));
-        task.setProject("nexus-bmi");
-        return task;
-    }
-
-    private Task buildTask2(TaskHeader taskHeader) {
-        Task task = new Task();
-        task.setTaskHeaderId(taskHeader.getTaskHeaderId());
-        task.setWfWdlFile(CONTAINER_B_WDL_PATH);
-
-        task.setRequestId("");
-        task.setCromwellId("");
-        task.setTaskIndex(1);
-        task.setTaskName("taskB");
-        task.setWfType(String.valueOf(WfType.WDL));
-        task.setProcessStatus(String.valueOf(ProcessStatus.Waiting));
-        task.setProject("cloudypipelines");
-        task.setEmail("ping.gu@dbmi.emory.edu");
-        task.setLabel(composeTaskLabel(taskHeader.getTaskHeaderId(), task.getTaskName(), task.getTaskIndex()));
-        task.setRunningHoursAllowed(24);
-        task.setPreemptibleOption(String.valueOf(PreemptibleOption.PREEMPTIBLE_STANDARD_ATTEMPT_BOTH));
-        task.setTimeSubmitted(null);
-        task.setTimeCompleted(null);
-        task.setStartMillis(null);
-        task.setEndMillis(null);
-        return task;
-    }
-
-    //
-    private Task buildTask1(TaskHeader taskHeader, ResponseEntity<RequestJobsResponseMsg> responseEntity) {
-        Task task = new Task();
-        task.setTaskHeaderId(taskHeader.getTaskHeaderId());
-        task.setWfWdlFile(CONTAINER_A_WDL_PATH);
-        //TODO: how about json input file??
-        RequestJobsResponseMsg requestJobsResponseMsg = responseEntity.getBody();
-        if (requestJobsResponseMsg == null) {
-            LOGGER.error("buildTask1(): CloudyPipelines requestJobsResponseMsg is null, something wrong");
-            return null;
-        }
-        if (CommonUtil.isNullOrEmpty(requestJobsResponseMsg.getRequestId())) {
-            LOGGER.error("buildTask1(): CloudyPipelines requestId is null, something wrong");
-            return null;
-        }
-        task.setRequestId(requestJobsResponseMsg.getRequestId());
-        List<CPJobStatus> cpJobStatuses = requestJobsResponseMsg.getJobStatusList();
-        if (cpJobStatuses == null || cpJobStatuses.isEmpty()) {
-            LOGGER.error("buildTask1(): CloudyPipelines requestJobsResponseMsg job list is null, something wrong");
-            return null;
-        }
-        // should be only one
-        task.setCromwellId(cpJobStatuses.get(0).getId());
-        if (CommonUtil.isNullOrEmpty(task.getCromwellId())) {
-            LOGGER.error("buildTask1(): CloudyPipelines cromwellId is null, something wrong");
-            return null;
-        }
-        task.setTaskIndex(0);
-        task.setTaskName("taskA");
-        task.setWfType(String.valueOf(WfType.WDL));
-        task.setProcessStatus(String.valueOf(ProcessStatus.Submitted));
-        task.setProject("nexus-bmi");
-        task.setEmail("ping.gu@dbmi.emory.edu");
-        task.setLabel(composeTaskLabel(taskHeader.getTaskHeaderId(), task.getTaskName(), task.getTaskIndex()));
-        task.setRunningHoursAllowed(24);
-        task.setPreemptibleOption(String.valueOf(PreemptibleOption.PREEMPTIBLE_STANDARD_ATTEMPT_BOTH));
-        task.setTimeSubmitted(CommonUtil.getUTCNow());
-        task.setTimeCompleted(null);
-        task.setStartMillis(CommonUtil.getEpochMilli(task.getTimeSubmitted()));
-        task.setEndMillis(null);
-        return task;
     }
 
     private String composeTaskLabel(UUID taskHeaderId, String taskName, Integer taskIndex) {
@@ -270,22 +286,9 @@ public class DistributedComputing {
         return true;
     }
 
-    private TaskHeader saveNewTaskHeader(String inputPath, CommonRequest commonRequest) {
-        TaskHeader taskHeader = new TaskHeader();
-        taskHeader.setCompleted(false);
-        taskHeader.setInputPath(inputPath);
-        taskHeader.setTimeSubmitted(CommonUtil.getUTCNow());
-        taskHeader.setTimeCompleted(null);
-        taskHeader.setStartMillis(CommonUtil.getEpochMilli(taskHeader.getTimeSubmitted()));
-        taskHeader.setEndMillis(null);
-        taskHeader.setProcessStatus(String.valueOf(ProcessStatus.Submitted));
-        taskHeader.setLabel(commonRequest.getLabel());
-        return taskHeaderRepo.save(taskHeader);
-    }
-
     private String getTaskAJsonInputFilePath(String inputPath, String submissionDir) {
         TaskAInputDTO taskAInputDTO = new TaskAInputDTO();
-        taskAInputDTO.setWfContainerATaskADataInput(inputPath);
+        taskAInputDTO.setWfDistributedComputingTaskADataInput(inputPath);
         return CommonUtil.writePOJO2File(taskAInputDTO, submissionDir + "/" + "taskAInput.json");
     }
 
@@ -351,7 +354,7 @@ public class DistributedComputing {
         if (body == null) {
             return null;
         }
-        return CommonUtil.json2POJO(body, CPJobStatus.class);
+        return CommonUtil.json2Pojo(body, CPJobStatus.class);
     }
 
     private boolean wasJobFinished(CPJobStatus cpJobStatus) {
@@ -417,9 +420,12 @@ public class DistributedComputing {
         //TODO: only deal with one task here
         Task nextTask = subsequentTasks.get(0);
 
-        String submissionDir = CommonUtil.makeDestDirWithTimestamp(submissionRootDir);
-        String wdlFilePath = CommonUtil.copyFileToDirectory(nextTask.getWfWdlFile(), submissionDir);
+        String submissionDir = buildSubmissionDir();
+        String wdlFilePath = CommonUtil.copyTextToFile(nextTask.getWfWdlFile(), submissionDir + "/" + nextTask.getTaskName() + ".wdl");
         String inputDataUrl = buildInputDataUrl(task);
+        if (inputDataUrl != null) {
+            inputDataUrl = inputDataUrl.trim();
+        }
         String inputJsonFilePath = buildJsonInputPath(nextTask, inputDataUrl, submissionDir);
         CommonRequest commonRequest = buildCommonRequest(nextTask);
         ResponseEntity<RequestJobsResponseMsg> responseEntity = cloudyPipelinesHttpClient.submitByFilePath(commonRequest, wdlFilePath, inputJsonFilePath, null);
@@ -465,28 +471,71 @@ public class DistributedComputing {
         if (CommonUtil.isNullOrEmpty(pattern)) {
             return "";
         }
-        return pattern.replaceAll("CROMWELL_ID", task.getCromwellId()).replaceAll("REQUEST_ID", task.getRequestId());
+        return StringUtils.deleteWhitespace(pattern.replaceAll("CROMWELL_ID", task.getCromwellId()).replaceAll("REQUEST_ID", task.getRequestId()));
     }
 
-    private String buildJsonInputPath(Task nextTask, String inputDataUrl, String destDir) {
-        String jsonInputText = getTaskJsonInputText(nextTask, inputDataUrl);
-        return CommonUtil.copyTextToFile(jsonInputText, destDir + "/" + nextTask.getTaskName() + ".json");
-    }
-
-    private String getTaskJsonInputText(Task nextTask, String inputDataUrl) {
-        if (nextTask.getTaskIndex() == 1) {
-            TaskBInputDTO taskBInputDTO = new TaskBInputDTO();
-            taskBInputDTO.setWfContainerBTaskBFileTransferDataInputUrl(inputDataUrl);
-            return CommonUtil.POJO2Json(taskBInputDTO);
-
-        } else if (nextTask.getTaskIndex() == 2) {
-            TaskCInputDTO taskCInputDTO = new TaskCInputDTO();
-            taskCInputDTO.setWfContainerCTaskCFileTransferDataInputUrl(inputDataUrl);
-            return CommonUtil.POJO2Json(taskCInputDTO);
+    private String buildJsonInputPath(Task task, String inputDataUrl, String destDir) {
+        String jsonInputText = task.getWfInputFile();
+        if (jsonInputText != null) {
+            jsonInputText = jsonInputText.replaceAll("dataInput_replaced", inputDataUrl).replaceAll("dataInputUrl_replaced", inputDataUrl).trim();
+            task.setWfInputFile(jsonInputText);
         }
-        return "";
+        return CommonUtil.copyTextToFile(jsonInputText, destDir + "/" + task.getTaskName() + ".json");
     }
 
+    private String uploadUserFile(MultipartFile multipartFile) {
+        String loadDir = buildUploadDir();
+        return CommonUtil.saveUploadedFile(multipartFile, loadDir);
+    }
 
+    private String buildUploadDir() {
+        return CommonUtil.makeDestDirWithTimestamp(submissionRootDir + "/upload");
+    }
+
+    private String getWDLFilePath(Task task, String destFilePath) {
+        return CommonUtil.writeText2File(task.getWfWdlFile(), destFilePath);
+    }
+
+    private String getInputFilePath(Task task, String destFilePath, String dataInputPath) {
+        String inputFileText = task.getWfInputFile();
+        if (inputFileText != null) {
+            inputFileText = inputFileText.replaceAll("dataInput_replaced", dataInputPath).replaceAll("dataInputUrl_replaced", dataInputPath).trim();
+            task.setWfInputFile(inputFileText);
+        }
+        return CommonUtil.writeText2File(inputFileText, destFilePath);
+    }
+
+    private List<Task> buildNewTaskList(TaskHeader taskHeader, SubmissionConfig submissionConfig) {
+        List<Task> tasks = new ArrayList<>();
+        if (submissionConfig.getTaskList() == null) {
+            return tasks;
+        }
+        for (TaskListItem item : submissionConfig.getTaskList()) {
+            Task task = buildFromTaskItem(item, taskHeader.getTaskHeaderId(), submissionConfig.getEmail());
+            task.setCompleted(false);
+            task.setProcessStatus(String.valueOf(ProcessStatus.Waiting));
+            task.setTimeSubmitted(null);
+            task.setStartMillis(CommonUtil.getEpochMilli(CommonUtil.getUTCNow()));
+            tasks.add(taskRepo.save(task));
+        }
+        return tasks;
+    }
+
+    private Task buildFromTaskItem(TaskListItem item, UUID taskHeaderId, String email) {
+        Task task = new Task();
+        task.setTaskName(item.getName().trim());
+        task.setTaskIndex(item.getIndex());
+        task.setWfWdlFile(CommonUtil.readFile2Text(item.getWdlFilePath()).trim());
+        task.setWfInputFile(CommonUtil.readFile2Text(item.getInputFilePath()).trim());
+        task.setWfOptionFile("");
+        task.setTaskHeaderId(taskHeaderId);
+        task.setWfType(item.getWorkflowType());
+        task.setEmail(email);
+        task.setRunningHoursAllowed(item.getRunningHoursAllowed());
+        task.setPreemptibleOption(item.getPreemptibleOption());
+        task.setProject(item.getProject());
+        task.setLabel(composeTaskLabel(taskHeaderId, task.getTaskName(), task.getTaskIndex()));
+        return task;
+    }
 }
 

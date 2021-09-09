@@ -1,24 +1,23 @@
-workflow wf_containerC {
-    call taskCFileTransfer
-    call taskC {
-        input: dataInput = taskCFileTransfer.out
+workflow wf_distributed_nexus {
+    call transferB
+    call taskB {
+        input: dataInput = transferB.out
     }
     output {
-     taskC.out
+     taskB.out
     }
 }
-task taskCFileTransfer {
-    String taskName = "taskCFileTransfer"
-    String taskOutput = "taskCFileTransfer.out"
-    String dataInputUrl
+
+task transferB {
+    String taskName = "transferB"
+    String taskOutput = "transferB.out"
+    String dataInput
     command {
-        ##echo "wget -O ${taskOutput} ${dataInputUrl}"
-        ##wget -O "${taskOutput}" "${dataInputUrl}"
-        echo "curl ${dataInputUrl} > ${taskOutput}"
-        curl "${dataInputUrl}/" > ${taskOutput}
-        ls -alt "${taskOutput}"
+        echo "wget -O ${taskOutput} ${dataInput}"
+        wget -O ${taskOutput} ${dataInput}
+        ls -alt ${taskOutput}
         echo "cat ${taskOutput}"
-        cat "${taskOutput}"
+        cat ${taskOutput}
         echo "" >> "${taskOutput}"
         echo $(date -u +"%m/%d/%Y:%H:%M:%S") >> "${taskOutput}"
         echo "${taskName} started" >> "${taskOutput}"
@@ -35,16 +34,16 @@ task taskCFileTransfer {
     }
 }
 
-task taskC {
-    String taskName = "taskC"
-    String taskOutput = "taskC.out"
+task taskB {
+    String taskName = "taskB"
+    String taskOutput = "taskB.out"
     File dataInput
     command {
         cat ${dataInput} > "${taskOutput}"
         echo "" >> "${taskOutput}"
         echo $(date -u +"%m/%d/%Y:%H:%M:%S") >> "${taskOutput}"
         echo "${taskName} started" >> "${taskOutput}"
-        sleep 4
+        sleep 3
         echo "${taskName} ended" >> "${taskOutput}"
         echo $(date -u +"%m/%d/%Y:%H:%M:%S") >> "${taskOutput}"
 
