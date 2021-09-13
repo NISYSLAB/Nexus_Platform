@@ -2,7 +2,6 @@ package edu.emory.cloudypipelines.nexusweb.controller.pipeline;
 
 import edu.emory.cloudypipelines.nexusweb.bean.*;
 import edu.emory.cloudypipelines.nexusweb.bean.generated.SubmissionConfig;
-import edu.emory.cloudypipelines.nexusweb.bean.generated.TaskAInputDTO;
 import edu.emory.cloudypipelines.nexusweb.bean.generated.TaskListItem;
 import edu.emory.cloudypipelines.nexusweb.controller.ControllerUtil;
 import edu.emory.cloudypipelines.nexusweb.db.entity.AppConfig;
@@ -284,12 +283,6 @@ public class DistributedComputing {
         task.setStartMillis(CommonUtil.getEpochMilli(task.getTimeSubmitted()));
         task.setEndMillis(null);
         return true;
-    }
-
-    private String getTaskAJsonInputFilePath(String inputPath, String submissionDir) {
-        TaskAInputDTO taskAInputDTO = new TaskAInputDTO();
-        taskAInputDTO.setWfDistributedComputingTaskADataInput(inputPath);
-        return CommonUtil.writePOJO2File(taskAInputDTO, submissionDir + "/" + "taskAInput.json");
     }
 
     @Scheduled(fixedRate = 10000)

@@ -23,6 +23,6 @@ task taskA {
         File out="${taskOutput}"
     }
     runtime {
-        docker: "ubuntu:21.04"
+        docker: "us.gcr.io/cloudypipelines-com/nexus-utils:1.0"
     }
 }

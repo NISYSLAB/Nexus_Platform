@@ -12,13 +12,13 @@ task transferC {
     String taskOutput = "transferC.out"
     String dataInput
     command {
-        ##echo "wget -O ${taskOutput} ${dataInput}"
-        ##wget -O "${taskOutput}" "${dataInput}"
-        echo "curl ${dataInput} > ${taskOutput}"
-        curl ${dataInput} > ${taskOutput}
-        ls -alt ${taskOutput}
-        echo "cat ${taskOutput}"
-        cat ${taskOutput}
+    
+        sleep 90
+        /app/util_curl.sh "${dataInput}" /tmp/curl.out
+        /app/util_wget.sh "${dataInput}" /tmp/wget.out
+        
+        cat /tmp/curl.out >> "${taskOutput}"
+        cat /tmp/wget.out >> "${taskOutput}"
         echo "" >> "${taskOutput}"
         echo $(date -u +"%m/%d/%Y:%H:%M:%S") >> "${taskOutput}"
         echo "${taskName} started" >> "${taskOutput}"
@@ -31,7 +31,7 @@ task transferC {
         File out="${taskOutput}"
     }
     runtime {
-        docker: "us.gcr.io/cloudypipelines-com/nexus-filetransfer:1.0"
+        docker: "us.gcr.io/cloudypipelines-com/nexus-utils:1.0"
     }
 }
 
@@ -53,6 +53,6 @@ task taskC {
         File out="${taskOutput}"
     }
     runtime {
-        docker: "ubuntu:21.04"
+        docker: "us.gcr.io/cloudypipelines-com/nexus-utils:1.0"
     }
 }

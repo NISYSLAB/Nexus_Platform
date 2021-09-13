@@ -1,0 +1,9 @@
+FROM ubuntu:21.04
+
+ENV APP_DIR=/app
+WORKDIR ${APP_DIR}
+ADD poc_workflow/util*.sh ${APP_DIR}/
+RUN apt-get update && apt-get -y install wget  curl
+
+
+

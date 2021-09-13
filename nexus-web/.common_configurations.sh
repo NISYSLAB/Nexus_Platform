@@ -1,7 +1,7 @@
 #!/bin/bash
 
 WEB_RELEASE_TAG=1.1
-FILE_RELEASE_TAG=1.0
+UTILS_RELEASE_TAG=1.0
 DB_RELEASE_TAG=13.2
 
 #### functions
@@ -62,10 +62,10 @@ export db_user=postgres
 ## cloud
 ##export db_url="jdbc:postgresql://google/postgres?socketFactory=com.google.cloud.sql.postgres.SocketFactory&cloudSqlInstance=${db_project}:${db_region}:${db_instance}"
 
-## filetransfer
-filetransfer_image_name="us.gcr.io/cloudypipelines-com/nexus-filetransfer"
-filetransfer_image_tag=${FILE_RELEASE_TAG}
-filetransfer_dockerfile=Dockerfile.filetransfer
+## utils
+utils_image_name="us.gcr.io/cloudypipelines-com/nexus-utils"
+utils_image_tag=${UTILS_RELEASE_TAG}
+utils_dockerfile=Dockerfile.utils
 
 ## postgresql local docker:
 export db_port=5489
