@@ -1,5 +1,7 @@
 # Nexus_Platform
 
+## Nexus Web SwaggerUI at BMI Cluster URL
+https://cloudypipeline.bmi.emory.edu/nexus/swagger-ui.html
 
 ## CloudyPipelines Public URL
 https://pipelineapi.org:9000/

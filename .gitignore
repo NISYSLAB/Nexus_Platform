@@ -1,3 +1,5 @@
+**/local_backend
+**/*.log
 **/*json_input_template*.json
 **/*.zip
 **/*.iml
