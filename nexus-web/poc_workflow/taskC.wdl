@@ -14,11 +14,8 @@ task transferC {
     command {
     
         sleep 90
-        /app/util_curl.sh "${dataInput}" /tmp/curl.out
-        /app/util_wget.sh "${dataInput}" /tmp/wget.out
+        /app/util_curl.sh "${dataInput}" "${taskOutput}"
         
-        cat /tmp/curl.out >> "${taskOutput}"
-        cat /tmp/wget.out >> "${taskOutput}"
         echo "" >> "${taskOutput}"
         echo $(date -u +"%m/%d/%Y:%H:%M:%S") >> "${taskOutput}"
         echo "${taskName} started" >> "${taskOutput}"

@@ -1,7 +1,7 @@
 # Nexus_Platform
 
-## CloudyPipelines BMI Cluster URL
-http://cloudypipeline.bmi.emory.edu:9000/swagger-ui.html
+## Nexus Web SwaggerUI at BMI Cluster URL
+https://cloudypipeline.bmi.emory.edu/nexus/swagger-ui.html
 
 This service is running on ```cromwell-7.priv.bmi.emory.edu```. Users must logon on to Emory network to access
 
