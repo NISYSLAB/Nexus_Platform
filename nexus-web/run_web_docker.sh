@@ -46,7 +46,7 @@ function start_container_with_db_docker() {
     -e db_pass="${db_pass}"  \
     -e db_port="${db_port}"  \
     -e db_url="${db_url}"  \
-    -e CONFIG_EDITOR="${CONFIG_EDITOR}"  \
+    -e ADMIN_EDITOR="${ADMIN_EDITOR}"  \
     -e APP_ENV="${APP_ENV}"  \
     -t "${web_image_name}":"${web_image_tag}"
 }
