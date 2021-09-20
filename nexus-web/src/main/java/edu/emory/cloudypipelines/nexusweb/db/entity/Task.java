@@ -1,6 +1,5 @@
 package edu.emory.cloudypipelines.nexusweb.db.entity;
 
-import edu.emory.cloudypipelines.nexusweb.bean.CPJobStatus;
 import edu.emory.cloudypipelines.nexusweb.bean.ProcessStatus;
 import edu.emory.cloudypipelines.nexusweb.utils.CommonUtil;
 import lombok.Getter;
@@ -95,14 +94,6 @@ public class Task {
     @Column(name = "end_millis")
     private Long endMillis = null;
 
-    public void setCompleted(boolean completed) {
-        if (completed) {
-            this.completed = true;
-            this.setTimeCompleted(CommonUtil.getUTCNow());
-            this.setEndMillis(CommonUtil.getEpochMilli(this.getTimeCompleted()));
-        }
-    }
-
     public static boolean isTaskFinished(String status) {
         if (status.toLowerCase().contains(ProcessStatus.Aborted.toString().toLowerCase())) {
             return true;
@@ -116,10 +107,7 @@ public class Task {
         if (status.toLowerCase().contains(ProcessStatus.Succeeded.toString().toLowerCase())) {
             return true;
         }
-        if (status.toLowerCase().contains(ProcessStatus.Completed.toString().toLowerCase())) {
-            return true;
-        }
-        return false;
+        return status.toLowerCase().contains(ProcessStatus.Completed.toString().toLowerCase());
     }
 
     public static boolean isTaskFailedOrAborted(Task task) {
@@ -127,17 +115,19 @@ public class Task {
         if (status.contains(ProcessStatus.Failed.toString().toLowerCase())) {
             return true;
         }
-        if (status.contains(ProcessStatus.Aborted.toString().toLowerCase())) {
-            return true;
-        }
-        return false;
+        return status.contains(ProcessStatus.Aborted.toString().toLowerCase());
     }
 
     public static boolean isTaskSucceeded(Task task) {
         String status = task.getProcessStatus().toLowerCase();
-        if (status.contains(ProcessStatus.Succeeded.toString().toLowerCase())) {
-            return true;
+        return status.contains(ProcessStatus.Succeeded.toString().toLowerCase());
+    }
+
+    public void setCompleted(boolean completed) {
+        if (completed) {
+            this.completed = true;
+            this.setTimeCompleted(CommonUtil.getUTCNow());
+            this.setEndMillis(CommonUtil.getEpochMilli(this.getTimeCompleted()));
         }
-        return false;
     }
 }

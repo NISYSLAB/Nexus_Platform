@@ -24,5 +24,8 @@ task taskA {
     }
     runtime {
         docker: "us.gcr.io/cloudypipelines-com/nexus-utils:1.0"
+        cpu: "1"
+        memory: "1G"
+        disks: "local-disk 10 SSD"
     }
 }
