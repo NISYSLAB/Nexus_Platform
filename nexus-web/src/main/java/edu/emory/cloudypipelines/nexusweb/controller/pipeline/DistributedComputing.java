@@ -6,8 +6,10 @@ import edu.emory.cloudypipelines.nexusweb.bean.generated.TaskListItem;
 import edu.emory.cloudypipelines.nexusweb.controller.ControllerUtil;
 import edu.emory.cloudypipelines.nexusweb.db.entity.AppConfig;
 import edu.emory.cloudypipelines.nexusweb.db.entity.Task;
+import edu.emory.cloudypipelines.nexusweb.db.entity.TaskFile;
 import edu.emory.cloudypipelines.nexusweb.db.entity.TaskHeader;
 import edu.emory.cloudypipelines.nexusweb.db.repo.AppConfigRepo;
+import edu.emory.cloudypipelines.nexusweb.db.repo.TaskFileRepo;
 import edu.emory.cloudypipelines.nexusweb.db.repo.TaskHeaderRepo;
 import edu.emory.cloudypipelines.nexusweb.db.repo.TaskRepo;
 import edu.emory.cloudypipelines.nexusweb.service.AsyncService;
@@ -50,6 +52,8 @@ public class DistributedComputing {
     TaskHeaderRepo taskHeaderRepo;
     @Autowired
     TaskRepo taskRepo;
+    @Autowired
+    TaskFileRepo taskFileRepo;
     @Autowired
     AsyncService asyncService;
     private boolean debug_monitoring = true;
@@ -482,8 +486,8 @@ public class DistributedComputing {
         Task task = new Task();
         task.setTaskName(item.getName().trim());
         task.setTaskIndex(item.getIndex());
-        task.setWfWdlFile(CommonUtil.readFile2Text(item.getWdlFilePath()).trim());
-        task.setWfInputFile(CommonUtil.readFile2Text(item.getInputFilePath()).trim());
+        task.setWfWdlFile(getFileContent(item.getWdlFilePath()));
+        task.setWfInputFile(getFileContent(item.getInputFilePath()));
         task.setWfOptionFile("");
         task.setTaskHeaderId(taskHeader.getTaskHeaderId());
         task.setWfType(item.getWorkflowType());
@@ -493,6 +497,29 @@ public class DistributedComputing {
         task.setProject(item.getProject());
         task.setLabel(composeTaskLabel(taskHeader, task.getTaskName(), task.getTaskIndex()));
         return task;
+    }
+
+    private String getFileContent(String filePath) {
+        final String methodName = "getFileContent():";
+        String[] splits = filePath.split(":");
+        if (splits == null || splits.length < 2) {
+            LOGGER.error("{} unable to parse {}", methodName, filePath);
+            return "";
+        }
+        if (splits[0].trim().toUpperCase().startsWith("DB")) {
+            String name = splits[1].trim();
+            TaskFile taskFile = taskFileRepo.findDistinctByFileName(name);
+            if (taskFile == null) {
+                LOGGER.error("{} {} not found in db file table", methodName, name);
+                return "";
+            }
+            String content = taskFile.getFileContent();
+            if (content == null) {
+                return "";
+            }
+            return content.trim();
+        }
+        return CommonUtil.readFile2Text(splits[1].trim());
     }
 }
 
