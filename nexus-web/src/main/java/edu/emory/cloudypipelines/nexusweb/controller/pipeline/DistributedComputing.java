@@ -59,7 +59,7 @@ public class DistributedComputing {
     private boolean debug_monitoring = true;
 
     @RequestMapping(value = "/" + WF_VERSION_1, method = RequestMethod.POST)
-    @ApiOperation(value = "Run DistributedComputingPOC: " + "/" + WF_VERSION_2)
+    @ApiOperation(value = "Run DistributedComputingPOC: " + "/" + WF_VERSION_1)
     @ApiResponses(value = {@ApiResponse(code = 200, message = "Ok", response = String.class),
             @ApiResponse(code = 404, message = "Not found", response = String.class)})
     public ResponseEntity<?> submitOnlineAndRunByConfigFile(
@@ -281,7 +281,7 @@ public class DistributedComputing {
         if (headers == null || headers.isEmpty()) {
             return;
         }
-        LOGGER.info("{} {} running taskHeaders found", methodName, headers.size());
+        //LOGGER.info("{} {} running taskHeaders found", methodName, headers.size());
         for (TaskHeader header : headers) {
             List<Task> tasks = taskRepo.findDistinctByTaskHeaderIdAndCompleted(header.getTaskHeaderId(), false);
             if (tasks != null && tasks.size() > 0) {
@@ -300,7 +300,7 @@ public class DistributedComputing {
         if (runningTasks == null || runningTasks.isEmpty()) {
             return;
         }
-        LOGGER.info("{} {} non finished tasks found", methodName, runningTasks.size());
+        //LOGGER.info("{} {} non finished tasks found", methodName, runningTasks.size());
         for (Task task : runningTasks) {
             CPJobStatus cpJobStatus = getCPJobStatus(task);
             if (cpJobStatus == null) {
