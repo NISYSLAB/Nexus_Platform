@@ -1,6 +1,6 @@
 #!/bin/bash
 
-WEB_RELEASE_TAG=1.2
+WEB_RELEASE_TAG=1.3
 UTILS_RELEASE_TAG=1.0
 DB_RELEASE_TAG=13.2
 
@@ -110,4 +110,8 @@ export APP_ENV=localhost
 export SWAGGER_PORT=8899
 export SWAGGER_HOST=localhost
 
+## LOG
+export logging_level_root=ERROR
+
+####
 source ./.ssl/.settings.conf

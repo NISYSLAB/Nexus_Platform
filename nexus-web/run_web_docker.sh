@@ -23,6 +23,7 @@ function start_container() {
     -e SWAGGER_HOST="${SWAGGER_HOST}"  \
     -e CONFIG_EDITOR="${CONFIG_EDITOR}"  \
     -e APP_ENV="${APP_ENV}"  \
+    -e logging.level.root=${logging_level_root} \
     -t "${web_image_name}":"${web_image_tag}"
 }
 

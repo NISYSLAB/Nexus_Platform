@@ -5,7 +5,7 @@ taskList:
   - name: taskA
     index: 0
     preemptibleOption: PREEMPTIBLE_STANDARD_ATTEMPT_BOTH
-    project: nexus-bmi
+    project: synergy1
     runningHoursAllowed: 2
     workflowType: WDL
     wdlFilePath: 'DB:poc_taskA_wdl'
@@ -21,7 +21,7 @@ taskList:
   - name: taskC
     index: 2
     preemptibleOption: PREEMPTIBLE_STANDARD_ATTEMPT_BOTH
-    project: nexus-bmi
+    project: synergy2
     runningHoursAllowed: 2
     workflowType: WDL
     wdlFilePath: 'DB:poc_taskC_wdl'
