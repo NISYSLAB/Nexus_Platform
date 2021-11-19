@@ -31,7 +31,7 @@ public class FmriBiomarkerTestFileMonitor {
 
             LOGGER.info("onFileCreate(): new file received: {}", file);
             fmriBiomarkerProcess.runPredict(file);
-            fmriBiomarkerProcess.runFeatureActivationMap(file);
+            //fmriBiomarkerProcess.runFeatureActivationMap(file);
         }
 
         @Override

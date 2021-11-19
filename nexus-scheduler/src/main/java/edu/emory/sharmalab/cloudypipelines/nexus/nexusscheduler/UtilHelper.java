@@ -2,6 +2,7 @@ package edu.emory.sharmalab.cloudypipelines.nexus.nexusscheduler;
 
 import edu.emory.sharmalab.cloudypipelines.nexus.nexusscheduler.service.RuntimeExecutionService;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,5 +51,9 @@ public class UtilHelper {
 
         }
 
+    }
+
+    public static String getFileNameWithoutExtension(String fileName) {
+        return FilenameUtils.removeExtension(fileName);
     }
 }
