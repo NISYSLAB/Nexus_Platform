@@ -21,6 +21,9 @@ public class FmriBiomarkerTestFileMonitor {
     @Value("${fmri_biomarker_test_dataset_listener_folder}")
     String fmriBiomarkerTestDatasetListenerFolder;
 
+    @Value("${executor_check_interval}")
+    private Integer executorCheckInterval;
+
     @Autowired
     FmriBiomarkerProcess fmriBiomarkerProcess;
 
@@ -55,7 +58,7 @@ public class FmriBiomarkerTestFileMonitor {
         final String methodName = "startFmriBiomarkerTestMonitor():";
 
         FileAlterationObserver observer = new FileAlterationObserver(fmriBiomarkerTestDatasetListenerFolder);
-        FileAlterationMonitor monitor = new FileAlterationMonitor(2000);
+        FileAlterationMonitor monitor = new FileAlterationMonitor(executorCheckInterval);
         observer.addListener(fmriBiomarkerTestDatasetListener);
         monitor.addObserver(observer);
 
