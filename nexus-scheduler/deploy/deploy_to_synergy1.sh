@@ -19,6 +19,6 @@ rm -rf ./*.zip
 ZIP_FILE=release-${VERSION}.zip
 DEST_FILE=/home/pgu6/app/listener/fMri_realtime/${ZIP_FILE}
 zip_file
-## time scp_to_vm "${ZIP_FILE}" "${DEST_FILE}" "${SYNERGY_1_VM}"
-time scp_to_vm "fmri_task_id_rsa.pub" "/home/pgu6/app/listener/fMri_realtime/fmri_task_id_rsa.pub" "${SYNERGY_1_VM}"
+time scp_to_vm "${ZIP_FILE}" "${DEST_FILE}" "${SYNERGY_1_VM}"
+## time scp_to_vm "fmri_task_id_rsa.pub" "/home/pgu6/app/listener/fMri_realtime/fmri_task_id_rsa.pub" "${SYNERGY_1_VM}"
 

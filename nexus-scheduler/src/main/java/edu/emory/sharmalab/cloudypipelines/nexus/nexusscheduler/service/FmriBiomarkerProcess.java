@@ -1,5 +1,6 @@
 package edu.emory.sharmalab.cloudypipelines.nexus.nexusscheduler.service;
 
+import edu.emory.sharmalab.cloudypipelines.nexus.nexusscheduler.UtilHelper;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -49,7 +50,8 @@ public class FmriBiomarkerProcess extends CommonProcess {
     public void runPredict(File dataset) {
         final String methodName = getNamingThread() + ": runPredict():";
         LOGGER.info("{} received dataset={}", methodName, dataset);
-        String mountFolder = createProcessFolder("/predict/" + dataset.getName());
+        String fileNameWithoutExt = UtilHelper.getFileNameWithoutExtension(dataset.getName());
+        String mountFolder = createProcessFolder("/predict/" + fileNameWithoutExt);
         String[] commandArr = new String[]{
                 "bash",
                 startFmriBiomarkerPredictScript,
