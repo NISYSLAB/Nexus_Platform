@@ -154,7 +154,7 @@ rm -rf save_results
 
 print_info "${TASK} ended"
 
-if [[ "${COPY_RESULTS}" == "Y" ]]; then
+##if [[ "${COPY_RESULTS}" == "Y" ]]; then
   ##print_info "mv /root/work/${savedResults}.tar.gz ${DISK_MOUNTS}/"
-  mv ${WORK_DIR}/${savedResults}.tar.gz ${DISK_MOUNTS}/
-fi
+  ##mv ${WORK_DIR}/${savedResults}.tar.gz ${DISK_MOUNTS}/
+##fi

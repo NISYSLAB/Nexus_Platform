@@ -18,6 +18,7 @@ uid=${uid:0:12}
 containerName="predict_fmri_biomarker"
 MOUNT=/home/pgu6/app/listener/fMri_realtime/listener_execution/mount_predit/${uid}
 ##MOUNT=$PWD/"mount_predit_${uid}"
++DISK_MOUNTS=/home/pgu6/app/listener/fMri_realtime/listener_execution/mount_predit
 
 version=1
 trainedModelOutputs="trained_model"
@@ -81,8 +82,8 @@ function exec_docker() {
 function push_2_remote() {
    local datafile=$1
    echo "scp ${datafile} ${REMOTE_USER}@${REMOTE_HOST_IP}:${REMOTE_TASK_RECEIVING_DIR}/"
-   scp ${datafile} ${REMOTE_USER}@${REMOTE_HOST_IP}:${REMOTE_TASK_RECEIVING_DIR}/${uid}_${savedResults}.tar.gz
-   ##scp ${datafile} ${REMOTE_USER}@${REMOTE_HOST_IP}:${REMOTE_TASK_RECEIVING_DIR}/$(date -u +"%m_%d_%Y_%H_%M_%S")_${savedResults}.tar.gz
+   ##scp ${datafile} ${REMOTE_USER}@${REMOTE_HOST_IP}:${REMOTE_TASK_RECEIVING_DIR}/${uid}_${savedResults}.tar.gz
+   scp ${datafile} ${REMOTE_USER}@${REMOTE_HOST_IP}:${REMOTE_TASK_RECEIVING_DIR}/$(date -u +"%m_%d_%Y_%H_%M_%S")_${savedResults}.tar.gz
 }
 
 ######## main entry
