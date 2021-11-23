@@ -12,16 +12,19 @@ CONTAINER_REGISTRY=gcr.io
 docker_image=${CONTAINER_REGISTRY}/${GCR_PATH}/${IMAGE_NAME}:${IMAGE_TAG}
 execScript=${predict_exec_script}
 
-uid=$((1 + $RANDOM % 5000))
-containerName="predict_fmri_biomarker_${uid}"
-MOUNT=$PWD/"mount_predit_${uid}"
+##uid=$((1 + $RANDOM % 5000))
+uid=$(uuidgen)
+uid=${uid:0:12}
+containerName="predict_fmri_biomarker"
+MOUNT=/home/pgu6/app/listener/fMri_realtime/listener_execution/mount_predit/${uid}
+##MOUNT=$PWD/"mount_predit_${uid}"
 
 version=1
 trainedModelOutputs="trained_model"
 savedResults="predict_saved_results"
 
 TASK_CALL_NAME=modelPredict
-WORKFLOW_ID=$(uuidgen)
+##WORKFLOW_ID=$(uuidgen)
 COPY_RESULTS=Y
 
 ## for scp results to remote
@@ -50,12 +53,7 @@ function pre_run() {
     mkdir -p ${MOUNT}
     cp  ${execScript} ${MOUNT}/predict_exec.sh
     cp ${trainData} ${MOUNT}/trained_model.tar.gz
-    cp ${testData} ${MOUNT}/${test_data_file_name}
-}
-
-function cleanup() {
-  docker stop ${containerName} || echo "failed: docker stop ${containerName}. Ignore ..."
-  docker rm --force ${containerName} || echo "failed: docker rm --force ${containerName} . Ignore ..."
+    mv ${testData} ${MOUNT}/${test_data_file_name}
 }
 
 
@@ -74,11 +72,17 @@ function run_docker() {
         /bin/bash ${cmdArgs} 2>&1 | tee ${MOUNT}/${TASK_CALL_NAME}.log
 
 }
+function exec_docker() {
+  local cmdArgs="${MOUNT}/predict_exec.sh ${MOUNT}/trained_model.tar.gz ${MOUNT}/${test_data_file_name} ${version} ${trainedModelOutputs} ${savedResults}"
+  echo "docker exec ${containerName} ${cmdArgs} 2>&1 | tee ${MOUNT}/${TASK_CALL_NAME}.log"
+  docker exec ${containerName} ${cmdArgs} 2>&1 | tee ${MOUNT}/${TASK_CALL_NAME}.log
+}
 
 function push_2_remote() {
    local datafile=$1
    echo "scp ${datafile} ${REMOTE_USER}@${REMOTE_HOST_IP}:${REMOTE_TASK_RECEIVING_DIR}/"
-   scp ${datafile} ${REMOTE_USER}@${REMOTE_HOST_IP}:${REMOTE_TASK_RECEIVING_DIR}/$(date -u +"%m_%d_%Y_%H_%M_%S")_${savedResults}.tar.gz
+   scp ${datafile} ${REMOTE_USER}@${REMOTE_HOST_IP}:${REMOTE_TASK_RECEIVING_DIR}/${uid}_${savedResults}.tar.gz
+   ##scp ${datafile} ${REMOTE_USER}@${REMOTE_HOST_IP}:${REMOTE_TASK_RECEIVING_DIR}/$(date -u +"%m_%d_%Y_%H_%M_%S")_${savedResults}.tar.gz
 }
 
 ######## main entry
@@ -93,13 +97,14 @@ trainData="$1"
 testData="$2"
 
 test_data_file_name=$( basename ${testData} )
-savedResults=$(echo ${test_data_file_name} | tr '.' '_' )_${savedResults}
+changed_name=$(echo ${test_data_file_name} | tr '.' '_' )
+savedResults=${changed_name}_${savedResults}
 
-print_info "Processing Started: ${test_data_file_name}"
+##print_info "Processing Started: ${test_data_file_name}"
 ##print_env
 pre_run
-time run_docker
-##cleanup
+##time run_docker
+time exec_docker
 push_2_remote "${MOUNT}/${savedResults}.tar.gz"  >> ${MOUNT}/${TASK_CALL_NAME}.log 2>&1
 
-print_info "Processing Completed: ${test_data_file_name}"
+##print_info "Processing Completed: ${test_data_file_name}"
