@@ -1,3 +1,4 @@
+trainData="$1"
 #!/bin/bash
 SCRIPT_NAME=$(basename -- "$0")
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
@@ -64,7 +65,7 @@ function extract_folder_name() {
 
 ########## execution starts ##########
 
-print_info "${TASK} started"
+##print_info "${TASK} started"
 ##print_sys_info
 
 ########## check arguments ##########
@@ -76,7 +77,6 @@ if [[ "$#" -ne ${argCount} ]]; then
     print_error "Invalid arguments: expecting ${argCount}, actually passing: $#"
     exit 1
 fi
-
 ########## Collect inputs ##########
 ## ./run_model_predict.sh ${trainedModelData} ${testData} ${version} ${outputs}
 trainData="$1"
@@ -93,12 +93,19 @@ if [[ ! -d "${WORK_DIR}" ]] ; then
   exit 1
 fi
 
+## get MOUNT folder
+process_dir="$(dirname "${trainData}")"
+rsync -aqr ${WORK_DIR}/* ${process_dir}/
+##cp -arf ${WORK_DIR}/* ${process_dir}/
+
+WORK_DIR=${process_dir}
+
 cd ${WORK_DIR}
 
 ########## get folder name from tar ##########
 train_folder=$( extract_folder_name ${trainData} )
 tar -xf ${trainData} --directory  ${WORK_DIR}/
-##rm -rf ${trainData}
+rm -rf ${trainData}
 
 test_folder=test
 ## if file ends with .tar.gz
@@ -106,7 +113,7 @@ if [[ "$testData" == *.tar.gz ]]
 then
     test_folder=$( extract_folder_name ${testData} )
     tar -xf ${testData} --directory ${WORK_DIR}/
-    ##rm -rf ${testData}
+    rm -rf ${testData}
 else
     mkdir -p ${WORK_DIR}/${test_folder}/single_image
     cp ${testData} ${WORK_DIR}/${test_folder}/single_image
@@ -134,19 +141,20 @@ rtn_code=$?
 print_info "${TASK} tar command returned code=${rtn_code}"
 if [[ "${rtn_code}" != "0" ]]; then
     print_error "${TASK} tar command threw errors, exit with code 25"
+    rm -rf save_predict
+    rm -rf ${savedResults}
+    rm -rf save_results
     print_info "${TASK} ended"
     exit 25
 fi
 
-##rm -rf ${savedResults}
-##rm -rf save_predict
-##rm -rf save_results
+rm -rf ${savedResults}
+rm -rf save_predict
+rm -rf save_results
 
 print_info "${TASK} ended"
 
-if [[ "${COPY_RESULTS}" == "Y" ]]; then
+##if [[ "${COPY_RESULTS}" == "Y" ]]; then
   ##print_info "mv /root/work/${savedResults}.tar.gz ${DISK_MOUNTS}/"
-  mv /root/work/${savedResults}.tar.gz ${DISK_MOUNTS}/
-
-fi
-
+  ##mv ${WORK_DIR}/${savedResults}.tar.gz ${DISK_MOUNTS}/
+##fi

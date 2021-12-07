@@ -45,6 +45,7 @@ public class FmriBiomarkerTestFileMonitor {
         @Override
         public void onFileChange(File file) {
             LOGGER.info("onFileChange(): file changed: {}", file);
+            fmriBiomarkerProcess.runPredict(file);
         }
     };
 

@@ -1,7 +1,8 @@
 
 
 ## release version
-VERSION=1.1
+## onFileChange=onFileNew
+VERSION=1.2
 
 JAR=./target/nexus-scheduler-0.0.1-SNAPSHOT.jar
 APP_JAR=nexus-scheduler-"${VERSION}".jar
