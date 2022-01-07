@@ -26,6 +26,7 @@ public class CommonProcess {
     private static final Logger LOGGER = LoggerFactory.getLogger(CommonProcess.class);
 
     public final String NEXUS_SCHEDULER_EXECUTOR = "nexusSchedulerExecutor";
+    public final String GRA_PIPELINE_EXECUTOR = "graPipelineExecutor";
 
     @Value("${mount_disk}")
     String mountDisk;
@@ -61,6 +62,6 @@ public class CommonProcess {
         SystemCommandOutput systemCommandOutput = runtimeExecutionService.execSystemCommand(commandArr, null, new File(mountFolder));
         long end = System.currentTimeMillis();
         LOGGER.info("{} {} second or {} minutes taken for process: {}. Output={}", methodName, (end - start) / 1000.0, (System.currentTimeMillis() - start) / (1000 * 60.0), commandArr, mountFolder + "/process.log");
-        UtilHelper.writeStringToFile(mountFolder + "/process.log", systemCommandOutput.toString());
+        UtilHelper.writeStringToFile(mountFolder + "/server_process.log", systemCommandOutput.toString());
     }
 }
