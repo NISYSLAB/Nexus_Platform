@@ -9,21 +9,26 @@ USER=nonroot
 LOG=run_everything.log
 
 ####
-echo "JOBID=${JOBID}"
-echo "data_in_folder_name=${data_in_folder_name}"
+#### function definitions
+function print_info() {
+    local msg=$1
+    echo "${SCRIPT_NAME} [$( date +"%m/%d/%Y:%H:%M:%S" )]: ${msg}"
+}
+####
 
-echo "Current folder: $PWD"
-set -x
+####
+print_info "JOBID=${JOBID}"
+print_info "data_in_folder_name=${data_in_folder_name}"
+
+print_info "Current folder: $PWD"
 mkdir -p ${HOME_DIR}/raw-data
 rm -rf ${HOME_DIR}/raw-data/*
 cp -rf /tmp/raw-data/* ${HOME_DIR}/raw-data/
 ##rm -rf ${HOME_DIR}/processed-data/*   || echo "OK, No files under ${HOME_DIR}/processed-data/ at startup"
 
 cd ${HOME_DIR}/GRAPipeline
-echo "time ./process-run-everything ${HOME_DIR}/raw-data/${data_in_folder_name} 2>&1"
-echo "JOBID=${JOBID} started" >> run_everything.log
-time ./process-run-everything ${HOME_DIR}/raw-data/${data_in_folder_name} 2>&1 | tee run_everything.log
-echo "JOBID=${JOBID} completed" >> run_everything.log
+print_info "time ./process-run-everything ${HOME_DIR}/raw-data/${data_in_folder_name} 2>&1"
+print_info "JOBID=${JOBID} started" >> run_everything.log
+time ./process-run-everything ${HOME_DIR}/raw-data/${data_in_folder_name} >> run_everything.log 2>&1
+print_info "JOBID=${JOBID} completed" >> run_everything.log
 cp run_everything.log "${HOME_DIR}"/processed-data/
-
-

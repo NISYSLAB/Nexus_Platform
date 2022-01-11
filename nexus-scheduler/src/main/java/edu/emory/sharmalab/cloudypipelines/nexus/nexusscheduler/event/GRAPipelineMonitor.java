@@ -37,8 +37,8 @@ public class GRAPipelineMonitor {
 
         @Override
         public void onFileChange(File file) {
-            LOGGER.info("onFileChange(): file changed: {}", file);
-            graPipelineProcess.runEveryThing(file);
+            LOGGER.info("onFileChange(): file changed: {}, do not process, since it might be copying", file);
+            //graPipelineProcess.runEveryThing(file);
         }
     };
     @Value("${gra_check_interval}")

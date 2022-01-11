@@ -9,8 +9,8 @@ echo "139733abE /${PASS} 445577"
 function zip_file() {
   cd ..
   ## for GRAPipeline
-  cp "$HOME"/workspace/GRAPipeline/start_container_batch.sh ./script/gra/gra_start_container_batch.sh
-  cp "$HOME"/workspace/GRAPipeline/app_scripts/call_run_everything.sh ./script/gra/gra_call_run_everything.sh
+  ## cp "$HOME"/workspace/GRAPipeline/start_container_batch.sh ./script/gra/gra_start_container_batch.sh
+  ## cp "$HOME"/workspace/GRAPipeline/app_scripts/call_run_everything.sh ./script/gra/gra_call_run_everything.sh
 
   echo "zip -r ${ZIP_FILE} ${APP_JAR} script/*.sh"
   zip -r "${ZIP_FILE}" "${APP_JAR}" common_settings.sh script/*.sh
@@ -21,8 +21,8 @@ function zip_file() {
 #### Start
 
 ## scp
-time scp_to_vm /Users/anniegu/workspace/GRAPipeline/CR0343.zip /labs/mahmoudilab/synergy_remote_data1/gra/gra_file_in_dir.backup/CR0343.zip "${SYNERGY_1_VM}"
-exit 0
+## time scp_to_vm /Users/anniegu/workspace/GRAPipeline/CR0343.zip /labs/mahmoudilab/synergy_remote_data1/gra/gra_file_in_dir.backup/CR0343.zip "${SYNERGY_1_VM}"
+## exit 0
 
 rm -rf ./*.zip
 ZIP_FILE=release-${VERSION}.zip
