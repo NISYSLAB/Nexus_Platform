@@ -31,6 +31,16 @@ function scp_to_vm() {
   scp -o ProxyCommand="ssh -W %h:%p ${USER}@${JUMP_ODDJOBS}" -v "${src}" "${USER}"@"${dest_vm}":"${dest}"
 }
 
+function scp_from_vm() {
+  local src=$1
+  local dest=$2
+  local src_vm=$3
+  echo "SCP file: ${USER}@${src_vm}:${src} ${dest} "
+  ##echo "scp -o 'ProxyJump ${JUMP_ODDJOBS}' "${from}" ${BMI_VM}:/home/pgu6/local_backend/"
+  ##scp -o "ProxyCommand ssh ${USER}@${JUMP_ODDJOBS} -W %h:%p" "${from}" ${USER}@${BMI_VM}:/home/pgu6/local_backend/
+  scp -o ProxyCommand="ssh -W %h:%p ${USER}@${JUMP_ODDJOBS}" -v "${USER}"@"${src_vm}":"${src}" "${dest}"
+}
+
 function scp_to_jumpbox() {
   local from=$1
   local dest=$2
