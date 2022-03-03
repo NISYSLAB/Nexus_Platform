@@ -2,9 +2,12 @@
 
 SCRIPT_NAME=$(basename -- "$0")
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-source ./common_settings.sh
 
-echo "Dep;#13973 /${PASS}"
-set -x
-ssh  "${USER}@${DATALINK}"
-##ssh -i "${SSH_ID_FILE}" "${USER}@${DATALINK}"
+source ./common_settings.sh
+log_dir=${log_root}/synergy1
+
+log=$(ls -t ${log_dir}/*.log | head -1)
+
+echo "listener log: ${log}"
+view  ${log}
+
