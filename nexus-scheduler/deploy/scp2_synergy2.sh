@@ -19,9 +19,8 @@ function zip_file() {
 }
 
 #### Start
-time scp_from_vm "/home/pgu6/app/listener/fMri_realtime_listener.zip" "./fMri_realtime_listener.zip" "${SYNERGY_1_VM}"
-exit 0
 
-time scp_from_vm "/home/pgu6/.ssh/michael_id_rsa.pub" "./michael_id_rsa.pub" "${SYNERGY_1_VM}"
-echo "cksum"
-cksum michael_id_rsa.pub
+## scp
+time scp_to_vm /Users/anniegu/workspace/fMRI_Biomarker.zip /home/pgu6/fMRI_Biomarker.zip "${SYNERGY_2_VM}"
+
+

@@ -19,6 +19,12 @@ function zip_file() {
 }
 
 #### Start
+time scp_to_vm  \
+    /Users/anniegu/workspace/dicom2nifti/dicom2nifti_python/dicom2nifti_app.zip \
+    /home/pgu6/app/listener/fMri_realtime/listener_execution/dicom2nifti/dicom2nifti_app.zip \
+     "${SYNERGY_1_VM}"
+
+exit 0
 
 ## scp
 ## time scp_to_vm /Users/anniegu/workspace/GRAPipeline/CR0343.zip /labs/mahmoudilab/synergy_remote_data1/gra/gra_file_in_dir.backup/CR0343.zip "${SYNERGY_1_VM}"

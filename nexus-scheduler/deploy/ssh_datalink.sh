@@ -6,4 +6,5 @@ source ./common_settings.sh
 
 echo "Dep;#13973 /${PASS}"
 set -x
-ssh -i "${SSH_ID_FILE}" "${USER}@${DATALINK}"
+ssh  "${USER}@${DATALINK}"
+##ssh -i "${SSH_ID_FILE}" "${USER}@${DATALINK}"
