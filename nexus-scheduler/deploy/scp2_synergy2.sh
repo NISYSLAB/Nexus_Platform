@@ -21,6 +21,7 @@ function zip_file() {
 #### Start
 
 ## scp
-time scp_to_vm /Users/anniegu/workspace/fMRI_Biomarker.zip /home/pgu6/fMRI_Biomarker.zip "${SYNERGY_2_VM}"
+time scp_to_vm ~/workspace/GRAPipeline/CR0343.tar.gz /labs/mahmoudilab/synergy_slurm/dataset/CR0343.tar.gz "${SYNERGY_2_VM}"
+## time scp_to_vm /Users/anniegu/workspace/fMRI_Biomarker.zip /home/pgu6/fMRI_Biomarker.zip "${SYNERGY_2_VM}"
 
 
