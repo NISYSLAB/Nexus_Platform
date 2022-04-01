@@ -4,7 +4,7 @@ SCRIPT_NAME=$(basename -- "$0")
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source ./common_settings.sh
 
-echo "139733abE /${PASS} 445577"
+echo "LL-$139733abE / ${PASS} 445577$$SEP"
 #### function definitionss
 function zip_file() {
   cd ..

@@ -1,0 +1,60 @@
+FROM centos:7.9.2009
+
+ENV MCR_VERSION R2021b
+ENV MCR_NUM     v911
+ENV MCRROOT /opt/mcr/${MCR_NUM}
+
+ENV APP_ROOT /home/login
+
+RUN mkdir -p ${APP_ROOT}
+WORKDIR ${APP_ROOT}
+
+## https://ssd.mathworks.com/supportfiles/downloads/R2021b/Release/2/deployment_files/installer/complete/glnxa64/MATLAB_Runtime_R2021b_Update_2_glnxa64.zip
+## https://ssd.mathworks.com/supportfiles/downloads/R2021b/Release/2/deployment_files/installer/complete/glnxa64/MATLAB_Runtime_R2021b_Update_2_glnxa64.zip
+ENV INSTALLER  https://ssd.mathworks.com/supportfiles/downloads/${MCR_VERSION}/Release/2/deployment_files/installer/complete/glnxa64/MATLAB_Runtime_R2021b_Update_2_glnxa64.zip
+## https://ssd.mathworks.com/supportfiles/downloads/R2021b/Release/2/deployment_files/installer/complete/glnxa64/MATLAB_Runtime_R2021b_Update_2_glnxa64.zip
+
+## https://www.mathworks.com/matlabcentral/answers/637445-how-to-set-ld_library_path-on-linux-for-deployed-code-without-mcr
+
+##  && yum install -y wget curl xorg unzip which compat-libstdc++-33.x86_64 libxtst6 libxt6 libglu1 libxrandr2 libXt python3 \
+## && mv mcr.zip /mcr-install/mcr.zip \
+
+## SPM12 https://www.fil.ion.ucl.ac.uk/spm/software/download/
+## CANLAB CORE TOOLS https://github.com/canlab/CanlabCore
+## && unlink /usr/bin/python ||  echo "link python does not exit" \
+##    && ln -s /usr/bin/python3 /usr/bin/python \
+####
+
+RUN yum -y update \
+    && yum install -y wget curl git make xorg unzip which mesa-libGL libgl1-mesa-glx libxtst6 libxt6 libglu1 libxrandr2 libXt libsndfile \
+    && yum -y update \
+    && mkdir -p /mcr-install \
+    && mkdir -p /opt/mcr \
+    && wget  -O /mcr-install/mcr.zip ${INSTALLER} \
+    && cd /mcr-install \
+    && unzip mcr.zip \
+    && ./install -destinationFolder /opt/mcr -agreeToLicense yes -mode silent \
+    && cd / \
+    && rm -rf mcr-install \
+    && test -e /usr/bin/ldd &&  ldd --version |  grep -q "(GNU libc) 2\.17"
+
+## it looks like it may be due to a compatibility issue between RHEL/CentOS 7 and Matlab R2020b's libstdc++ library
+ENV LD_PRELOAD ${MCRROOT}/bin/glnxa64/glibc-2.17_shim.so
+ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:/opt/mcr/${MCR_NUM}/runtime/glnxa64:/opt/mcr/${MCR_NUM}/bin/glnxa64:/opt/mcr/${MCR_NUM}/sys/os/glnxa64:/opt/mcr/${MCR_NUM}/extern/bin/glnxa64:${APP_ROOT}/spm12:${APP_ROOT}/CanlabCore
+ENV PATH ${PATH}:${APP_ROOT}/spm12:${APP_ROOT}/CanlabCore
+
+RUN wget -O ${APP_ROOT}/spm12.zip https://www.fil.ion.ucl.ac.uk/spm/download/restricted/eldorado/spm12.zip \
+    && wget -O ${APP_ROOT}/spm12_updates_r7771.zip https://www.fil.ion.ucl.ac.uk/spm/download/spm12_updates/spm12_updates_r7771.zip \
+    && cd ${APP_ROOT} && unzip spm12.zip && unzip -o spm12_updates_r7771.zip -d spm12 \
+    && rm -rf ./*.zip
+
+## RUN addpath /app/spm12:/app/CanlabCore
+## RUN addpath /app/CanlabCore
+
+ADD CanlabCore.zip ${APP_ROOT}/CanlabCore.zip
+RUN cd ${APP_ROOT} && unzip CanlabCore.zip && rm -rf CanlabCore.zip
+
+ADD RT_Preproc ${APP_ROOT}/RT_Preproc
+
+
+
