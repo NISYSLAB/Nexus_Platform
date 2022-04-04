@@ -66,11 +66,13 @@ function build_on_physionet() {
 function build_on_cloudypipelines() {
   GCR_PATH=cloudypipelines-com
   echo "Build and push to ${GCR_PATH}"
-  time build_push_image ${image_name} ${image_tag} Dockerfile
+  time build_push_image ${image_name} ${image_tag} Dockerfile.r2021b
+  ##time build_push_image ${image_name} ${image_tag} Dockerfile
 }
 
 #### Main starts
-
+build_on_cloudypipelines
+exit 0
 read -p "Build and push to PhysionetChallenge2022 ? (y/n): " yesno
 echo "You answer: ${yesno}"
 [[ ${yesno} == [nN] ]] && build_on_cloudypipelines

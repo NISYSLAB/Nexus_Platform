@@ -9,8 +9,8 @@ CONTAINER_REGISTRY=us.gcr.io
 image_name=closedloop-preprocess-tools
 image_tag=matlab-1.0
 
+container_name=${image_name}-${image_tag}
 image_name=${CONTAINER_REGISTRY}/${GCR_PATH}/${image_name}:${image_tag}
-container_name=${image_name}:${image_tag}
 
 #### functions
 function stop_docker() {
@@ -21,7 +21,7 @@ function stop_docker() {
 function run_docker() {
   docker run -d \
       --name ${container_name}  \
-      -v $PWD/dicom:/app/dicom \
+      -v $PWD/dicom:/home/login/dicom \
       -t ${image_name}
 }
 #### Main starts
@@ -30,4 +30,8 @@ docker ps
 stop_docker
 run_docker
 echo "Enter container: ${container_name}"
+echo "export PATH=$PATH:/home/login/spm12;/home/login/CanlabCore"
+echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/login/spm12;/home/login/CanlabCore"
+echo "Run: ./RT_Preproc('/home/login/nii')"
+echo "./RT_Preproc /home/login/nii"
 docker exec -it ${container_name} /bin/bash

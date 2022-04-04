@@ -2,10 +2,21 @@
 
 SCRIPT_NAME=$(basename -- "$0")
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+source ~/.bash_profile
 source ./common_settings.sh
 
-echo "LL-$139733abE / ${PASS} 445577$$SEP"
-#### function definitionss
+echo "$(random8) / ${PASS} $(random10)"
+#### functions
+
+function scp_synergy2() {
+  local src=realtime-closedloop.zip
+  local dest=/home/pgu6/dockers/realtime-closedloop/${src}
+  local dest_vm=${BMI_SYNERGY_2_VM}
+  rm -rf ${src}
+  zip -r ${src} ./*.m ./run*.sh ./compile_matlab.sh ./build_push_matlab.sh ./Dockerfil* ./.ssl/* ./dicom/*.*
+  time scp_to_vm ${src} ${dest} ${dest_vm}
+}
+
 function zip_file() {
   cd ..
   ## for GRAPipeline
@@ -18,8 +29,11 @@ function zip_file() {
   mv ../"${ZIP_FILE}" ./
 }
 
-#### Start
+#### Main starts
+scp_synergy2
+ssh_to_vm ${BMI_SYNERGY_2_VM}
 
+exit 0
 ## scp
 time scp_to_vm ~/workspace/GRAPipeline/CR0343.tar.gz /labs/mahmoudilab/synergy_slurm/dataset/CR0343.tar.gz "${SYNERGY_2_VM}"
 ## time scp_to_vm /Users/anniegu/workspace/fMRI_Biomarker.zip /home/pgu6/fMRI_Biomarker.zip "${SYNERGY_2_VM}"

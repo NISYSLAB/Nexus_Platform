@@ -14,3 +14,6 @@ function make_spm() {
 }
 
 echo "scl enable devtoolset-9 bash"
+echo "scl enable gcc-toolset-10 'bash' "
+echo ""
+

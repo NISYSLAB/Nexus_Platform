@@ -43,10 +43,12 @@ ENV LD_PRELOAD ${MCRROOT}/bin/glnxa64/glibc-2.17_shim.so
 ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:/opt/mcr/${MCR_NUM}/runtime/glnxa64:/opt/mcr/${MCR_NUM}/bin/glnxa64:/opt/mcr/${MCR_NUM}/sys/os/glnxa64:/opt/mcr/${MCR_NUM}/extern/bin/glnxa64:${APP_ROOT}/spm12:${APP_ROOT}/CanlabCore
 ENV PATH ${PATH}:${APP_ROOT}/spm12:${APP_ROOT}/CanlabCore
 
-RUN wget -O ${APP_ROOT}/spm12.zip https://www.fil.ion.ucl.ac.uk/spm/download/restricted/eldorado/spm12.zip \
-    && wget -O ${APP_ROOT}/spm12_updates_r7771.zip https://www.fil.ion.ucl.ac.uk/spm/download/spm12_updates/spm12_updates_r7771.zip \
-    && cd ${APP_ROOT} && unzip spm12.zip && unzip -o spm12_updates_r7771.zip -d spm12 \
-    && rm -rf ./*.zip
+## RUN wget -O ${APP_ROOT}/spm12.zip https://www.fil.ion.ucl.ac.uk/spm/download/restricted/eldorado/spm12.zip \
+##    && wget -O ${APP_ROOT}/spm12_updates_r7771.zip https://www.fil.ion.ucl.ac.uk/spm/download/spm12_updates/spm12_updates_r7771.zip \
+##    && cd ${APP_ROOT} && unzip spm12.zip && unzip -o spm12_updates_r7771.zip -d spm12 \
+##    && rm -rf ./*.zip
+
+COPY spm12/ ${APP_ROOT}/spm12
 
 ## RUN addpath /app/spm12:/app/CanlabCore
 ## RUN addpath /app/CanlabCore
