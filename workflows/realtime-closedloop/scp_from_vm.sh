@@ -14,7 +14,16 @@ function scp_realtime_closedloop_vm() {
   echo "./vm/gra.zip transferred"
   ls -alt ./vm/realtime_closedloop.zip
 }
+
+function scp_mahmoudimatlab_realtime_closedloop() {
+  local SRC=/home/pgu6/realtime-closedloop/remote_mahmoudimatlab_realtime-closedloop.zip
+  local DEST=$PWD
+  local REMOTE_VM=${BMI_MATLAB_SYNERGY_VM}
+
+  scp_from_vm ${SRC} ${DEST} ${REMOTE_VM}
+}
 ####
 
-scp_realtime_closedloop_vm
+scp_mahmoudimatlab_realtime_closedloop
+##scp_realtime_closedloop_vm
 
