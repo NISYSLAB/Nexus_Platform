@@ -9,6 +9,7 @@ echo "$(random8) ${PASS} $(random10)"
 function scp_matlab() {
   local src=realtime-closedloop.zip
   local dest=/home/pgu6/realtime-closedloop/${src}
+  ##local dest_vm=${BMI_MATLAB_VM}
   local dest_vm=${BMI_MATLAB_SYNERGY_VM}
   rm -rf ${src}
   zip -r ${src} ./*.m ./run*.sh ./compile_matlab.sh \

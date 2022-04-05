@@ -4,7 +4,7 @@ SCRIPT_NAME=$(basename -- "$0")
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source ./common_settings.sh
 
-echo "13973-AB3 /${PASS} TT-;234049"
+echo "$(random8) ${PASS} $(random10)"
 ################################################
 
 function scp_realtime_closedloop_vm() {
@@ -14,7 +14,22 @@ function scp_realtime_closedloop_vm() {
   echo "./vm/gra.zip transferred"
   ls -alt ./vm/realtime_closedloop.zip
 }
-####
 
-scp_realtime_closedloop_vm
+function scp_mahmoudimatlab_realtime_closedloop() {
+  local SRC=/home/pgu6/realtime-closedloop/remote_mahmoudimatlab_realtime-closedloop.zip
+  local DEST=$PWD
+  local REMOTE_VM=${BMI_MATLAB_SYNERGY_VM}
+
+  scp_from_vm ${SRC} ${DEST} ${REMOTE_VM}
+}
+
+function exec_remote_zip_cmd() {
+  local REMOTE_VM=${BMI_MATLAB_SYNERGY_VM}
+  local EXEC_SCRIPT=$PWD/get_zip.sh
+  exec_on_vm ${REMOTE_VM} ${EXEC_SCRIPT}
+}
+####
+exec_remote_zip_cmd
+scp_mahmoudimatlab_realtime_closedloop
+##scp_realtime_closedloop_vm
 

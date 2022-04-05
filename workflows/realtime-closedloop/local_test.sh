@@ -5,7 +5,7 @@
 
 ## At physionetmatlab.priv.bmi.emory.edu, the Matlab R2022a software & associated files should all be located in
 ## /usr/local/MATLAB/R2022a/ and its subdirectories;
-INSTALLATION_ROOT=/usr/local/MATLAB/R2022a
+INSTALLATION_ROOT=/usr/local/MATLAB/R2021b
 MCR_NUM=v911
 MCRROOT=${INSTALLATION_ROOT}
 ## MCRROOT=/opt/mcr/${MCR_NUM}

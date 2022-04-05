@@ -3,6 +3,7 @@
 SCRIPT_NAME=$(basename -- "$0")
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
+MATLAB_VER=R2021b
 function download_spm12() {
   FILE=spm12.zip
   [[ -f "${FILE}" ]] && return 0
@@ -20,6 +21,14 @@ function download_canlabcore() {
 download_spm12
 download_canlabcore
 
+echo "Enter Matlab Console: matlab -nodisplay -nosplash"
+echo "cd /home/pgu6/realtime-closedloop"
+echo ">> compile_files"
+echo ">> exit"
+echo "Run in host: "
+echo "cd home/pgu6/realtime-closedloop"
+echo "$ ./run_RT_Preproc.sh /usr/local/MATLAB/${MATLAB_VER} $PWD/nii"
+exit 0
 ##MCC=/usr/local/MATLAB/R2022a/bin/mcc
 MCC=/usr/local/MATLAB/R2021b/bin/mcc
 SRC=RT_Preproc
