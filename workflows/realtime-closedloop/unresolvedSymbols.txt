@@ -1,0 +1,17 @@
+Path	Symbol	Reason
+RT_Preproc/spm12/config/spm_cfg_opm_create.m	boolean	undeployable
+RT_Preproc/spm12/external/fieldtrip/fileio/private/ft_scalingfactor.m	newunit	undeployable
+RT_Preproc/spm12/external/fieldtrip/fileio/private/rotate.m	syms	undeployable
+RT_Preproc/spm12/external/fieldtrip/forward/private/ft_scalingfactor.m	newunit	undeployable
+RT_Preproc/spm12/external/fieldtrip/ft_denoise_tsr.m	cellcat	undeployable
+RT_Preproc/spm12/external/fieldtrip/inverse/private/ft_scalingfactor.m	newunit	undeployable
+RT_Preproc/spm12/external/fieldtrip/inverse/private/rotate.m	syms	undeployable
+RT_Preproc/spm12/external/fieldtrip/plotting/private/ft_scalingfactor.m	newunit	undeployable
+RT_Preproc/spm12/external/fieldtrip/plotting/private/rotate.m	syms	undeployable
+RT_Preproc/spm12/external/fieldtrip/private/bsscca.m	cellcat	undeployable
+RT_Preproc/spm12/external/fieldtrip/private/rotate.m	syms	undeployable
+RT_Preproc/spm12/external/fieldtrip/utilities/ft_scalingfactor.m	newunit	undeployable
+RT_Preproc/spm12/external/fieldtrip/utilities/private/rotate.m	syms	undeployable
+RT_Preproc/spm12/matlabbatch/@cfg_entry/subsasgn_check.m	subs	undeployable
+RT_Preproc/spm12/tests/test_checkcode.m	analyzeCodeCompatibility	undeployable
+RT_Preproc/spm12/toolbox/dcm_meeg/spm_fx_cmc_tfm.m	syms	undeployable

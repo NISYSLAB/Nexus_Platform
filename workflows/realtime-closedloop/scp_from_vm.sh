@@ -22,8 +22,14 @@ function scp_mahmoudimatlab_realtime_closedloop() {
 
   scp_from_vm ${SRC} ${DEST} ${REMOTE_VM}
 }
-####
 
+function exec_remote_zip_cmd() {
+  local REMOTE_VM=${BMI_MATLAB_SYNERGY_VM}
+  local EXEC_SCRIPT=$PWD/get_zip.sh
+  exec_on_vm ${REMOTE_VM} ${EXEC_SCRIPT}
+}
+####
+exec_remote_zip_cmd
 scp_mahmoudimatlab_realtime_closedloop
 ##scp_realtime_closedloop_vm
 
