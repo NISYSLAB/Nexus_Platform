@@ -6,6 +6,5 @@ source ./common_settings.sh
 
 ##=${BMI_MATLAB_VM}
 DEST_VM=${BMI_MATLAB_SYNERGY_VM}
-echo "$(random8) ${PASS} $(random10)"
 ssh_to_vm "${DEST_VM}"
 
