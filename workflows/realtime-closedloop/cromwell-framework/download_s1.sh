@@ -3,22 +3,10 @@
 SCRIPT_NAME=$(basename -- "$0")
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-DEST_VM=${BMI_SYNERGY_1_VM}
-EXE_SCRIPT=./zip_remote.sh
-LOCAL_DIR=/Users/anniegu/workspace/Nexus_Platform/workflows/realtime-closedloop/cromwell-framework
 REMOTE_DIR=/home/pgu6/app/cromwell
-LOCAL_ZIP=local_cromwell-framework
-
-#### functions
-function zip_local() {
-    cd $/home/pgu6/app/cromwell
-    zip -r $LOCAL_ZIP ./*.sh
-}
-
-function scp2_s1() {
-  scp_to_vm ${LOCAL_DIR}/${LOCAL_ZIP} ${REMOTE_DIR}/${LOCAL_ZIP} ${DEST_VM}
-}
+REMOTE_ZIP=remote_cromwell-framework.zip
 
 #### Main starts
-time zip_local
-time scp2_s1
+exec_on_vm ${BMI_SYNERGY_1_VM} $PWD/zip_remote.sh
+scp_from_vm ${REMOTE_DIR}/${REMOTE_ZIP} ${PWD}/${REMOTE_ZIP} ${BMI_SYNERGY_1_VM}
+echo "Downloaded ${REMOTE_ZIP}"
