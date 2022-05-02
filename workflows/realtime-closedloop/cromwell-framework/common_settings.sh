@@ -3,7 +3,8 @@
 export DOMAIN=cloudypipeline.bmi.emory.edu
 
 ## docker images or services release tags
-CROMWELL_TAG=59
+CROMWELL_TAG=78
+##CROMWELL_TAG=59
 POSTGRES_TAG=6.1
 
 ## exposed ports

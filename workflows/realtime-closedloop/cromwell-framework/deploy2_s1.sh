@@ -12,7 +12,8 @@ LOCAL_ZIP=local_cromwell-framework.zip
 #### functions
 function zip_local() {
     cd ${LOCAL_DIR}
-    zip -r $LOCAL_ZIP ./*.sh
+    rm -rf $LOCAL_ZIP
+    zip -r $LOCAL_ZIP ./*.sh -x ./deploy2_s1.sh -x zip_remote.sh -x download_s1.sh
 }
 
 function scp2_s1() {
