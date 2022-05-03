@@ -14,19 +14,21 @@ workflow wf_realtim_closedloop{
 
 task dicom2nifti {
   File dicomInput
-  String niiOutput = "$PWD/nii.tar.gz"
-  String dicomDir= "/app/dicom"
-  String niiDir= "/app/nii"
-
+  File exeScript
+  String result = "nii.tar.gz"
+  String log = "dicom2nifti.log"
   command {
-    mkdir -p ${dicomDir} && mkdir -p ${niiDir} && mv ${dicomInput} ${dicomDir}/input.tar.gz
-    cd ${dicomDir} && tar -xzf input.tar.gz && rm -f input.tar.gz && cd /app
-    time python dicom_pypreprocess.py --filepath ${dicomDir} --savepath ${niiDir}
-    tar -czf ${niiOutput} ${niiDir}
-    rm -rf ${niiDir}
+    chmod a+x ${exeScript}
+    cp ${exeScript} /app/exec_dicom2nifti.sh
+    cd /app
+    ./exec_dicom2nifti.sh ${dicomInput} ${result} > ${log} 2>&1
+    cd -
+    cp /app/${result} .
+    cp /app/${log} .
   }
   output {
-    File out="${niiOutput}"
+    File out = "${result}"
+    File logOut = "${log}"
   }
   runtime {
     docker: "gcr.io/cloudypipelines-com/fmri_conversion:1.0"
@@ -36,20 +38,28 @@ task dicom2nifti {
 
 task rtpreproc {
   File niiInut
-  String procOutput = "$PWD/rtcpre.txt"
-  String runScript = "run_RT_Preproc.sh"
-  String matlab_ver= "/opt/mcr/v911"
+  File matlabScript
+  String result = "rtcpre.txt"
+  File exeScript
   String appDir = "/home/pgu6/realtime-closedloop"
+  String matlab_ver= "/opt/mcr/v911"
+  String log = "rtpreproc.log"
 
   command {
-    mkdir -p ${appDir} &&  mkdir -p ${appDir}/nii
-    mv ${niiInut} ${appDir}/nii/input.tar.gz
-    cd ${appDir}/nii tar -xzf input.tar.gz && rm -f input.tar.gz && cd ${appDir}
-    time ./run_RT_Preproc.sh ${matlab_ver} ${appDir}/nii
-    cat "waiting for ML developer good coding" > ${procOutput}
+    mkdir -p ${appDir}
+    chmod a+x ${exeScript}
+    cd ${appDir}
+    cp ${exeScript} ./exec_rtpreproc.sh
+    ./exec_rtpreproc.sh ${matlabScript} ${matlab_ver} ${niiInut} ${result} > ${log} 2>&1
+    cd -
+    ## TODO:need to find out the output of this process
+    cp ${appDir}/${result} .
+    cp ${appDir}/${log} .
+
   }
   output {
-    File out="${procOutput}"
+    File out = "${result}"
+    File logOut = "${log}"
   }
   runtime {
     docker: "us.gcr.io/cloudypipelines-com/closedloop-preprocess-tools:matlab-1.0"
@@ -61,10 +71,11 @@ task csvgen {
   File InputFile
   String csvOutput
   String rootDir = "$PWD"
+  String log = "csvgen.log"
 
   command {
     cd /app && mkdir -p csv
-    python output_randomcsv.py --savepath /app/csv --savename ${rootDir}/${csvOutput}"
+    python output_randomcsv.py --savepath /app/csv --savename ${rootDir}/${csvOutput}" > ${log} 2>&1
   }
   output {
     File out="${rootDir}/${csvOutput}"
