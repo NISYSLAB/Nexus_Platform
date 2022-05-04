@@ -4,7 +4,8 @@ FROM centos/python-38-centos7
 ENV MCR_VERSION R2021b
 ENV MCR_NUM     v911
 ENV MCRROOT /opt/mcr/${MCR_NUM}
-ENV BASE_DIR /app
+ENV BASE_DIR /home/pgu6/realtime-closedloop
+WORKDIR ${BASE_DIR}
 
 USER root
 
@@ -38,6 +39,4 @@ RUN yum -y update \
 ENV LD_PRELOAD ${MCRROOT}/bin/glnxa64/glibc-2.17_shim.so
 ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:/opt/mcr/${MCR_NUM}/runtime/glnxa64:/opt/mcr/${MCR_NUM}/bin/glnxa64:/opt/mcr/${MCR_NUM}/sys/os/glnxa64:/opt/mcr/${MCR_NUM}/extern/bin/glnxa64
 
-RUN mkdir /home/pgu6/realtime-closedloop
-WORKDIR /home/pgu6/realtime-closedloop
 
