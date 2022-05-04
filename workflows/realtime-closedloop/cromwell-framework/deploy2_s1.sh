@@ -24,8 +24,10 @@ function scp2_s1() {
 
 function zip_wdl() {
   cd ${LOCAL_DIR}/wdl
-  zip -r ${LOCAL_WDL_ZIP} ./*.wdl ./*.json ./*.sh
-  local remote_wdl
+  rm -rf ${LOCAL_WDL_ZIP}
+  cp ~/workspace/Nexus_Platform/workflows/dicom2nifti/docker/*.py .
+  zip -r ${LOCAL_WDL_ZIP} ./*.wdl ./*.json ./*.sh ./Docker*.* ./*.py
+  rm -rf ./*.py
   scp_to_vm ${LOCAL_DIR}/wdl/${LOCAL_WDL_ZIP} ${REMOTE_WDL_DIR}/${LOCAL_WDL_ZIP} ${DEST_VM}
 }
 
