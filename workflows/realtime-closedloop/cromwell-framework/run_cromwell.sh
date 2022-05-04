@@ -7,6 +7,7 @@ echo "CROMWELL_PORT=${cromwell_port}"
 export log_file=${cromwell_log}
 mkdir -p "$(dirname "$cromwell_log")"
 
+##export CONFIG_FILE=/home/pgu6/app/cromwell/.config/slurm_application.conf
 export CONFIG_FILE=/home/pgu6/app/cromwell/.config/local_backend_local_filesystems.conf
 
 ###########################################################################
