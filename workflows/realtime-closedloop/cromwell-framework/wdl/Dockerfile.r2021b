@@ -8,7 +8,18 @@ ENV BASE_DIR /home/pgu6/realtime-closedloop
 WORKDIR ${BASE_DIR}
 
 USER root
+#### Main starts
+COPY CanlabCore.tar.gz ${BASE_DIR}/
+COPY spm12.tar.gz ${BASE_DIR}/
+COPY run_RT_Preproc.sh ${BASE_DIR}/
+COPY RT_Preproc ${BASE_DIR}/
 
+RUN cd ${BASE_DIR} && tar -xzf CanlabCore.tar.gz && rm -rf CanlabCore.tar.gz \
+    && tar -xzf spm12.tar.gz && rm -rf spm12.tar.gz
+
+#### matlab code: rt_preproc
+
+#### python: dicom2nii
 COPY dicom_pypreprocess.py ${BASE_DIR}/
 COPY output_randomcsv.py ${BASE_DIR}/
 
@@ -16,6 +27,8 @@ RUN pip install numpy dicom_numpy && \
     pip install -U pip setuptools && \
     pip --no-cache-dir install pydicom nibabel
 
+
+#### matlab code: rt_preproc
 ## https://ssd.mathworks.com/supportfiles/downloads/R2021b/Release/2/deployment_files/installer/complete/glnxa64/MATLAB_Runtime_R2021b_Update_2_glnxa64.zip
 ENV INSTALLER  https://ssd.mathworks.com/supportfiles/downloads/${MCR_VERSION}/Release/2/deployment_files/installer/complete/glnxa64/MATLAB_Runtime_R2021b_Update_2_glnxa64.zip
 
