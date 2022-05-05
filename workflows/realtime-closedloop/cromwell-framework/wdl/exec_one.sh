@@ -3,6 +3,11 @@
 SCRIPT_NAME=$(basename -- "$0")
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
+#### Pre-defined
+MATLAB_VER=/opt/mcr/v911
+dicomDir="dicom"
+niiDir="nii"
+
 #### functions
 function print_info() {
     local msg=$1
@@ -28,7 +33,12 @@ function dicom2nifti() {
 
 function rtpreproc() {
   print_info "rtpreproc() started"
-  print_info "rtpreproc(): Under construction"
+  cd ${currDir}
+  local cmd_line="./run_RT_Preproc.sh ${MATLAB_VER} ${currDir}/${niiDir}"
+  print_info "Calling: time ${cmd_line}"
+  time ${cmd_line}
+  rtn_code=$?
+  print_info "rtpreproc() user coding returned code=${rtn_code}"
   print_info "rtpreproc() completed"
 }
 
@@ -52,8 +62,6 @@ function csvgen() {
 
 #### Main starts
 ## ./exec_realtime_loop.sh ${dicomInput} ${csvOutput} > ${log} 2>&1
-dicomDir="dicom"
-niiDir="nii"
 
 msg="Calling: ${SCRIPT_NAME} $@"
 print_info "${msg}"

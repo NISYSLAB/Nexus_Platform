@@ -14,3 +14,7 @@ curl -X POST "http://localhost:9033/api/workflows/v1" \
     -H "Content-Type: multipart/form-data" \
     -F "workflowSource=@${wdl_file}" \
     -F "workflowInputs=@${json_input};type=application/json"
+
+
+## return: {"id":"ae0dde76-e0d8-4cc1-ad5c-27c995d346cc","status":"Submitted"}
+## output: /home/pgu6/app/cromwell/cromwell-executions/wf_realtime_v1/ae0dde76-e0d8-4cc1-ad5c-27c995d346cc/call-run/execution/dummy_test.csv

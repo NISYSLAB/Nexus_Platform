@@ -14,6 +14,8 @@ CONTAINER_REGISTRY=us.gcr.io
 image_name=closedloop-preprocess-tools
 image_tag=matlab-1.1
 
+rt_preproc_dir=/labs/mahmoudilab/synergy-rt-preproc
+
 ####
 function build_image() {
    local image_name=$1
@@ -70,22 +72,24 @@ function build_on_cloudypipelines() {
   ##time build_push_image ${image_name} ${image_tag} Dockerfile
 }
 
+function copy_rtcpreproc() {
+  cp ${rt_preproc_dir}/CanlabCore.tar.gz .
+  cp ${rt_preproc_dir}/spm12.tar.gz .
+  cp ${rt_preproc_dir}/run_RT_Preproc.sh .
+  cp ${rt_preproc_dir}/RT_Preproc .
+}
+
+function remote_rtcpreproc() {
+  rm ./CanlabCore.tar.gz
+  rm ./spm12.tar.gz
+  rm ./run_RT_Preproc.sh
+  rm ./RT_Preproc
+}
+
 #### Main starts
-rt_preproc_dir=/labs/mahmoudilab/synergy-rt-preproc
-## chmod a+x ${rt_preproc_dir}/build_tar.sh
-## time ${rt_preproc_dir}/build_tar.sh
-cp ${rt_preproc_dir}/CanlabCore.tar.gz .
-cp ${rt_preproc_dir}/spm12.tar.gz .
-cp ${rt_preproc_dir}/run_RT_Preproc.sh .
-cp ${rt_preproc_dir}/RT_Preproc .
-
-## Create soft links for build
-## ln -s /labs/mahmoudilab/synergy-rt-preproc/CanlabCore ./CanlabCore || echo " CanlabCore link exists, OK to proceed"
-## ln -s /labs/mahmoudilab/synergy-rt-preproc/spm12 ./spm12 || echo " spm12 link exists, OK to proceed"
-## ln -s /labs/mahmoudilab/synergy-rt-preproc/run_RT_Preproc.sh ./run_RT_Preproc.sh || echo " run_RT_Preproc.sh link exists, OK to proceed"
-## ln -s /labs/mahmoudilab/synergy-rt-preproc/RT_Preproc ./RT_Preproc|| echo " RT_Preproc link exists, OK to proceed"
-
+copy_rtcpreproc
 build_on_cloudypipelines
+remote_rtcpreproc
 exit 0
 read -p "Build and push to PhysionetChallenge2022 ? (y/n): " yesno
 echo "You answer: ${yesno}"
