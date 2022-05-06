@@ -7,6 +7,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 MATLAB_VER=/opt/mcr/v911
 dicomDir="dicom"
 niiDir="nii"
+niiOutput="nii.tar.gz"
 
 #### functions
 function print_info() {
@@ -28,6 +29,8 @@ function dicom2nifti() {
     print_info "dicom2nifti() user coding returned code=${rtn_code}"
     print_info "Files in nii directory: ${niiDir}"
     ls ${niiDir}
+    ## delete dicomDir
+    rm -rf ${dicomDir}
     print_info "dicom2nifti() completed"
 }
 
@@ -39,6 +42,8 @@ function rtpreproc() {
   time ${cmd_line}
   rtn_code=$?
   print_info "rtpreproc() user coding returned code=${rtn_code}"
+  ## generate niiOutput
+  tar -czf ${niiOutput} ${niiDir} && rm -rf ${niiDir}
   print_info "rtpreproc() completed"
 }
 

@@ -4,6 +4,7 @@ SCRIPT_NAME=$(basename -- "$0")
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 #### pre-defined
+submissionFile=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_dir_processed/submissions.csv
 apiUrl=http://localhost:9033/api/workflows/v1
 wdlFileBase=base_wdl.wdl
 inputFileBase=base_input.json
@@ -77,5 +78,9 @@ response=$(submit_job)
 cromwellId=$(get_id "id" "${response}")
 print_info "jobId=${cromwellId}"
 delete_tmp_dir
+## YYYY-MM-DD_hh:mm:ss
+now=$(date -u '+%F_%T')
+line="${cromwellId},${imagePath},submitted,${now}"
+echo "$line" >> ${submissionFile}
 ## return: {"id":"ae0dde76-e0d8-4cc1-ad5c-27c995d346cc","status":"Submitted"}
 ## output: /home/pgu6/app/cromwell/cromwell-executions/wf_realtime_v1/ae0dde76-e0d8-4cc1-ad5c-27c995d346cc/call-run/execution/dummy_test.csv

@@ -11,9 +11,10 @@ workflow wf_realtime_v1{
 }
 
 task run {
-  String csvOutput
   File dicomInput
   File exeScript
+  String csvOutput
+  String niiOutput = "nii.tar.gz"
   String log = "process.log"
   String appDir = "/home/pgu6/realtime-closedloop"
   command {
@@ -21,12 +22,12 @@ task run {
     cd ${appDir}
     ./exec_realtime_loop.sh ${dicomInput} ${csvOutput} > ${log} 2>&1
     cd -
-    cp ${appDir}/${log} .
-    cp ${appDir}/${csvOutput} .
+    cp ${appDir}/${log} . && cp ${appDir}/${csvOutput} . && cp ${appDir}/${niiOutput} .
   }
   output {
     File out = "${csvOutput}"
     File logOut = "${log}"
+    File niiOut = "${niiOutput}"
   }
   runtime {
     docker: "us.gcr.io/cloudypipelines-com/closedloop-preprocess-tools:matlab-1.1"
