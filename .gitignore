@@ -19,6 +19,7 @@
 **/csiccluster
 **/.ssl
 **/ssl
+**/home
 **/volum*
 **/.mvn
 **/mvnw.cmd
