@@ -15,10 +15,15 @@ function print_info() {
     echo "${SCRIPT_NAME}: [$(date -u +"%m/%d/%Y:%H:%M:%S")]: Info: ${msg}"
 }
 
+function nameonly() {
+  shortname=$( basename ${dicomInput} )
+}
+
 function dicom2nifti() {
     print_info "dicom2nifti() started"
-    mkdir -p ${dicomDir} && mkdir -p ${niiDir} && cp ${dicomInput} ${dicomDir}/input.tar.gz
-    cd ${dicomDir} && tar -xzf input.tar.gz && rm -f input.tar.gz && cd -
+    mkdir -p ${dicomDir} && mkdir -p ${niiDir} && cp ${dicomInput} ${dicomDir}/${shortname}
+    cd ${dicomDir} && unzip ${shortname} || echo "Unable to unzip, try tar" &&  tar -xzf ${shortname}
+    rm -f ${shortname} && cd -
     print_info "Files in directory: $(pwd)"
     ls
     print_info "Files in dicom directory: ${dicomDir}"
@@ -82,6 +87,7 @@ fi
 
 dicomInput=$1
 csvOutput=$2
+shortname=$( nameonly )
 
 dicom2nifti
 rtpreproc

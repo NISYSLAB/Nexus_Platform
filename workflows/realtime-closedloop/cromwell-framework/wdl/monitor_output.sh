@@ -60,6 +60,7 @@ function exec_main() {
 #### Main starts
 ## for testing
 echo "OUTPUT_LOG=$OUTPUT_LOG"
+
 exec_main >> ${OUTPUT_LOG} 2>&1
 
 exit 0
