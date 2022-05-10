@@ -1,0 +1,5 @@
+{
+  "wf_realtime_v1.dicomFileInput": "wf_realtime_v1.dicomFileInput_TOBEREPLACED",
+  "wf_realtime_v1.script": "/home/pgu6/app/listener/fMri_realtime/listener_execution/wdl/exec_one.sh",
+  "wf_realtime_v1.csvFileName": "wf_realtime_v1.csvFileName_TOBEREPLACED"
+}
