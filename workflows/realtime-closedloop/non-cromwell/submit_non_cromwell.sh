@@ -4,7 +4,9 @@ SCRIPT_NAME=$(basename -- "$0")
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 #### global settings
+CONTAINER_NAME=realtime-closedloop-prod
 MOUNT=/home/pgu6/app/listener/fMri_realtime/listener_execution/mount
+CONTAINER_MOUNT=/mount
 CONTAINER_HOME=/home/pgu6/realtime-closedloop
 execScript=exec_one.sh
 DISK_MOUNTS="${MOUNT}"
@@ -33,10 +35,10 @@ function submit_job(){
   ## dicom input
   cp ${imagePath} ${host_exec_dir}/${nameonly}
 
-  local exe_dir=${CONTAINER_HOME}/${TASK_CALL_NAME}/${WORKFLOW_ID}
+  local exe_dir=${CONTAINER_MOUNT}/${TASK_CALL_NAME}/${WORKFLOW_ID}
   local cmdArgs="${exe_dir}/exec_realtime_loop.sh ${exe_dir}/${nameonly} ${csvfilename} ${WORKFLOW_ID}"
   print_info "docker exec ${container_full_name} ${cmdArgs}"
-  docker exec ${CONTAINER_NAME} ${cmdArgs} 2>&1 | tee ${exe_dir}/process.log
+  docker exec ${CONTAINER_NAME} ${cmdArgs} 2>&1 | tee ${host_exec_dir}/process.log
   print_info "outPut="${host_exec_dir}/csv/${csvfilename}""
 }
 

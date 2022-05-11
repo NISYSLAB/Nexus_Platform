@@ -9,6 +9,8 @@ dicomDir="dicom"
 niiDir="nii"
 niiOutput="nii.tar.gz"
 
+MOUNT=/home/pgu6/app/listener/fMri_realtime/listener_execution/mount
+CONTAINER_MOUNT=/mount
 CONTAINER_HOME=/home/pgu6/realtime-closedloop
 TASK_CALL_NAME=wf-rt-closedloop
 
@@ -18,21 +20,20 @@ function print_info() {
     echo "${SCRIPT_NAME}: [$(date -u +"%m/%d/%Y:%H:%M:%S")]: Info: ${msg}"
 }
 
-function nameonly() {
-  shortname=$( basename ${dicomInput} )
-}
-
 function dicom2nifti() {
     print_info "dicom2nifti() started"
     cd ${EXE_DIR}
     mkdir -p ${dicomDir} && mkdir -p ${niiDir} && cp ${dicomInput} ${dicomDir}/${shortname}
-    cd ${dicomDir} && unzip ${shortname} || echo "Unable to unzip, try tar" &&  tar -xzf ${shortname}
+    print_info "files under $PWD"
+    ls ./*
+    cd ${dicomDir} && echo print_info "current dir: $PWD, files " && ls
+    echo "tar -xvf ${shortname}" && tar -xvf ${shortname}
     rm -f ${shortname} && cd -
     print_info "Files in directory: $(pwd)"
     ls
     print_info "Files in dicom directory: ${dicomDir}"
     ls ${dicomDir}/
-    cd {CONTAINER_HOME}
+    cd ${CONTAINER_HOME}
     print_info "Calling: time python dicom_pypreprocess.py --filepath ${EXE_DIR}/${dicomDir} --savepath ${EXE_DIR}/${niiDir}"
     time python dicom_pypreprocess.py --filepath ${EXE_DIR}/${dicomDir} --savepath ${EXE_DIR}/${niiDir}
     rtn_code=$?
@@ -71,7 +72,7 @@ function csvgen() {
     print_info "Files in directory: csv"
     ls ${EXE_DIR}/csv
     print_info "csvOutput=${EXE_DIR}/csv/${csvOutput}"
-    print_info "csvOutput=${MOUNT}/csv/${csvOutput}"
+    print_info "csvOutput=${host_exec_dir}/csv/${csvOutput}"
     print_info "csvgen() completed"
 }
 
@@ -79,7 +80,7 @@ function csvgen() {
 
 #### Main starts
 ## ./exec_realtime_loop.sh ${dicomInput} ${csvOutput} ${WORKFLOW_ID} > ${log} 2>&1
-## exe_dir=${CONTAINER_HOME}/${TASK_CALL_NAME}/${WORKFLOW_ID}
+## exe_dir=${CONTAINER_MOUNT}/${TASK_CALL_NAME}/${WORKFLOW_ID}
 ##${exe_dir}/exec_realtime_loop.sh ${exe_dir}/${nameonly} ${csvfilename} ${WORKFLOW_ID}
 ## TASK_CALL_NAME=wf-rt-closedloop
 
@@ -96,9 +97,10 @@ fi
 
 dicomInput=$1
 csvOutput=$2
-shortname=$( nameonly )
+shortname=$( basename ${dicomInput} )
 WORKFLOW_ID=$3
-EXE_DIR=${CONTAINER_HOME}/${TASK_CALL_NAME}/${WORKFLOW_ID}
+EXE_DIR=${CONTAINER_MOUNT}/${TASK_CALL_NAME}/${WORKFLOW_ID}
+host_exec_dir=${MOUNT}/${TASK_CALL_NAME}/${WORKFLOW_ID}
 
 dicom2nifti
 rtpreproc
