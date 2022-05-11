@@ -10,6 +10,7 @@ EXE_ENTRY_DIR=/home/pgu6/app/listener/fMri_realtime/listener_execution/non-wdl
 LOG_DIR=/labs/mahmoudilab/synergy_remote_data1/logs
 MAX_PER_RUN=1
 MAX_PROC=10
+SUBMISSION_SCRIPT=submit_non_cromwell.sh
 
 #### functions
 function get_uid() {
@@ -34,7 +35,7 @@ function exec_main() {
 
     cd $EXE_ENTRY_DIR
     log=${LOG_DIR}/${uuid}_job.log
-    local cmd="./submit_non_cromwell.sh ${tmplist}/${nameonly}"
+    local cmd="./${SUBMISSION_SCRIPT} ${tmplist}/${nameonly}"
     echo "${cmd} > ${log}  2>&1 &"
     ${cmd} > ${log} 2>&1 &
 }

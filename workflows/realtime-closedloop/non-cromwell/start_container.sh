@@ -45,6 +45,11 @@ time create_container
 sleep 2
 docker ps -a
 
+echo "Home directory"
 docker exec "${CONTAINER_NAME}" pwd
+
+echo "Files in ${CONTAINER_HOME}"
 docker exec "${CONTAINER_NAME}" bash -c "ls ${CONTAINER_HOME}/"
+
+echo "Files in ${CONTAINER_MOUNT}"
 docker exec "${CONTAINER_NAME}" bash -c "ls ${CONTAINER_MOUNT}/"
