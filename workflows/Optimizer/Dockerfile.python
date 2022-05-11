@@ -1,0 +1,11 @@
+FROM centos/python-38-centos7:20210726-fad62e9
+## FROM python:3.7.13-slim-bullseye
+
+ENV BASE_DIR /home/pgu6/realtime-closedloop
+WORKDIR ${BASE_DIR}
+
+USER root
+#### Main starts
+COPY ["*.py","requirements.txt", "${BASE_DIR}/"]
+RUN pip install -r requirements.txt
+

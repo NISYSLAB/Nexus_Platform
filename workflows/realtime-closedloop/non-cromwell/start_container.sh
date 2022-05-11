@@ -8,6 +8,7 @@ IMAGE=us.gcr.io/cloudypipelines-com/closedloop-preprocess-tools:matlab-1.1
 CONTAINER_NAME=realtime-closedloop-prod
 
 MOUNT=/home/pgu6/app/listener/fMri_realtime/listener_execution/mount
+CONTAINER_MOUNT=/mount
 CONTAINER_HOME=/home/pgu6/realtime-closedloop
 execScript=exec_one.sh
 DISK_MOUNTS="${MOUNT}"
@@ -21,17 +22,15 @@ function cleanup() {
 
 function create_container() {
   echo "Creating container: ${CONTAINER_NAME}"
-  docker create -t \
-        -v "${MOUNT}":${CONTAINER_HOME}/ \
+  docker run --entrypoint /bin/bash \
+        -p 9666:8080 \
+        -v "${MOUNT}/":${CONTAINER_MOUNT}/ \
         --name ${CONTAINER_NAME}  \
         -e "DISK_MOUNTS=${DISK_MOUNTS}" \
         -e TASK_CALL_NAME=${TASK_CALL_NAME} \
         -e TASK_CALL_ATTEMPT=1 \
-        -e containerName=${container_full_name} \
-        "${IMAGE}"
-
-    echo "Starting container: ${CONTAINER_NAME}"
-    docker start "${CONTAINER_NAME}"
+        -e containerName=${CONTAINER_NAME} \
+        -itd "${IMAGE}"
 }
 
 function prep() {
@@ -39,15 +38,18 @@ function prep() {
     mkdir -p ${MOUNT}/${TASK_CALL_NAME}
 }
 
-function delete_docker() {
-    docker stop ${CONTAINER_NAME}
-    docker rm -f -v ${CONTAINER_NAME}
-}
-
 #### Main starts
 cleanup
 prep
-create_container
-echo "docker exec ${container_full_name} pwd"
-docker exec "${container_full_name}" pwd
-docker exec "${container_full_name}" bash -c "ls ${CONTAINER_HOME}/"
+time create_container
+sleep 2
+docker ps -a
+
+echo "Home directory"
+docker exec "${CONTAINER_NAME}" pwd
+
+echo "Files in ${CONTAINER_HOME}"
+docker exec "${CONTAINER_NAME}" bash -c "ls ${CONTAINER_HOME}/"
+
+echo "Files in ${CONTAINER_MOUNT}"
+docker exec "${CONTAINER_NAME}" bash -c "ls ${CONTAINER_MOUNT}/"
