@@ -1,11 +1,15 @@
 # This folder contains the code for the controller/optimizer module using Bayesian optimization
 
+
+## Required Software
+* A Unix-based operating system (including Mac)
+* Git: https://git-scm.com/downloads
+* Docker: https://docs.docker.com/get-docker/
+
 ## Installation instruction:
 Run the following command to install the requirements.
 
 ```pip install -r requirements.txt```
-
-
 
 ## To run the code
 
@@ -20,3 +24,14 @@ To run the Bayesian optimization module, run the following command:
 The output of this script is a csv file saved as ```--savename $(csv-filename).csv```.
 
 After each call of the optimizer module, one row with updated task parameters will be added to the end of the CSV file.
+
+## Build Docker Image
+Run following script: 
+
+```./build_push_docker.sh```
+
+## Testing
+Run 
+```./unit_test.sh```
+
+the csv output is generated as  ```csv/output.csv```
