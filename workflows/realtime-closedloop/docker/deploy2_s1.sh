@@ -15,7 +15,7 @@ REMOTE_WDL_DIR=/home/pgu6/app/listener/fMri_realtime/listener_execution/wdl
 function zip_local() {
     cd ${LOCAL_DIR}
     rm -rf $LOCAL_ZIP
-    zip -r $LOCAL_ZIP ./*.sh ./Dock*.* -x ./deploy2_s1.sh -x zip_remote.sh -x download_s1.sh
+    zip -r $LOCAL_ZIP ./*.sh  ./*.py ./req*.txt ./Dock*.* -x ./deploy2_s1.sh -x zip_remote.sh -x download_s1.sh
 }
 
 function scp2_s1() {
@@ -27,13 +27,13 @@ function get_scripts() {
   cp ~/workspace/Nexus_Platform/workflows/dicom2nifti/docker/*.py .
   cp ~/workspace/Nexus_Platform/workflows/dicom2nifti/docker/req*.txt .
   cp /Users/anniegu/workspace/Nexus_Platform/workflows/Optimizer/*.py .
-  cp /Users/anniegu/workspace/Nexus_Platform/workflows/Optimizer/requirements.txt .
+  cp /Users/anniegu/workspace/Nexus_Platform/workflows/Optimizer/req*.txt .
 }
 
 function delete_scripts() {
   cd ${LOCAL_DIR}
   rm -rf ./*.py
-  rm -rf ./requirements.txt
+  rm -rf ./req*.txt
 }
 
 #### Main starts

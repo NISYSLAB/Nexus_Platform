@@ -1,5 +1,3 @@
-## FROM centos:7.9.2009
-## FROM centos/python-38-centos7
 FROM centos/python-38-centos7:20210726-fad62e9
 
 ENV MCR_VERSION R2021b
@@ -11,8 +9,11 @@ WORKDIR ${BASE_DIR}
 USER root
 #### Main starts
 
-## for optimizer
-RUN pip install -r requirements.txt
+COPY ["*.py","requirements.txt", "${BASE_DIR}/"]
+RUN pip install -r requirements.txt && \
+    pip install numpy dicom_numpy && \
+    pip install -U pip setuptools && \
+    pip --no-cache-dir install pydicom nibabel
 
 ## for rt_preproc
 COPY CanlabCore.tar.gz ${BASE_DIR}/
@@ -22,17 +23,6 @@ COPY RT_Preproc ${BASE_DIR}/
 
 RUN cd ${BASE_DIR} && tar -xzf CanlabCore.tar.gz && rm -rf CanlabCore.tar.gz \
     && tar -xzf spm12.tar.gz && rm -rf spm12.tar.gz
-
-## matlab code: rt_preproc
-
-## python: dicom2nii
-COPY dicom_pypreprocess.py ${BASE_DIR}/
-COPY output_randomcsv.py ${BASE_DIR}/
-
-RUN pip install numpy dicom_numpy && \
-    pip install -U pip setuptools && \
-    pip --no-cache-dir install pydicom nibabel
-
 
 #### matlab code: rt_preproc
 ## https://ssd.mathworks.com/supportfiles/downloads/R2021b/Release/2/deployment_files/installer/complete/glnxa64/MATLAB_Runtime_R2021b_Update_2_glnxa64.zip
