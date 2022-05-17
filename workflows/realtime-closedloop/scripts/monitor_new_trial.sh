@@ -67,12 +67,12 @@ function execMain() {
     do
         #3 echo "Cue1_Onset=${Cue1_Onset}, ITI_Offset=${ITI_Offset}"
         local intS=$( roundUp "${Cue1_Onset}" )
-        local intE=$( roundUp "${ITI_Offset}" )
+        local intE=$( roundUp "${ITI_Onset}" )
         local padS=$( padZero "${intS}" )
         local padE=$( padZero "${intE}" )
-        local imageSeq="$( getSeq ${intS} ${intE} )"
-        echo "${Cue1_Onset},${ITI_Offset} ==> ${intS}, ${intE} ==> ${padS}, ${padE}"
-        echo ${imageSeq}
+        ##local imageSeq="$( getSeq ${intS} ${intE} )"
+        echo "${Cue1_Onset},${ITI_Onset} ==> ${intS}, ${intE} ==> ${padS}, ${padE}"
+        ##echo ${imageSeq}
         ##echo "ITI_Offset=${ITI_Offset}"
     done < "${MONITORING_TRIAL_LOG}"
 
