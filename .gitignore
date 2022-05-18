@@ -24,3 +24,6 @@
 **/.mvn
 **/mvnw.cmd
 **/*.backup*
+**/cromwell-executions
+**/postgres-synergy*
+**/tmp
