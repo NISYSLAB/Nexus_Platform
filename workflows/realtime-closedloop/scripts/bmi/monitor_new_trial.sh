@@ -26,6 +26,26 @@ PADDINGS=5
 FIELDS="subject,effortDelay,run,runStart,trial,Cue1_Onset,Cue2_Onset,CueAll_Onset,CueAll_Offset,response,Reward,Effort,Order,RT,Trigger,ITI_Onset,ITI_Offset,CounterBalance_Order,Epoch1_Press,Epoch1_PressRT,Epoch2_Press,Epoch2_PressRT"
 TRIM_COMMA=$(echo $FIELDS | tr ',' ' ')
 #### functions
+function areFilesSame() {
+    local file1=$1
+    local file2=$2
+    if cmp -s -- "$file1" "$file2"; then
+      return 0
+    else
+      return 1
+    fi
+}
+
+function diffFiles() {
+    local file1=$1
+    local file2=$2
+    if diff -u "$file1" "$file2"; then
+      echo "$file1 and $file2 have identical contents"
+    else
+      echo "$file1 and $file2 differ"
+    fi
+}
+
 function getUid() {
     echo "$( date +'%m-%d-%Y:%H:%M:%S' )_$((1000 + RANDOM % 9999))"
 }
@@ -101,6 +121,17 @@ function execMain() {
 
 #### Main starts
 #### for testing
+echo "----- using cmp command ---"
+areFilesSame new.csv old.csv && echo "same"
+areFilesSame new.csv old.csv || echo "notSame"
+
+
+echo ""
+echo "----- using diff command ---"
+diffFiles new.csv old.csv
+echo ""
+exit 0
+
 printConfig
 execMain
 exit 0
