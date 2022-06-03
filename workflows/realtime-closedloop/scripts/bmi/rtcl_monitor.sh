@@ -90,6 +90,7 @@ function appendAllRecords() {
     local contentFile=$1
     while read notefile; do
       appendFile ${notefile} ${contentFile}
+      mv ${notefile} ${MONITORING_PROCESSED_DIR}/
     done < "${TMP_CSV}"
 }
 
@@ -101,7 +102,7 @@ function appendFile() {
     local fileName=$( basename "${rawFile}" )
     mkdir -p "${tmpDir}"
     mkdir -p ${MONITORING_PROCESSED_DIR}
-    mv "${rawFile}" "${tmpDir}/${fileName}"
+    cp "${rawFile}" "${tmpDir}/${fileName}"
 
     cd "${tmpDir}"
     [[ $fileName == *zip ]] && unzip "${fileName}" &&  mv $fileName "${MONITORING_PROCESSED_DIR}"/
@@ -172,9 +173,8 @@ function processRecord() {
     mkdir -p $PWD/tmp
     local newRecordFile=${WORK_DIR}/tmp_rec_$( timeStamp ).csv
     parseNewRecords "${file}" "${newRecordFile}"
+    [[ ! -f $newRecordFile ]] && printInfo "No new extractions available, skip this run" && return 0
     extractAndSubmit "${newRecordFile}"
-
-    ##submit2Pipeline "$csvFile" && echo "$row" >> "$PROCESSED_EXTRACTION_LOG" && cp "$PROCESSED_EXTRACTION_LOG" "$PROCESSED_EXTRACTION_LOG".backup
 }
 
 ## submit2Pipeline ${ceilStart} ${ceilEnd}
@@ -222,10 +222,8 @@ function execMain() {
 
 #### Main starts
 preProcess
-execMain
-exit 0
-##for i in {1..56}
-for i in {1..3}
+
+for i in {1..56}
 do
   printInfo "Loop: $i"
   execMain
