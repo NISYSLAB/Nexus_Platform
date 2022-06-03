@@ -12,10 +12,12 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 ## BMI
 ## MONITORING_CSV_DIR=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_dir
 ## MONITORING_PROCESSED_DIR=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_dir_processed
+##PIPELINE_LISTENER_DIR=/labs/mahmoudilab/synergy_remote_data1/rtcl_data_in_dir
 
 ## Dev
 MONITORING_CSV_DIR=$PWD/tmp
 MONITORING_PROCESSED_DIR=$PWD/processed
+PIPELINE_LISTENER_DIR=$PWD/rtcl_data_in_dir
 PADDING_ZEROS=5
 
 ## common
@@ -110,7 +112,6 @@ function appendFile() {
       ##printInfo "cat $csvFile >> ${tmpCSVFile}"
       cat $csvFile >> ${tmpCSVFile}
     done
-
     cd -
     rm -rf "${tmpDir}"
 }
@@ -162,6 +163,7 @@ function extractAndSubmit() {
       local padEnd=$(padding $ceilEnd)
       printInfo "start=$start ==> ceil=$ceilStart ==> padding=$padStart"
       printInfo "end=$end ==> ceil=$ceilEnd ==> padding=$padEnd"
+      submit2Pipeline ${ceilStart} ${ceilEnd}
     done < $fileToBeRead
 }
 
@@ -175,15 +177,31 @@ function processRecord() {
     ##submit2Pipeline "$csvFile" && echo "$row" >> "$PROCESSED_EXTRACTION_LOG" && cp "$PROCESSED_EXTRACTION_LOG" "$PROCESSED_EXTRACTION_LOG".backup
 }
 
+## submit2Pipeline ${ceilStart} ${ceilEnd}
+## cd ${dicomDir} && tar -xvf ${shortname}
 function submit2Pipeline() {
-    local file=$1
-    local tmpzip=$MONITORING_CSV_DIR/$( basename "$file" )_$( timeStamp ).zip
-    zip "$tmpzip" "$file"
-    echo "scp $tmpzip $REMOTE_BMI_USER@$REMOTE_BMI_HOST:$REMOTE_RECEIVING_DIR/"
-    scp "$tmpzip" "$REMOTE_BMI_USER"@"$REMOTE_BMI_HOST":"$REMOTE_RECEIVING_DIR"/
-    local rtCode=$?
-    rm -rf "$tmpzip"
-    return $rtCode
+    local ceilStart=$1
+    local ceilEnd=$2
+
+    local tmpName=${ceilStart}-${ceilEnd}-dicom
+    mkdir -p ${tmpName}
+    local x=${ceilStart}
+    while [ $x -le ${ceilEnd} ]
+    do
+      local file=$(padding ${x})
+      echo "Copy dicom file:${file}.dcm "
+      mv ${MONITORING_CSV_DIR}/${file}.dcm ${tmpName}/
+      x=$(( $x + 1 ))
+    done
+
+    local actnum=$( ls ${tmpName}/*.dcm | wc -l | xargs )
+    [[ "$actnum" -eq 0 ]] && rm -rf ${tmpName} && echo "No dicom files [$(padding ${ceilStart}).dcm - $(padding ${ceilEnd}).dcm] available, skip this run" && return 1
+
+    cd ${tmpName}
+    tar -czf ${tmpName}.tar.gz *.dcm
+    mv ${tmpName}.tar.gz ${PIPELINE_LISTENER_DIR}/
+    cd -
+    rm -rf ${tmpName}
 }
 
 function execMain() {
