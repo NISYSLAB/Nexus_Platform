@@ -10,15 +10,18 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 #### configurations  should be replaced with the real one in TASK server
 ## BMI
-## MONITORING_CSV_DIR=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_dir
-## MONITORING_PROCESSED_DIR=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_dir_processed
-##PIPELINE_LISTENER_DIR=/labs/mahmoudilab/synergy_remote_data1/rtcl_data_in_dir
+MONITORING_CSV_DIR=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_dir
+MONITORING_PROCESSED_DIR=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_dir_processed
+PIPELINE_LISTENER_DIR=/labs/mahmoudilab/synergy_remote_data1/rtcl_data_in_dir
 
 ## Dev
-MONITORING_CSV_DIR=$PWD/tmp
-MONITORING_PROCESSED_DIR=$PWD/processed
-PIPELINE_LISTENER_DIR=$PWD/rtcl_data_in_dir
-PADDING_ZEROS=5
+function setDevEnv() {
+  MONITORING_CSV_DIR=$PWD/tmp
+  MONITORING_PROCESSED_DIR=$PWD/processed
+  PIPELINE_LISTENER_DIR=$PWD/rtcl_data_in_dir
+}
+
+[[ "${ENV_PROFILE}" == "dev" ]] &&  echo "ENV_PROFILE is set to dev" && setDevEnv
 
 ## common
 PROCESS_ID=$( uuidgen )
@@ -30,6 +33,12 @@ TRIM_COMMA=$( echo $PROCESS_HEADER | tr ',' ' ')
 HASH_CMD=md5sum
 RAW_HEADER="subject,effortDelay,run,runStart,trial,Cue1_Onset,Cue2_Onset,CueAll_Onset,CueAll_Offset,response,Reward,Effort,Order,RT,Trigger,ITI_Onset,ITI_Offset,CounterBalance_Order,Epoch1_Press,Epoch1_PressRT,Epoch2_Press,Epoch2_PressRT,"
 RAW_HEADER_TRIM=$( echo $RAW_HEADER | tr ',' ' ')
+
+## sample: 001_000003_000001.dcm
+PADDING_ZEROS=6
+NAME_PART1=001
+NAME_PART2=000003
+
 #### functions
 function timeStamp() {
     date +'%Y%m%d:%H:%M:%S'
@@ -43,6 +52,8 @@ function whichHashCmd() {
 
 function preProcess() {
     whichHashCmd
+
+    mkdir -p ${SCRIPT_DIR}/tmp
     
     if [ -s "$PROCESSED_EXTRACTION_LOG" ]
     then
@@ -70,7 +81,9 @@ function cksumFile() {
 
 function hashCode() {
     local str=$1
-    local hash=$(echo $str | ${HASH_CMD} | xargs )
+    local hash=1234567890
+    [[ "$HASH_CMD" == "md5sum" ]] && hash=$(echo -n $str | ${HASH_CMD} | cut -d " " -f1 | xargs )
+    [[ "$HASH_CMD" == "md5" ]] && hash=$(echo $str | ${HASH_CMD} | xargs )
     echo ${hash}
 }
 
@@ -80,10 +93,10 @@ function printInfo() {
 }
 
 function printConfig() {
-   printInfo "MONITORING_TRIAL_LOG=$MONITORING_TRIAL_LOG"
-   printInfo "PROCESSED_TRIAL_LOG=$PROCESSED_TRIAL_LOG"
-   printInfo "MONITOR_LOG=$MONITOR_LOG"
-   printInfo "TRIM_COMMA=$TRIM_COMMA"
+  printInfo "SCRIPT_DIR=$SCRIPT_DIR"
+   printInfo "MONITORING_CSV_DIR=$MONITORING_CSV_DIR"
+   printInfo "MONITORING_PROCESSED_DIR=$MONITORING_PROCESSED_DIR"
+   printInfo "PIPELINE_LISTENER_DIR=$PIPELINE_LISTENER_DIR"
 }
 
 function appendAllRecords() {
@@ -108,7 +121,8 @@ function appendFile() {
     [[ $fileName == *zip ]] && unzip "${fileName}" &&  mv $fileName "${MONITORING_PROCESSED_DIR}"/
     [[ $fileName == *tar.gz ]] && tar -xf "${fileName}" &&  mv $fileName "${MONITORING_PROCESSED_DIR}"/
 
-    for csvFile in *.csv
+    ##for csvFile in *.csv
+    for csvFile in $( find . -type f -name '*.csv' )
     do
       ##printInfo "cat $csvFile >> ${tmpCSVFile}"
       cat $csvFile >> ${tmpCSVFile}
@@ -171,7 +185,7 @@ function extractAndSubmit() {
 function processRecord() {
     local file=$1
     mkdir -p $PWD/tmp
-    local newRecordFile=${WORK_DIR}/tmp_rec_$( timeStamp ).csv
+    local newRecordFile=${WORK_DIR}/new_trial_record.csv
     parseNewRecords "${file}" "${newRecordFile}"
     [[ ! -f $newRecordFile ]] && printInfo "No new extractions available, skip this run" && return 0
     extractAndSubmit "${newRecordFile}"
@@ -182,15 +196,17 @@ function processRecord() {
 function submit2Pipeline() {
     local ceilStart=$1
     local ceilEnd=$2
+    [[ -z "$ceilStart" ]] && return 0
+    [[ -z "$ceilEnd" ]] && return 0
 
     local tmpName=${ceilStart}-${ceilEnd}-dicom
     mkdir -p ${tmpName}
     local x=${ceilStart}
     while [ $x -le ${ceilEnd} ]
     do
-      local file=$(padding ${x})
-      echo "Copy dicom file:${file}.dcm "
-      mv ${MONITORING_CSV_DIR}/${file}.dcm ${tmpName}/
+      local dicomfile=${NAME_PART1}_${NAME_PART2}_$(padding ${x}).dcm
+      echo "Copy dicom file:${dicomfile}"
+      mv ${MONITORING_CSV_DIR}/${dicomfile} ${tmpName}/
       x=$(( $x + 1 ))
     done
 
@@ -206,26 +222,31 @@ function submit2Pipeline() {
 
 function execMain() {
     PROCESS_ID=$( uuidgen )
-    TMP_CSV=$MONITORING_CSV_DIR/tmp_${PROCESS_ID}.txt
+    WORK_DIR=$PWD/tmp/worker_${PROCESS_ID}
+    mkdir -p ${WORK_DIR}
+    TMP_CSV=${WORK_DIR}/filelist.txt
     collectFiles $TMP_CSV
 
     local actnum=$( cat ${TMP_CSV} | wc -l | xargs )
-    [[ "$actnum" -eq 0 ]] && rm -rf $TMP_CSV && echo "No notification trial files available, skip this run" && return 0
+    [[ "$actnum" -eq 0 ]] && rm -rf ${WORK_DIR} && return 0
+    #3[[ "$actnum" -eq 0 ]] && rm -rf ${WORK_DIR} && echo "No notification trial files available, skip this run" && return 0
 
-    WORK_DIR=$PWD/tmp/worker_${PROCESS_ID}
-    mkdir -p ${WORK_DIR}
     local allRecordsFile=${WORK_DIR}/all.csv
     appendAllRecords ${allRecordsFile}
-    rm -rf "${TMP_CSV}"
+    ##rm -rf "${TMP_CSV}"
     processRecord ${allRecordsFile}
 }
 
 #### Main starts
+
+printConfig
+cd ${SCRIPT_DIR}
+mkdir -p tmp
 preProcess
 
 for i in {1..56}
 do
-  printInfo "Loop: $i"
+  ##printInfo "Loop: $i"
   execMain
   sleep 1
 done
