@@ -6,6 +6,8 @@ ENV MCRROOT /opt/mcr/${MCR_NUM}
 ENV BASE_DIR /home/pgu6/realtime-closedloop
 WORKDIR ${BASE_DIR}
 
+ENV DCM2NII_INSTALLER https://github.com/rordenlab/dcm2niix/releases/download/v1.0.20211006/dcm2niix_lnx.zip
+
 USER root
 #### Main starts
 
@@ -42,10 +44,12 @@ RUN yum -y update \
     && ./install -destinationFolder /opt/mcr -agreeToLicense yes -mode silent \
     && cd / \
     && rm -rf mcr-install  \
-    && test -e /usr/bin/ldd &&  ldd --version |  grep -q "(GNU libc) 2\.17"
+    && test -e /usr/bin/ldd &&  ldd --version |  grep -q "(GNU libc) 2\.17" \
+    && wget -O ${BASE_DIR}/dcm2niix_lnx.zip ${DCM2NII_INSTALLER} \
+    && cd ${BASE_DIR} && unzip dcm2niix_lnx.zip && rm -rf dcm2niix_lnx.zip \
+    && echo "Files in ${BASE_DIR}" && ls ${BASE_DIR}
 
 ## it looks like it may be due to a compatibility issue between RHEL/CentOS 7 and Matlab R2020b's libstdc++ library
 ENV LD_PRELOAD ${MCRROOT}/bin/glnxa64/glibc-2.17_shim.so
 ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:/opt/mcr/${MCR_NUM}/runtime/glnxa64:/opt/mcr/${MCR_NUM}/bin/glnxa64:/opt/mcr/${MCR_NUM}/sys/os/glnxa64:/opt/mcr/${MCR_NUM}/extern/bin/glnxa64
-
 
