@@ -2,7 +2,7 @@
 
 ######## common settings
 PYTHON_IMAGE_NAME=fmri_conversion
-PYTHON_IMAGE_TAG=1.0
+PYTHON_IMAGE_TAG=2.0
 PYTHON_DOCKERFILE=Dockerfile.fmri_conversion
 CONTAINER_NAME=${PYTHON_IMAGE_NAME}-${PYTHON_IMAGE_TAG}
 
