@@ -13,6 +13,7 @@ function cleanup() {
 function run_docker() {
     docker run -d \
      -v $PWD/dicom/:/app/dicom/ \
+     -v $PWD/niftidir/:/app/niftidir/ \
      --name ${CONTAINER_NAME}  \
      -t ${CONTAINER_REGISTRY}/${GCR_PATH}/${PYTHON_IMAGE_NAME}:${PYTHON_IMAGE_TAG}
 }
@@ -23,5 +24,5 @@ run_docker
 sleep 2
 docker ps
 echo "Enter container: ${CONTAINER_NAME}"
-echo "run: python dicom_pypreprocess.py --filepath /app/dicom --savepath /app/nii"
+echo "run: ./dcm2niix -o /app/niftidir -f D4_dcm2nii /app/dicom"
 docker exec -it ${CONTAINER_NAME} /bin/bash

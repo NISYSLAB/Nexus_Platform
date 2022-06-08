@@ -1,17 +1,16 @@
 FROM python:slim-buster
 
 LABEL maintainer="Yusen Zhu yusenz@gatech.edu"
-ENV     BASE_DIR="/app"
+ENV BASE_DIR="/app"
+ENV INSTALLER https://github.com/rordenlab/dcm2niix/releases/download/v1.0.20211006/dcm2niix_lnx.zip
+WORKDIR ${BASE_DIR}
+
+## https://github.com/rordenlab/dcm2niix/releases/tag/v1.0.20211006
+## dcm2niix -o ~/niftidir -f filename ~/dicomdir
 
 RUN apt-get -y update && \
-    pip install numpy dicom_numpy && \
-    pip install -U pip setuptools && \
-    pip --no-cache-dir install pydicom nibabel && \
-    apt-get update
-
-WORKDIR /app
-
-
-WORKDIR ${BASE_DIR}
-COPY dicom_pypreprocess.py ${BASE_DIR}/
-COPY output_randomcsv.py ${BASE_DIR}/
+    apt-get install -y wget zip unzip curl && \
+    wget -O ${BASE_DIR}/dcm2niix_lnx.zip ${INSTALLER} && \
+    cd ${BASE_DIR} && \
+    unzip dcm2niix_lnx.zip && \
+    rm -rf dcm2niix_lnx.zip
