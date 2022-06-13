@@ -10,44 +10,122 @@ PROCESSED_DIR=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_di
 EXE_ENTRY_DIR=/home/pgu6/app/listener/fMri_realtime/listener_execution/non-wdl
 LOG_DIR=/labs/mahmoudilab/synergy_remote_data1/logs/rtcl/workflow
 MAX_PER_RUN=1
-MAX_PROC=10
+MAX_PROC=1
 SUBMISSION_SCRIPT=submit_non_cromwell.sh
+
+IN_PROCESS=N
 
 #### functions
 function get_uid() {
     echo "$( date +'%m-%d-%Y-%H-%M-%S' )_$((1000 + RANDOM % 9999))"
 }
 
+function print_info() {
+    local msg=$1
+    echo "${SCRIPT_NAME}: [$(date -u +"%m/%d/%Y:%H:%M:%S")]: Info: ${msg}"
+}
+
+function file_copy_check() {
+  local file=$1
+  print_info "file_copy_check: $file"
+  local oldsize=$( wc -c <"$file" | awk '{print $1}' )
+  print_info "oldsize=$oldsize"
+  sleep 1
+  local newsize=$( wc -c <"$file" | awk '{print $1}' )
+  print_info "newsize=$newsize"
+
+  while [[ "$oldsize" -lt "$newsize" ]]
+  do
+     print_info "$file growing, still copying ..."
+     oldsize=$( wc -c <"$file" | awk '{print $1}' )
+     sleep 1
+     newsize=$( wc -c <"$file" | awk '{print $1}' )
+  done
+
+  if [ "$oldsize" -eq "$newsize" ]
+  then
+     print_info "The copying is done for file: $file!"
+  fi
+}
+
 function exec_main() {
+    local procnum=$( ps -eaf | grep submit_non_cromwell | wc -l | xargs )
+    [[ "$procnum" -gt $MAX_PROC ]]  && return 0
+    ##[[ "$procnum" -gt $MAX_PROC ]] && print_info "Reach max running processes, wait and skip this run" && return 0
+
     local actnum=$( find "${MONITORING_DIR}" -type f -name '*.*'  | wc -l | xargs )
     ##local actnum=$( ls ${MONITORING_DIR}/*.* | wc -l | xargs )
     [[ "$actnum" -eq 0 ]] && return 0
-    ##[[ "$actnum" -eq 0 ]] && echo "No files available in folder: ${MONITORING_DIR}, skip this run" && return 0
+    ##[[ "$actnum" -eq 0 ]] && print_info "No files available in folder: ${MONITORING_DIR}, skip this run" && return 0
 
-    local procnum=$( ps -eaf | grep submit_non_cromwell | wc -l | xargs )
-    [[ "$procnum" -gt $MAX_PROC ]] && echo "Reach max running processes, wait and skip this run" && return 0
+    ## double check
+    procnum=$( ps -eaf | grep submit_non_cromwell | wc -l | xargs )
+    [[ "$procnum" -gt $MAX_PROC ]]  && return 0
 
     uuid=$( get_uid )
+    [[ "$MAX_PROC" == 1 ]] && uuid="single-thread"
     tmplist=${PROCESSED_DIR}/${uuid}
     mkdir -p ${tmplist}
     cd ${MONITORING_DIR}
     ## process a group each time
     local myfile=$( ls -rt | head -n 1 )
     local nameonly=$( basename "$myfile" )
-    mv ${myfile} ${tmplist}/${nameonly}
+    file_copy_check ${myfile}
+    mv ${myfile} ${tmplist}/${nameonly} || return 0
 
     cd $EXE_ENTRY_DIR
-    log=${LOG_DIR}/process_${uuid}.log
     local cmd="./${SUBMISSION_SCRIPT} ${tmplist}/${nameonly}"
-    echo "${cmd} > ${log}  2>&1 &"
-    ${cmd} > ${log} 2>&1 &
+    log=${LOG_DIR}/submission_${uuid}.log
+    if [[ "$MAX_PROC" == 1 ]]; then
+        log=${LOG_DIR}/submission_${uuid}_$( date +'%m-%d-%Y' ).log
+        print_info "${cmd} >> ${log}  2>&1"
+        ${cmd} >> ${log} 2>&1
+    else
+         print_info "${cmd} > ${log}  2>&1 &"
+         ${cmd} > ${log} 2>&1 &
+    fi
+}
+
+function exec_main_single_thread() {
+
+    [[ $IN_PROCESS == "Y" ]]  && return 0
+    local procnum=$( ps -eaf | grep submit_non_cromwell | wc -l | xargs )
+    [[ "$procnum" -gt $MAX_PROC ]]  && return 0
+    ##[[ "$procnum" -gt $MAX_PROC ]] && print_info "Reach max running processes, wait and skip this run" && return 0
+
+    local actnum=$( find "${MONITORING_DIR}" -type f -name '*.*'  | wc -l | xargs )
+    ##local actnum=$( ls ${MONITORING_DIR}/*.* | wc -l | xargs )
+    [[ "$actnum" -eq 0 ]] && return 0
+    ##[[ "$actnum" -eq 0 ]] && print_info "No files available in folder: ${MONITORING_DIR}, skip this run" && return 0
+
+    ## double check
+    procnum=$( ps -eaf | grep submit_non_cromwell | wc -l | xargs )
+    [[ "$procnum" -gt $MAX_PROC ]]  && return 0
+
+    uuid="single-thread"
+    tmplist=${PROCESSED_DIR}/${uuid}/$(get_uid)
+    log=${LOG_DIR}/submission_${uuid}_$( date +'%m-%d-%Y' ).log
+    mkdir -p ${tmplist}
+    mv ${MONITORING_DIR}/*.* ${tmplist}/ || return 0
+
+    cd $EXE_ENTRY_DIR
+    IN_PROCESS=Y
+    for FILE in ${tmplist}/*.*
+    do
+      ##print_info "Submit $FILE"
+      local cmd="./${SUBMISSION_SCRIPT} ${FILE}"
+      print_info "${cmd} >> ${log}  2>&1"
+      ${cmd} >> ${log} 2>&1
+    done
+    IN_PROCESS=N
 }
 
 #### Main starts
 cd "$SCRIPT_DIR"
-for i in {1..56}
+for i in {1..30}
 do
-  ##echo "loop: $i"
-  exec_main
-  sleep 1
+  ##print_info "loop: $i"
+  ##exec_main
+  exec_main_single_thread
+  sleep 2
 done

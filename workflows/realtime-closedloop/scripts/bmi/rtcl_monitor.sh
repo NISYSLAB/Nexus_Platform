@@ -218,6 +218,7 @@ function submit2Pipeline() {
     mv ${tmpName}.tar.gz ${PIPELINE_LISTENER_DIR}/
     cd -
     rm -rf ${tmpName}
+    sleep 1
 }
 
 function execMain() {

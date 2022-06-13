@@ -11,6 +11,7 @@ CONTAINER_HOME=/home/pgu6/realtime-closedloop
 execScript=/home/pgu6/app/listener/fMri_realtime/listener_execution/non-wdl/exec_one.sh
 DISK_MOUNTS="${MOUNT}"
 TASK_CALL_NAME=wf-rt-closedloop
+MAX_PROC=1
 
 #### functions
 function print_info() {
@@ -38,7 +39,7 @@ function submit_job(){
   local exe_dir=${CONTAINER_MOUNT}/${TASK_CALL_NAME}/${WORKFLOW_ID}
   local cmdArgs="${exe_dir}/exec_realtime_loop.sh ${exe_dir}/${nameonly} ${csvfilename} ${WORKFLOW_ID}"
   print_info "docker exec ${CONTAINER_NAME} ${cmdArgs}"
-  docker exec ${CONTAINER_NAME} ${cmdArgs} 2>&1 | tee ${host_exec_dir}/process.log
+  docker exec ${CONTAINER_NAME} ${cmdArgs} 2>&1 | tee -a ${host_exec_dir}/process.log
   print_info "finalOutput=${host_exec_dir}/csv/${csvfilename}"
 }
 
@@ -56,9 +57,11 @@ fi
 
 imagePath=$1
 nameonly=$(basename -- "$imagePath")
-csvfilename="${nameonly%.*}"
-csvfilename="${csvfilename%.*}".csv
+##csvfilename="${nameonly%.*}"
+##csvfilename="${csvfilename%.*}".csv
+csvfilename=optimizer_out.csv
 WORKFLOW_ID=$(uuidgen)
+[[ "$MAX_PROC" == 1 ]] && WORKFLOW_ID="single-thread"
 print_info "imagePath=${imagePath}"
 print_info "nameonly=${nameonly}"
 print_info "csvfilename=${csvfilename}"
