@@ -1,6 +1,11 @@
 % % modify the paths to be the actual path when you run it
-addpath(genpath("/home/pgu6/realtime-closedloop/spm12"))
-addpath(genpath("/home/pgu6/realtime-closedloop/CanlabCore"))
+spm_path = "/home/pgu6/realtime-closedloop/spm12";
+CanlabCore_path = "/home/pgu6/realtime-closedloop/CanlabCore";
+Neu3CA_RT_path = '/home/Neu3CA-RT';
+addpath(genpath(spm_path)) 
+addpath(genpath(CanlabCore_path))
+addpath(genpath(Neu3CA_RT_path))
+
 %%
 % spm configs from spm library
 fid = fopen(fullfile(spm('dir'),'config','spm_cfg_static_tools.m'),'wt');
@@ -82,7 +87,7 @@ end
 
 %%
 % canlabcore
-
+mask_canlab = [CanlabCore_path filesep 'canlab_canonical_brains' filesep 'Canonical_brains_surfaces' filesep 'brainmask_canlab.nii'];
 
 %%
 %==========================================================================
@@ -93,6 +98,8 @@ Ropts = {'-R','-singleCompThread'} ;
 if ~ismac && spm_check_version('matlab','8.4') >= 0
     Ropts = [Ropts, {'-R','-softwareopengl'}];
 end
-mcc('-m', '-v', 'RT_Preproc.m',...
-    Ropts{:},...
-    '-a',spm('dir'))
+mcc('-m', '-v', 'rtPreprocessing_simple_new.m',...
+    '-N',Nopts{:},Ropts{:},...
+    '-a',spm('dir'),'-a',mask_canlab,...
+    '-a','Wager_ACC_cluster8.nii',...
+    '-a',[CanlabCore_path filesep '@fmri_data' filesep '*.m'])
