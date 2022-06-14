@@ -1,4 +1,4 @@
-RT_Preproc Executable
+rtPreprocessing_simple_new Executable
 
 1. Prerequisites for Deployment 
 
@@ -23,12 +23,12 @@ in the MathWorks Documentation Center.
 
 Files to Package for Standalone 
 ================================
--RT_Preproc 
--run_RT_Preproc.sh (shell script for temporarily setting environment variables and 
-                    executing the application)
+-rtPreprocessing_simple_new 
+-run_rtPreprocessing_simple_new.sh (shell script for temporarily setting environment 
+                                    variables and executing the application)
    -to run the shell script, type
    
-       ./run_RT_Preproc.sh <mcr_directory> <argument_list>
+       ./run_rtPreprocessing_simple_new.sh <mcr_directory> <argument_list>
        
     at Linux or Mac command prompt. <mcr_directory> is the directory 
     where version 9.11 of the MATLAB Runtime is installed or the directory where 
@@ -38,12 +38,12 @@ Files to Package for Standalone
     If you have version 9.11 of the MATLAB Runtime installed in 
     /mathworks/home/application/v911, run the shell script as:
     
-       ./run_RT_Preproc.sh /mathworks/home/application/v911
+       ./run_rtPreprocessing_simple_new.sh /mathworks/home/application/v911
        
     If you have MATLAB installed in /mathworks/devel/application/matlab, 
     run the shell script as:
     
-       ./run_RT_Preproc.sh /mathworks/devel/application/matlab
+       ./run_rtPreprocessing_simple_new.sh /mathworks/devel/application/matlab
 -MCRInstaller.zip
     Note: if end users are unable to download the MATLAB Runtime using the
     instructions in the previous section, include it when building your 
@@ -91,7 +91,7 @@ ${LD_LIBRARY_PATH}:MR/v911/runtime/glnxa64:MR/v911/bin/glnxa64:MR/v911/sys/os/gl
         NOTE: The environment variable syntax utilizes forward 
               slashes (/), delimited by colons (:).  
         NOTE: When deploying standalone applications, you can
-              run the shell script file run_RT_Preproc.sh 
+              run the shell script file run_rtPreprocessing_simple_new.sh 
               instead of setting environment variables. See 
               section 2 "Files to Deploy and Package".    
 

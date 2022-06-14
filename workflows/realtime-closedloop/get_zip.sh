@@ -10,4 +10,4 @@ echo "user=$(whoami)"
 echo "PWD=$PWD"
 
 rm -rf ${zipfile}
-zip -r ${zipfile} ./*.sh ./*.m ./*.txt ./Docker* ./.ssl
+zip -r ${zipfile} ./*.sh ./*.m ./*.txt ./*.nii ./.ssl

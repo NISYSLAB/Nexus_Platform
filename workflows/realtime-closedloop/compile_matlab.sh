@@ -17,9 +17,16 @@ function download_canlabcore() {
   git clone https://github.com/canlab/CanlabCore.git
 }
 
+function download_Neu3CA_RT() {
+    local dir=Neu3CA-RT
+    [[ -d "${dir}" ]] && return 0
+    git clone https://github.com/jsheunis/Neu3CA-RT.git
+}
+
 #### Main starts
 download_spm12
 download_canlabcore
+download_Neu3CA_RT
 
 echo "Enter Matlab Console: matlab -nodisplay -nosplash"
 echo "cd /home/pgu6/realtime-closedloop"

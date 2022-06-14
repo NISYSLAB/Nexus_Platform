@@ -14,6 +14,7 @@ MAX_PROC=1
 SUBMISSION_SCRIPT=submit_non_cromwell.sh
 
 IN_PROCESS=N
+LOCK_FILE=${PROCESSED_DIR}/rtcl_proc.lock
 
 #### functions
 function get_uid() {
@@ -87,20 +88,12 @@ function exec_main() {
 }
 
 function exec_main_single_thread() {
-
-    [[ $IN_PROCESS == "Y" ]]  && return 0
-    local procnum=$( ps -eaf | grep submit_non_cromwell | wc -l | xargs )
-    [[ "$procnum" -gt $MAX_PROC ]]  && return 0
-    ##[[ "$procnum" -gt $MAX_PROC ]] && print_info "Reach max running processes, wait and skip this run" && return 0
+    single_instance
 
     local actnum=$( find "${MONITORING_DIR}" -type f -name '*.*'  | wc -l | xargs )
     ##local actnum=$( ls ${MONITORING_DIR}/*.* | wc -l | xargs )
     [[ "$actnum" -eq 0 ]] && return 0
     ##[[ "$actnum" -eq 0 ]] && print_info "No files available in folder: ${MONITORING_DIR}, skip this run" && return 0
-
-    ## double check
-    procnum=$( ps -eaf | grep submit_non_cromwell | wc -l | xargs )
-    [[ "$procnum" -gt $MAX_PROC ]]  && return 0
 
     uuid="single-thread"
     tmplist=${PROCESSED_DIR}/${uuid}/$(get_uid)
@@ -109,18 +102,37 @@ function exec_main_single_thread() {
     mv ${MONITORING_DIR}/*.* ${tmplist}/ || return 0
 
     cd $EXE_ENTRY_DIR
-    IN_PROCESS=Y
-    for FILE in ${tmplist}/*.*
+    echo "Y" > $LOCK_FILE
+    print_info "Set LOCK .............................."
+    print_info "Files under ${tmplist}/ "
+    ls ${tmplist}/
+    for FILE in $( ls -rt ${tmplist}/*.*)
     do
       ##print_info "Submit $FILE"
+      ##echo "Y" > $LOCK_FILE
       local cmd="./${SUBMISSION_SCRIPT} ${FILE}"
       print_info "${cmd} >> ${log}  2>&1"
       ${cmd} >> ${log} 2>&1
     done
-    IN_PROCESS=N
+    echo "N"> $LOCK_FILE
+    print_info "Release LOCK ............................"
+}
+
+function single_instance() {
+    # Check if another instance of this script is running
+    pidof -o %PPID -x $0 >/dev/null && print_info "ERROR: Script $0 already running" && exit 0
+
+    ##IN_PROCESS=$( cat $LOCK_FILE )
+    ##[[ $IN_PROCESS == "Y" ]]  && exit 0
+
+    local procnum=$( ps -eaf | grep submit_non_cromwell | wc -l | xargs )
+    [[ "$procnum" -gt $MAX_PROC ]]  && return 0
+    ##[[ "$procnum" -gt $MAX_PROC ]] && print_info "Reach max running processes, wait and skip this run" && return 0
 }
 
 #### Main starts
+test -f $LOCK_FILE || touch $LOCK_FILE
+IN_PROCESS=$( cat $LOCK_FILE )
 cd "$SCRIPT_DIR"
 for i in {1..30}
 do
