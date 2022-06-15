@@ -120,7 +120,7 @@ function exec_main_single_thread() {
 
 function single_instance() {
     # Check if another instance of this script is running
-    pidof -o %PPID -x $0 >/dev/null && print_info "ERROR: Script $0 already running" && exit 0
+    pidof -o %PPID -x $0 >/dev/null && print_info "ERROR: Script $0 already running" && return 0
 
     ##IN_PROCESS=$( cat $LOCK_FILE )
     ##[[ $IN_PROCESS == "Y" ]]  && exit 0

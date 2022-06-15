@@ -4,14 +4,13 @@ SCRIPT_NAME=$(basename -- "$0")
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 #### global settings
-IMAGE=gcr.io/cloudypipelines-com/rt-closedloop:2.0
-##IMAGE=us.gcr.io/cloudypipelines-com/closedloop-preprocess-tools:matlab-1.1
+IMAGE=gcr.io/cloudypipelines-com/rt-closedloop:2.1
 CONTAINER_NAME=realtime-closedloop-prod
 
 MOUNT=/home/pgu6/app/listener/fMri_realtime/listener_execution/mount
 CONTAINER_MOUNT=/mount
 CONTAINER_HOME=/home/pgu6/realtime-closedloop
-execScript=exec_one.sh
+EXEC_SCRIPT=exec_one.sh
 DISK_MOUNTS="${MOUNT}"
 TASK_CALL_NAME=wf-rt-closedloop
 

@@ -8,10 +8,15 @@ CONTAINER_NAME=realtime-closedloop-prod
 MOUNT=/home/pgu6/app/listener/fMri_realtime/listener_execution/mount
 CONTAINER_MOUNT=/mount
 CONTAINER_HOME=/home/pgu6/realtime-closedloop
-execScript=/home/pgu6/app/listener/fMri_realtime/listener_execution/non-wdl/exec_one.sh
+EXEC_SCRIPT=/home/pgu6/app/listener/fMri_realtime/listener_execution/non-wdl/exec_one.sh
 DISK_MOUNTS="${MOUNT}"
 TASK_CALL_NAME=wf-rt-closedloop
 MAX_PROC=1
+
+## TODO: following lines may not needed
+## cd  /home/pgu6/app/listener/fMri_realtime/listener_execution/mount/wf-rt-closedloop/single-thread
+## ln -s /labs/mahmoudilab/synergy-rt-preproc/4D_pre.nii 4D_pre.nii
+## cd $SCRIPT_DIR
 
 #### functions
 function print_info() {
@@ -32,14 +37,14 @@ function submit_job(){
   local host_exec_dir=${MOUNT}/${TASK_CALL_NAME}/${WORKFLOW_ID}
   mkdir -p ${host_exec_dir}
   ## exec scrpt
-  cp ${execScript} ${host_exec_dir}/exec_realtime_loop.sh
+  cp ${EXEC_SCRIPT} ${host_exec_dir}/exec_realtime_loop.sh
   ## dicom input
   cp ${imagePath} ${host_exec_dir}/${nameonly}
 
   local exe_dir=${CONTAINER_MOUNT}/${TASK_CALL_NAME}/${WORKFLOW_ID}
   local cmdArgs="${exe_dir}/exec_realtime_loop.sh ${exe_dir}/${nameonly} ${csvfilename} ${WORKFLOW_ID}"
   print_info "docker exec ${CONTAINER_NAME} ${cmdArgs}"
-  docker exec ${CONTAINER_NAME} ${cmdArgs} 2>&1 | tee -a ${host_exec_dir}/process.log
+  docker exec ${CONTAINER_NAME} ${cmdArgs} 2>&1 | tee -a ${host_exec_dir}/process_$( date +'%m-%d-%Y' ).log
   print_info "finalOutput=${host_exec_dir}/csv/${csvfilename}"
 }
 
@@ -59,7 +64,7 @@ imagePath=$1
 nameonly=$(basename -- "$imagePath")
 ##csvfilename="${nameonly%.*}"
 ##csvfilename="${csvfilename%.*}".csv
-csvfilename=optimizer_out.csv
+csvfilename=objective.csv
 WORKFLOW_ID=$(uuidgen)
 [[ "$MAX_PROC" == 1 ]] && WORKFLOW_ID="single-thread"
 print_info "imagePath=${imagePath}"
