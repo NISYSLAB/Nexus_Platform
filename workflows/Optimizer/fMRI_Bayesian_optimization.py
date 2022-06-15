@@ -48,6 +48,7 @@ base_path=os.path.abspath(os.path.dirname(__file__))
 parser = argparse.ArgumentParser(description='Arguments for model training')
 parser.add_argument('--savepath', type=str, default= None, help="Directory of the output")
 parser.add_argument('--savename', type=str, default= None, help="Filename of the output")
+parser.add_argument('--objectivepath', type=str, default= None, help="Path to the objective (output of RT_Proc")
 
 args = parser.parse_args()
 save_path = args.savepath
@@ -60,10 +61,12 @@ N_burn_in = 5 #Number of initial samples
 # example filename: 013_my_file_time_stamp.csv
 
 filename = os.path.join(save_path,save_name)
+obj_filename = args.objectivepath
 
 
-def BayesOpt(filename):
+def BayesOpt(filename, obj_filename):
     
+    flag_end = 0 # flag to the end of experiment
     if os.path.exists(filename):
         with open(filename) as f:
             rows=[]
@@ -71,15 +74,26 @@ def BayesOpt(filename):
                 rows.append(line.replace('\n','').split(','))
 #        print('rows', rows)
 #        print(len(rows))
+        # Read objective value (output of RC_proc)
+        if os.path.exists(obj_filename):
+            obj = []
+            with open(obj_filename) as f:
+                for i, line in enumerate(f):
+                    obj.append(line.replace('\n','').split(',')[0])
         
+        
+        rows[len(rows)-1][2] = float(obj[0])
         if len(rows)< N_burn_in: # initial random samples
+            
+            # rows[len(rows)-1][2] = obj
             
             reward_values = [0.2, 0.5, 0.8, 1.0]
             #task parameters
             q1 = str(np.random.randint(0,10)/2)
             q2 = str(reward_values[np.random.randint(0,4)])
     
-            new_row = ['2', 'e100.png', 'r1.png', 'e100_r1.png', q1, q2]
+            # new_row = ['2', 'e100.png', 'r1.png', 'e100_r1.png', q1, q2]
+            new_row = [q1, q2, '', flag_end]
             rows.append(new_row)
             with open(filename, 'w') as csvfile:
                 # creating a csv writer object
@@ -87,6 +101,10 @@ def BayesOpt(filename):
                 # writing the data rows
                 csvwriter.writerows(rows)
         else: #Suggested samples from Bayesian optimization:
+            
+            if len(rows)>=29:
+                flag_end = 1 # flag to the end of experiment
+            
             
             # Define the discrete parameter space:
             q1_values = np.arange(0, 5, 0.5)
@@ -121,21 +139,24 @@ def BayesOpt(filename):
             We will use the function "objecttive_values" once we have the output 
             of the RT_Proc module and we will read the RT_Proc output from a file
             '''
-#            def objecttive_values(x):
-#                y = []
-#                for i, query in enumerate(x):
-#                    y.append(Y_all[i])
-#                    y.append(np.random.random(1)[0])
-#                return np.array([y]).T
+            def objecttive_values(x):
+                y = []
+                for i, query in enumerate(x):
+                    y.append(Y_all[i])
+                return np.array([y]).T
             
 #            Y_all needs to be updated here
-            q1_history = np.array([np.array(rows)[:,4].tolist()])
-            q2_history = np.array([np.array(rows)[:,5].tolist()])
+            q1_history = np.array([np.array(rows)[:,0].tolist()])
+            q2_history = np.array([np.array(rows)[:,1].tolist()])
             task_params = np.concatenate((q1_history, q2_history), axis=0).T
             query_points = tf.constant(task_params, dtype=tf.float64)
+            Y_all = np.array([float(i) for i in np.array(rows)[:,2]])
             
             # The scaled_branin function is a placeholder for the real objective value
-            observer = trieste.objectives.utils.mk_observer(scaled_branin)
+            # observer = trieste.objectives.utils.mk_observer(scaled_branin)
+            # collected_data = observer(query_points)
+            
+            observer = trieste.objectives.utils.mk_observer(objecttive_values)
             collected_data = observer(query_points)
             print(collected_data)
             logging.info(collected_data)
@@ -152,7 +173,7 @@ def BayesOpt(filename):
                 #            print('history-----', history)
                 dataset = result.unwrap().dataset
                 query_points = dataset.query_points
-                new_row = ['2', 'e100.png', 'r1.png', 'e100_r1.png', query_points[-1][0].numpy(), query_points[-1][1].numpy()]
+                new_row = [query_points[-1][0].numpy(), query_points[-1][1].numpy(), '', flag_end]
                 rows.append(new_row)
             else:
     
@@ -161,7 +182,7 @@ def BayesOpt(filename):
                 dataset = history[0].dataset
                 query = dataset.query_points.numpy().tolist()
                 query.append(query[-1])
-                new_row = ['2', 'e100.png', 'r1.png', 'e100_r1.png', query[-1][0], query[-1][1]]
+                new_row = [query[-1][0], query[-1][1], '', flag_end]
                 rows.append(new_row)
 
             with open(filename, 'w') as csvfile:
@@ -181,7 +202,7 @@ def BayesOpt(filename):
         q2 = str(reward_values[np.random.randint(0,4)])
     
         # data rows of csv file
-        rows = [['2', 'e100.png', 'r1.png', 'e100_r1.png', q1, q2]]
+        rows = [[q1, q2, '', str(flag_end)]]
         # writing to csv file
 
         with open(filename, 'w') as csvfile:
@@ -194,7 +215,7 @@ def BayesOpt(filename):
         
 def main():
     # main
-    BayesOpt(filename)
+    BayesOpt(filename, obj_filename)
 
 if __name__ == "__main__":
     main()
