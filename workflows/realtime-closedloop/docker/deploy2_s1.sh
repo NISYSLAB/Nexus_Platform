@@ -38,11 +38,12 @@ function delete_scripts() {
   rm -rf ./req*.txt
   rm -rf ./*.m
   rm -rf ./*.nii
+  rm -rf  ./$LOCAL_ZIP
 }
 
 #### Main starts
 get_scripts
 zip_local
-delete_scripts
 time scp2_s1
+delete_scripts
 echo "Remote $REMOTE_DIR"

@@ -20,8 +20,11 @@ RUN pip install -r requirements.txt && \
 ## for rt_preproc
 COPY CanlabCore.tar.gz ${BASE_DIR}/
 COPY spm12.tar.gz ${BASE_DIR}/
-COPY run_RT_Preproc.sh ${BASE_DIR}/
-COPY RT_Preproc ${BASE_DIR}/
+COPY rtPreprocessing_simple_new ${BASE_DIR}/
+COPY run_rtPreprocessing_simple_new.sh ${BASE_DIR}/
+
+## COPY run_RT_Preproc.sh ${BASE_DIR}/
+## COPY RT_Preproc ${BASE_DIR}/
 
 RUN cd ${BASE_DIR} && tar -xzf CanlabCore.tar.gz && rm -rf CanlabCore.tar.gz \
     && tar -xzf spm12.tar.gz && rm -rf spm12.tar.gz
