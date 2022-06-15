@@ -13,7 +13,7 @@ CONTAINER_REGISTRY=gcr.io
 ## CONTAINER_REGISTRY=us.gcr.io
 
 image_name=rt-closedloop
-image_tag=2.0
+image_tag=2.1
 
 rt_preproc_dir=/labs/mahmoudilab/synergy-rt-preproc
 
