@@ -45,7 +45,7 @@ function submit_job(){
   local cmdArgs="${exe_dir}/exec_realtime_loop.sh ${exe_dir}/${nameonly} ${csvfilename} ${WORKFLOW_ID}"
   print_info "docker exec ${CONTAINER_NAME} ${cmdArgs}"
   docker exec ${CONTAINER_NAME} ${cmdArgs} 2>&1 | tee -a ${host_exec_dir}/process_$( date +'%m-%d-%Y' ).log
-  print_info "finalOutput=${host_exec_dir}/csv/${csvfilename}"
+  print_info "finalOutput=${host_exec_dir}/csv/${optimizer_output}"
 }
 
 ## cmd="./submit_non_cromwell.sh ${tmplist}/${nameonly}"
@@ -71,5 +71,6 @@ print_info "imagePath=${imagePath}"
 print_info "nameonly=${nameonly}"
 print_info "csvfilename=${csvfilename}"
 print_info "WORKFLOW_ID=${WORKFLOW_ID}"
+optimizer_output=optimizer_out.csv
 
 submit_job
