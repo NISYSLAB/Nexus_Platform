@@ -91,6 +91,16 @@ function optimizer() {
     print_info "optimizer() completed"
 }
 
+function save_output() {
+  cd  ${EXE_DIR}
+  local save_zip=saved_outputs_$(date -u +"%m%d%Y-%H-%M-%S").tar.gz
+  print_info "tar -czf ${save_zip} ${DICOM_DIR} ${NII_DIR} ${CSV_DIR}"
+  tar -czf ${save_zip} ${DICOM_DIR} ${NII_DIR} ${CSV_DIR}
+
+  print_info "save_output(): Host:   OUTPUT=${HOST_EXEC_DIR}/${save_zip}"
+  print_info "save_output(): Docker: OUTPUT=${EXE_DIR}/${save_zip}"
+}
+
 ####
 
 #### Main starts
@@ -120,3 +130,4 @@ HOST_EXEC_DIR=${MOUNT}/${TASK_CALL_NAME}/${WORKFLOW_ID}
 dicom2nifti
 rtpreproc
 optimizer
+save_output
