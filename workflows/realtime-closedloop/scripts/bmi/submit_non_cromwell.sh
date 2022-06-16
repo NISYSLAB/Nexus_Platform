@@ -19,6 +19,16 @@ MAX_PROC=1
 ## cd $SCRIPT_DIR
 
 #### functions
+function push_2_remote() {
+   local REMOTE_USER=Synergy
+   local REMOTE_HOST_IP=170.140.61.150
+   local REMOTE_TASK_RECEIVING_DIR=/Users/Synergy/synergy_process/DATA_FROM_BMI
+   local datafile=$1
+   local shortname=$( basename ${datafile} )
+   print_info "scp ${datafile} ${REMOTE_USER}@${REMOTE_HOST_IP}:${REMOTE_TASK_RECEIVING_DIR}/${shortname}"
+   scp ${datafile} ${REMOTE_USER}@${REMOTE_HOST_IP}:${REMOTE_TASK_RECEIVING_DIR}/${shortname} && print_info "scp ${shortname} succeeded" || print_info "scp ${shortname} failed"
+}
+
 function print_info() {
     local msg=$1
     echo "${SCRIPT_NAME}: [$(date -u +"%m/%d/%Y:%H:%M:%S")]: Info: ${msg}"
@@ -46,6 +56,7 @@ function submit_job(){
   print_info "docker exec ${CONTAINER_NAME} ${cmdArgs}"
   docker exec ${CONTAINER_NAME} ${cmdArgs} 2>&1 | tee -a ${host_exec_dir}/process_$( date +'%m-%d-%Y' ).log
   print_info "finalOutput=${host_exec_dir}/csv/${optimizer_output}"
+  push_2_remote ${host_exec_dir}/csv/${optimizer_output}
 }
 
 ## cmd="./submit_non_cromwell.sh ${tmplist}/${nameonly}"
