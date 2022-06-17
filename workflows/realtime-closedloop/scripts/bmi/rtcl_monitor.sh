@@ -239,7 +239,7 @@ function execMain() {
 }
 
 function single_instance() {
-    pidof -o %PPID -x $0 >/dev/null && print_info "ERROR: Script $0 is running" && exit 0
+    pidof -o %PPID -x $0 >/dev/null && printInfo "Script $0 is running" && exit 0
 }
 
 #### Main starts

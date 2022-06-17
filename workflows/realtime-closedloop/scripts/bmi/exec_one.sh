@@ -63,6 +63,7 @@ function rtpreproc() {
   ## generate NII_OUTPUT
   cd ${EXE_DIR}
   ##tar -czf ${NII_OUTPUT} ${NII_DIR} && rm -rf ${NII_DIR}
+  chmod a+w ${EXE_DIR}/${CSV_DIR}/*.*
   print_info "rtpreproc(): Host:  OUTPUT=${HOST_EXEC_DIR}/${CSV_DIR}/${csv_output}"
   print_info "rtpreproc(): Docker:OUTPUT=${EXE_DIR}/${CSV_DIR}/${csv_output}"
   print_info "rtpreproc(): completed"
@@ -86,6 +87,7 @@ function optimizer() {
     print_info "Files in directory: ${EXE_DIR}/${CSV_DIR}/" && ls ${EXE_DIR}/${CSV_DIR}
 
     ## print_info "csv_output=${HOST_EXEC_DIR}/${CSV_DIR}/${csv_output}"
+    chmod a+w ${EXE_DIR}/${CSV_DIR}/*.*
     print_info "optimizer(): Host:   OUTPUT=${HOST_EXEC_DIR}/${CSV_DIR}/${optimizer_output}"
     print_info "optimizer(): Docker: OUTPUT=${EXE_DIR}/${CSV_DIR}/${optimizer_output}"
     print_info "optimizer() completed"
