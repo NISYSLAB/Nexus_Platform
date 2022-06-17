@@ -3,14 +3,16 @@
 SCRIPT_NAME=$(basename -- "$0")
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
+LOCKDIR=/tmp/synergy/bmi_transfer_lock
 root_dir=/mnt/drive0/synergyfernsync/synergy_process
 
 cd ${root_dir}
 source ./app_settings.sh
-history_log=data_push_history.log
+
+LOG_FILE=/mnt/drive0/synergyfernsync/synergy_process/logs/push_2_bmi_$(date -u +"%Y_%m_%d").log
 
 #### Configurations
-MAX_NUM=11
+MAX_NUM=7
 MAX_WAIT_SECONDS=10
 UUID=$(uuidgen)
 TMPDIR=tmp_${UUID}
@@ -25,78 +27,54 @@ function print_info() {
     echo "${SCRIPT_NAME}: [$(date -u +"%m/%d/%Y:%H:%M:%S")]: Info: ${msg}"
 }
 
-function exec_main_v0() {
-    local workdir=${root_dir}/DATA_TO_BMI
-    cd ${workdir}
-    local actnum=$( ls *.dcm | wc -l | xargs )
-    [[ "$actnum" -eq 0 ]] && echo "No dicom files available, skip this run" && return 0
-
-    ## make sure there are MAX_NUM file available
-    mkdir -p ${TMPDIR}
-    ## how long should wait?
-    num=0
-    while [ "$actnum" -lt "$MAX_NUM" ]
-    do
-        echo "number of dcm files is not $MAX_NUM, wait one second"
-        sleep 1
-        actnum=$( ls *.dcm | wc -l | xargs )
-        num=$(($num + 1))
-        [[ "$num" -gt $MAX_WAIT_SECONDS ]] && echo "Reach max wait, proceed" && break
-    done
-
-    mv $( ls -t *.dcm | head -n $MAX_NUM ) ${TMPDIR}/
-    cd ${TMPDIR}
-    zip -r ${ZIPFILE} *.dcm
-    mv ${ZIPFILE} ${workdir}/
-    cd ${workdir}
-    rm -rf ${TMPDIR}
-    #### ready to send
-    scp_2_bmi ${ZIPFILE}
-    log_history ${ZIPFILE}
-    move_2_completed ${ZIPFILE}
-    print_info "####################################" >> "$history_log"
+function copy_and_backup() {
+    local file=$1
+    local log_file=$2
+    local nameonly=$( basename "${file}" )
+    local mylock=$( dirname ${LOCKDIR} )/"${nameonly%.*}"_lock
+    mkdir "${mylock}" || (print_info "Failed to lock ${mylock}..."; return 1; )
+    scp_2_bmi "$file" >> "${log_file}" 2>&1
+    move_2_completed "$file" >> "${log_file}" 2>&1
+    rmdir "${mylock}" || ( print_info "Failed to  remove lock ${mylock}" >&2; )
 }
 
 function exec_main_v1() {
     local workdir=${root_dir}/DATA_TO_BMI
     cd ${workdir}
     
-    local actnum=$( ls *.dcm | wc -l | xargs )
+    local actnum=$( find . -type f -name '*.dcm' | wc -l | xargs )
     [[ "$actnum" -eq 0 ]] && print_info "No dicom files available, skip this run" && return 0
 
-    local files="$( ls -t *.dcm | head -n $MAX_NUM )"
+    local files="$( find . -type f -name '*.dcm' | sort | head -n $MAX_NUM )"
+    print_info "transfer files: ${files}"
     for FILE in $files
     do 
-        scp_2_bmi $FILE
-        move_2_completed $FILE
+        copy_and_backup "${FILE}" "${LOG_FILE}" &
     done
-    echo  "[$( get_now )]: pushed ${files} to BMI" >> ${root_dir}/${history_log}
 }
-
 function scp_2_bmi() {
     local file=$1
-    ##print_info "scp $file $REMOTE_BMI_USER@$REMOTE_BMI_HOST:$REMOTE_RECEIVING_DIR/"
+    print_info "scp $file $REMOTE_BMI_USER@$REMOTE_BMI_HOST:$REMOTE_RECEIVING_DIR/"
     scp "$file" "$REMOTE_BMI_USER"@"$REMOTE_BMI_HOST":"$REMOTE_RECEIVING_DIR"/
-}
-
-function log_history() {
-    local file=$1
-    local now=$(get_now)
-    echo "[${now}]: pushed $file to BMI remote" >> "$history_log"
 }
 
 function move_2_completed() {
     local complete_dir=${root_dir}/DATA_PUSH_COMPLETED
     local file=$1
-    ##print_info "mv $file $complete_dir/"
+    local dir=$( dirname $file )
+    dir=${dir#"./"}
+    complete_dir=${complete_dir}/$dir
+    mkdir -p ${complete_dir}
+    print_info "mv $file $complete_dir/"
     mv "$file" "$complete_dir"/
 }
+
 function file_copy_check() {
   local file=$1
 
   local oldsize=$(wc -c <"$file")
   print_info "oldsize=$oldsize"
-  sleep 2
+  sleep 1
   local newsize=$(wc -c <"$file")
   print_info "newsize=$newsize"
 
@@ -104,7 +82,7 @@ function file_copy_check() {
   do
      print_info "$file growing, still copying ..."
      oldsize=$(wc -c <"$file")
-     sleep 2
+     sleep 1
      newsize=$(wc -c <"$file")
   done
 
@@ -115,10 +93,20 @@ function file_copy_check() {
 
 }
 
+function start_loop() {
+  for i in {1..55}
+  do
+    exec_main_v1
+    sleep 1
+  done
+}
+
+function start_main() {
+    mkdir ${LOCKDIR} || (print_info "Failed to mkdir ${LOCKDIR}..."; exit 1; )
+    start_loop
+    rmdir $LOCKDIR || ( print_info "Failed to  remove lock dir $LOCKDIR" >&2; )
+}
+
 #### Main starts
-for i in {1..58}
-do
-  ##print_info "loop: $i"
-  exec_main_v1
-  sleep 1
-done
+
+start_main
