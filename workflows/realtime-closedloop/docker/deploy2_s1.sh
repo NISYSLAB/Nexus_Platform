@@ -15,7 +15,7 @@ REMOTE_WDL_DIR=/home/pgu6/app/listener/fMri_realtime/listener_execution/wdl
 function zip_local() {
     cd ${LOCAL_DIR}
     rm -rf $LOCAL_ZIP
-    zip -r $LOCAL_ZIP ./*.sh  ./*.py ./req*.txt ./Dock*.* -x ./deploy2_s1.sh -x zip_remote.sh -x download_s1.sh
+    zip -r $LOCAL_ZIP ./*.sh  ./*.py ./req*.txt ./Dock*.* ./*.m ./*.nii -x ./deploy2_s1.sh -x zip_remote.sh -x download_s1.sh
 }
 
 function scp2_s1() {
@@ -28,16 +28,22 @@ function get_scripts() {
   cp ~/workspace/Nexus_Platform/workflows/dicom2nifti/docker/req*.txt .
   cp /Users/anniegu/workspace/Nexus_Platform/workflows/Optimizer/*.py .
   cp /Users/anniegu/workspace/Nexus_Platform/workflows/Optimizer/req*.txt .
+  cp ../*.m .
+  cp ../*.nii .
 }
 
 function delete_scripts() {
   cd ${LOCAL_DIR}
   rm -rf ./*.py
   rm -rf ./req*.txt
+  rm -rf ./*.m
+  rm -rf ./*.nii
+  rm -rf  ./$LOCAL_ZIP
 }
 
 #### Main starts
 get_scripts
-time zip_local
-delete_scripts
+zip_local
 time scp2_s1
+delete_scripts
+echo "Remote $REMOTE_DIR"

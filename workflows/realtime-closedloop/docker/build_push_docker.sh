@@ -13,7 +13,7 @@ CONTAINER_REGISTRY=gcr.io
 ## CONTAINER_REGISTRY=us.gcr.io
 
 image_name=rt-closedloop
-image_tag=2.0
+image_tag=2.1
 
 rt_preproc_dir=/labs/mahmoudilab/synergy-rt-preproc
 
@@ -76,15 +76,21 @@ function build_on_cloudypipelines() {
 function copy_rtcpreproc() {
   cp ${rt_preproc_dir}/CanlabCore.tar.gz .
   cp ${rt_preproc_dir}/spm12.tar.gz .
-  cp ${rt_preproc_dir}/run_RT_Preproc.sh .
-  cp ${rt_preproc_dir}/RT_Preproc .
+  cp ${rt_preproc_dir}/rtPreprocessing_simple_new .
+  cp ${rt_preproc_dir}/run_rtPreprocessing_simple_new.sh .
+
+  ##cp ${rt_preproc_dir}/run_RT_Preproc.sh .
+  ##cp ${rt_preproc_dir}/RT_Preproc .
 }
 
 function remove_rtcpreproc() {
   rm ./CanlabCore.tar.gz
   rm ./spm12.tar.gz
-  rm ./run_RT_Preproc.sh
-  rm ./RT_Preproc
+  rm ./rtPreprocessing_simple_new
+  rm ./run_rtPreprocessing_simple_new.sh
+
+  ##rm ./run_RT_Preproc.sh
+  ##rm ./RT_Preproc
 }
 
 #### Main starts

@@ -1,7 +1,7 @@
 % % modify the paths to be the actual path when you run it
-spm_path = "/home/pgu6/realtime-closedloop/spm12";
-CanlabCore_path = "/home/pgu6/realtime-closedloop/CanlabCore";
-Neu3CA_RT_path = '/home/Neu3CA-RT';
+spm_path = '/home/pgu6/realtime-closedloop/spm12';
+CanlabCore_path = '/home/pgu6/realtime-closedloop/CanlabCore/CanlabCore';
+Neu3CA_RT_path = '/home/pgu6/realtime-closedloop';
 addpath(genpath(spm_path)) 
 addpath(genpath(CanlabCore_path))
 addpath(genpath(Neu3CA_RT_path))

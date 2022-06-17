@@ -5,10 +5,10 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 #### Pre-defined
 MATLAB_VER=/opt/mcr/v911
-dicomDir="dicom"
-niiDir="nii"
-csvDir="csv"
-niiOutput="nii.tar.gz"
+DICOM_DIR="dicom"
+NII_DIR="nii"
+CSV_DIR="csv"
+NII_OUTPUT="nii.tar.gz"
 
 MOUNT=/home/pgu6/app/listener/fMri_realtime/listener_execution/mount
 CONTAINER_MOUNT=/mount
@@ -24,65 +24,89 @@ function print_info() {
 function dicom2nifti() {
     print_info "dicom2nifti() started"
     cd ${EXE_DIR}
-    mkdir -p ${dicomDir} && mkdir -p ${niiDir} && cp ${dicomInput} ${dicomDir}/${shortname}
+    mkdir -p ${DICOM_DIR} && mkdir -p ${NII_DIR} && cp ${dicom_input} ${DICOM_DIR}/${shortname}
+    rm -rf ${NII_DIR}/*.*
     ##print_info "files under $PWD" && ls ./*
 
-    cd ${dicomDir} && tar -xvf ${shortname}
+    cd ${DICOM_DIR} && tar -xvf ${shortname}
     rm -f ${shortname} && cd -
 
     ##print_info "Files in directory: $(pwd)" && ls
-    ##print_info "Files in dicom directory: ${dicomDir}" && ls ${dicomDir}/
+    ##print_info "Files in dicom directory: ${DICOM_DIR}" && ls ${DICOM_DIR}/
 
     cd ${CONTAINER_HOME}
-    local command="./dcm2niix -o ${EXE_DIR}/${niiDir} -f D4_dcm2nii ${EXE_DIR}/${dicomDir}"
+    local command="./dcm2niix -o ${EXE_DIR}/${NII_DIR} -f D4_dcm2nii ${EXE_DIR}/${DICOM_DIR}"
     print_info "Calling: ${command}"
     time ${command}
-    ## print_info "Calling: time python dicom_pypreprocess.py --filepath ${EXE_DIR}/${dicomDir} --savepath ${EXE_DIR}/${niiDir}"
-    ## time python dicom_pypreprocess.py --filepath ${EXE_DIR}/${dicomDir} --savepath ${EXE_DIR}/${niiDir}
+    ## print_info "Calling: time python dicom_pypreprocess.py --filepath ${EXE_DIR}/${DICOM_DIR} --savepath ${EXE_DIR}/${NII_DIR}"
+    ## time python dicom_pypreprocess.py --filepath ${EXE_DIR}/${DICOM_DIR} --savepath ${EXE_DIR}/${NII_DIR}
     rtn_code=$?
     print_info "dicom2nifti() user coding returned code=${rtn_code}"
-    ##print_info "Files in nii directory: ${EXE_DIR}/${niiDir}" && ls ${EXE_DIR}/${niiDir}
-    ##print_info "delete folder: ${EXE_DIR}/${dicomDir}" && rm -rf ${EXE_DIR}/${dicomDir}
-    print_info "dicom2nifti(): OUTPUT=${host_exec_dir}/${niiDir}"
+    ##print_info "Files in nii directory: ${EXE_DIR}/${NII_DIR}" && ls ${EXE_DIR}/${NII_DIR}
+    ##print_info "delete folder: ${EXE_DIR}/${DICOM_DIR}" && rm -rf ${EXE_DIR}/${DICOM_DIR}
+    print_info "dicom2nifti(): Host:   OUTPUT=${HOST_EXEC_DIR}/${NII_DIR}"
+    print_info "dicom2nifti(): Docker: OUTPUT=${EXE_DIR}/${NII_DIR}"
     print_info "dicom2nifti() completed"
 }
 
 function rtpreproc() {
   print_info "rtpreproc() started"
+  mkdir -p ${EXE_DIR}/${CSV_DIR}
+  local pre_nii=${EXE_DIR}/4D_pre.nii
   cd ${CONTAINER_HOME}
-  local cmd_line="./run_RT_Preproc.sh ${MATLAB_VER} ${EXE_DIR}/${niiDir}"
+  ##local cmd_line="./run_RT_Preproc.sh ${MATLAB_VER} ${EXE_DIR}/${NII_DIR}"
+  local cmd_line="./run_rtPreprocessing_simple_new.sh ${MATLAB_VER} ${EXE_DIR}/${NII_DIR}/D4_dcm2nii.nii ${pre_nii} ${EXE_DIR}/${CSV_DIR}/${csv_output}"
   print_info "Calling: time ${cmd_line}"
   time ${cmd_line}
   rtn_code=$?
   print_info "rtpreproc() user coding returned code=${rtn_code}"
-  ## generate niiOutput
+  ## generate NII_OUTPUT
   cd ${EXE_DIR}
-  tar -czf ${niiOutput} ${niiDir} && rm -rf ${niiDir}
-  print_info "rtpreproc(): OUTPUT=${host_exec_dir}/TBD??"
-  print_info "rtpreproc() completed"
+  ##tar -czf ${NII_OUTPUT} ${NII_DIR} && rm -rf ${NII_DIR}
+  chmod a+w ${EXE_DIR}/${CSV_DIR}/*.*
+  print_info "rtpreproc(): Host:  OUTPUT=${HOST_EXEC_DIR}/${CSV_DIR}/${csv_output}"
+  print_info "rtpreproc(): Docker:OUTPUT=${EXE_DIR}/${CSV_DIR}/${csv_output}"
+  print_info "rtpreproc(): completed"
 }
 
 function optimizer() {
     print_info "optimizer() started"
+    local optimizer_output=optimizer_out.csv
     cd ${CONTAINER_HOME}
-    mkdir -p ${EXE_DIR}/${csvDir}
+    mkdir -p ${EXE_DIR}/${CSV_DIR}
     ## print_info "Files in directory: $(pwd)" && ls
 
-    print_info "Calling: python output_randomcsv.py --savepath ${EXE_DIR}/${csvDir} --savename ${csvOutput}"
-    time python output_randomcsv.py --savepath ${EXE_DIR}/${csvDir} --savename ${csvOutput}
+    ## python fMRI_Bayesian_optimization.py --savepath <csv-output-folder> --savename <csv-output-filename).csv --objectivepath <path to objective.csv file>
+    local cmd_line="python fMRI_Bayesian_optimization.py --savepath ${EXE_DIR}/${CSV_DIR} --savename ${optimizer_output} --objectivepath ${EXE_DIR}/${CSV_DIR}/${csv_output}"
+
+    print_info "Calling: time ${cmd_line}"
+    time ${cmd_line}
+    ## time python output_randomcsv.py --savepath ${EXE_DIR}/${CSV_DIR} --savename ${csv_output}
     rtn_code=$?
     print_info "optimizer() user coding returned code=${rtn_code}"
-    print_info "Files in directory: ${csvDir}" && ls ${EXE_DIR}/${csvDir}
+    print_info "Files in directory: ${EXE_DIR}/${CSV_DIR}/" && ls ${EXE_DIR}/${CSV_DIR}
 
-    ## print_info "csvOutput=${host_exec_dir}/${csvDir}/${csvOutput}"
-    print_info "optimizer(): OUTPUT=${host_exec_dir}/${csvDir}/${csvOutput}"
+    ## print_info "csv_output=${HOST_EXEC_DIR}/${CSV_DIR}/${csv_output}"
+    chmod a+w ${EXE_DIR}/${CSV_DIR}/*.*
+    print_info "optimizer(): Host:   OUTPUT=${HOST_EXEC_DIR}/${CSV_DIR}/${optimizer_output}"
+    print_info "optimizer(): Docker: OUTPUT=${EXE_DIR}/${CSV_DIR}/${optimizer_output}"
     print_info "optimizer() completed"
+}
+
+function save_output() {
+  cd  ${EXE_DIR}
+  local save_zip=saved_outputs_$(date -u +"%m%d%Y-%H-%M-%S").tar.gz
+  print_info "tar -czf ${save_zip} ${DICOM_DIR} ${NII_DIR} ${CSV_DIR}"
+  tar -czf ${save_zip} ${DICOM_DIR} ${NII_DIR} ${CSV_DIR}
+
+  print_info "save_output(): Host:   OUTPUT=${HOST_EXEC_DIR}/${save_zip}"
+  print_info "save_output(): Docker: OUTPUT=${EXE_DIR}/${save_zip}"
 }
 
 ####
 
 #### Main starts
-## ./exec_realtime_loop.sh ${dicomInput} ${csvOutput} ${WORKFLOW_ID} > ${log} 2>&1
+## ./exec_realtime_loop.sh ${dicom_input} ${csv_output} ${WORKFLOW_ID} > ${log} 2>&1
 ## exe_dir=${CONTAINER_MOUNT}/${TASK_CALL_NAME}/${WORKFLOW_ID}
 ##${exe_dir}/exec_realtime_loop.sh ${exe_dir}/${nameonly} ${csvfilename} ${WORKFLOW_ID}
 ## TASK_CALL_NAME=wf-rt-closedloop
@@ -98,13 +122,14 @@ if [[ "$#" -ne ${argCt} ]]; then
     exit 1
 fi
 
-dicomInput=$1
-csvOutput=$2
-shortname=$( basename ${dicomInput} )
+dicom_input=$1
+csv_output=$2
+shortname=$( basename ${dicom_input} )
 WORKFLOW_ID=$3
 EXE_DIR=${CONTAINER_MOUNT}/${TASK_CALL_NAME}/${WORKFLOW_ID}
-host_exec_dir=${MOUNT}/${TASK_CALL_NAME}/${WORKFLOW_ID}
+HOST_EXEC_DIR=${MOUNT}/${TASK_CALL_NAME}/${WORKFLOW_ID}
 
 dicom2nifti
 rtpreproc
 optimizer
+save_output

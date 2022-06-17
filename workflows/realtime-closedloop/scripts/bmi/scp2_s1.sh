@@ -10,6 +10,5 @@ rm -rf $files
 zip -r $files *.sh
 scp_to_vm "${dev_src}/${files}" "${remote_dest}/${files}" "$BMI_SYNERGY_1_VM"
 rm -rf $files
-echo "Remote: $BMI_SYNERGY_1_VM:${remote_dest}"
 
 

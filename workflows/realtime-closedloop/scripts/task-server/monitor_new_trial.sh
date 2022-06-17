@@ -101,9 +101,11 @@ function execMain() {
 }
 
 #### Main starts
+pidof -o %PPID -x $0 >/dev/null && echo "Script $0 already running, skip this run"  && exit 0
 for i in {1..56}
 do
   printInfo "Loop: $i"
+  ##pidof -o %PPID -x $0 >/dev/null && echo "Script $0 already running, skip this run"  && sleep 1 && continue
   execMain
   sleep 1
 done

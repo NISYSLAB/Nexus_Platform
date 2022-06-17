@@ -238,14 +238,18 @@ function execMain() {
     processRecord ${allRecordsFile}
 }
 
-#### Main starts
+function single_instance() {
+    pidof -o %PPID -x $0 >/dev/null && printInfo "Script $0 is running" && exit 0
+}
 
+#### Main starts
+single_instance
 printConfig
 cd ${SCRIPT_DIR}
 mkdir -p tmp
 preProcess
 
-for i in {1..56}
+for i in {1..58}
 do
   ##printInfo "Loop: $i"
   execMain
