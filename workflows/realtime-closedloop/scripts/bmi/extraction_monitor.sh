@@ -10,9 +10,11 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 #### configurations  should be replaced with the real one in TASK server
 ## BMI
+LOCKDIR=/tmp/synergy/extraction_lock
 MONITORING_CSV_DIR=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_dir
 MONITORING_PROCESSED_DIR=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_dir_processed
 PIPELINE_LISTENER_DIR=/labs/mahmoudilab/synergy_remote_data1/rtcl_data_in_dir
+RUN_RTCP_PIPELINE_SCRIPT=${SCRIPT_DIR}/run_rtcp_pipeline.sh
 
 ## Dev
 function setDevEnv() {
@@ -28,7 +30,7 @@ PROCESS_ID=$( uuidgen )
 WORK_DIR=$PWD/tmp/worker_${PROCESS_ID}
 PROCESSED_EXTRACTION_LOG=${MONITORING_CSV_DIR}/processed_extractions.csv
 TMP_CSV=$MONITORING_CSV_DIR/tmp_${PROCESS_ID}.txt
-PROCESS_HEADER='hash,start,end,datetime,raw'
+PROCESS_HEADER='hash,imgStart,imgEnd,parseTime,wfStart,wfEnd,raw'
 TRIM_COMMA=$( echo $PROCESS_HEADER | tr ',' ' ')
 HASH_CMD=md5sum
 RAW_HEADER="subject,effortDelay,run,runStart,trial,Cue1_Onset,Cue2_Onset,CueAll_Onset,CueAll_Offset,response,Reward,Effort,Order,RT,Trigger,ITI_Onset,ITI_Offset,CounterBalance_Order,Epoch1_Press,Epoch1_PressRT,Epoch2_Press,Epoch2_PressRT,"
@@ -52,6 +54,7 @@ function whichHashCmd() {
 
 function preProcess() {
     whichHashCmd
+    mkdir -p ${MONITORING_PROCESSED_DIR}
 
     mkdir -p ${SCRIPT_DIR}/tmp
     
@@ -69,8 +72,12 @@ function preProcess() {
 function collectFiles() {
     local TMP_CSV=$1
     ##find "${MONITORING_CSV_DIR}" -type f -name '*.csv' ! -name '*processed_extractions.csv*' > "${TMP_CSV}"
-    find "${MONITORING_CSV_DIR}" -type f -name '*.zip' > "${TMP_CSV}"
-    find "${MONITORING_CSV_DIR}" -type f -name '*.tar.gz' >> "${TMP_CSV}"
+    ls -rt $( find "${MONITORING_CSV_DIR}" -type f -name '*.zip') > "${TMP_CSV}"
+    ##ls -rt $( find "${MONITORING_CSV_DIR}" -type f -name '*.tar.gz' ) >> "${TMP_CSV}"
+    ## only process one file each time
+    local localtmp=tmp_${PROCESS_ID}.txt
+    cat "${TMP_CSV}" | head -n 1 > ${localtmp}
+    mv ${localtmp} ${TMP_CSV}
 }
 
 function cksumFile() {
@@ -111,13 +118,13 @@ function appendAllRecords() {
 function appendFile() {
     local rawFile=$1
     local tmpCSVFile=$2
-    local tmpDir=$PWD/tmp/$( uuidgen )
+    local tmpDir=$PWD/tmp/app_$PROCESS_ID
     local fileName=$( basename "${rawFile}" )
     mkdir -p "${tmpDir}"
-    mkdir -p ${MONITORING_PROCESSED_DIR}
     cp "${rawFile}" "${tmpDir}/${fileName}"
 
     cd "${tmpDir}"
+    rm -rf ./*.csv
     [[ $fileName == *zip ]] && unzip "${fileName}" &&  mv $fileName "${MONITORING_PROCESSED_DIR}"/
     [[ $fileName == *tar.gz ]] && tar -xf "${fileName}" &&  mv $fileName "${MONITORING_PROCESSED_DIR}"/
 
@@ -140,13 +147,16 @@ function parseNewRecords() {
       [[ $line == *"Cue1_Onset"* ]] && continue
       ##printInfo "$index: $line"
       local hash=$( hashCode $line )
-      if grep -q $hash "$PROCESSED_EXTRACTION_LOG"; then
+      ## comment out following lines to allow process no matter processed or not
+      ##if grep -q $hash "$PROCESSED_EXTRACTION_LOG"; then
         ##echo "$hash found in $PROCESSED_EXTRACTION_LOG, skip this record"
-        continue
-      fi
-      ## PROCESS_HEADER='hash,start,end,datetime,raw'
-      local row="$hash,'','',$( timeStamp ),\"$line\""
+        ## todo: ask Shamba?
+        ##continue
+      ##fi
+      ## PROCESS_HEADER='hash,imgStart,imgEnd,parseTime,wfStart,wfEnd,raw'
+      local row="$hash,'imgStartTBD','imgEndTBD',$( timeStamp ),'wfStartTBD','wfEndTBD',\"$line\""
       echo "$row" >> "$PROCESSED_EXTRACTION_LOG"
+      ## TODO: add hash code to this file, to serve as index
       echo $line >> ${newRecFile}
     done <${allRecFile}
 }
@@ -198,15 +208,16 @@ function submit2Pipeline() {
     local ceilEnd=$2
     [[ -z "$ceilStart" ]] && return 0
     [[ -z "$ceilEnd" ]] && return 0
-
-    local tmpName=${ceilStart}-${ceilEnd}-dicom
+    local tmpName=${ceilStart}-${ceilEnd}-dicom-${PROCESS_ID}
     mkdir -p ${tmpName}
     local x=${ceilStart}
     while [ $x -le ${ceilEnd} ]
     do
       local dicomfile=${NAME_PART1}_${NAME_PART2}_$(padding ${x}).dcm
       echo "Copy dicom file:${dicomfile}"
-      mv ${MONITORING_CSV_DIR}/${dicomfile} ${tmpName}/
+      ## TODO: might wait until images are availabe
+      cp ${MONITORING_CSV_DIR}/${dicomfile} ${tmpName}/
+      ##mv ${MONITORING_CSV_DIR}/${dicomfile} ${tmpName}/
       x=$(( $x + 1 ))
     done
 
@@ -218,7 +229,8 @@ function submit2Pipeline() {
     mv ${tmpName}.tar.gz ${PIPELINE_LISTENER_DIR}/
     cd -
     rm -rf ${tmpName}
-    sleep 1
+    ##ls ${PIPELINE_LISTENER_DIR}/
+    ${RUN_RTCP_PIPELINE_SCRIPT} ${PIPELINE_LISTENER_DIR}/${tmpName}.tar.gz
 }
 
 function execMain() {
@@ -238,20 +250,29 @@ function execMain() {
     processRecord ${allRecordsFile}
 }
 
-function single_instance() {
-    pidof -o %PPID -x $0 >/dev/null && printInfo "Script $0 is running" && exit 0
+function start_loop() {
+
+    for i in {1..55}
+    do
+      ##printInfo "Loop: $i"
+      execMain
+      sleep 1
+    done
+}
+
+function start_main() {
+    mkdir ${LOCKDIR} || exit 1
+
+    printConfig
+    cd ${SCRIPT_DIR}
+    mkdir -p tmp
+    preProcess
+    start_loop
+    rmdir $LOCKDIR || print_info "Failed to  remove lock dir $LOCKDIR" >&2
 }
 
 #### Main starts
-single_instance
-printConfig
-cd ${SCRIPT_DIR}
-mkdir -p tmp
-preProcess
+start_main
 
-for i in {1..58}
-do
-  ##printInfo "Loop: $i"
-  execMain
-  sleep 1
-done
+
+

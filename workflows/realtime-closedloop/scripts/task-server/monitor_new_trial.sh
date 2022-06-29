@@ -12,7 +12,9 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 LOCKDIR=/tmp/synergy/bmi_transfer_lock
 ## Task
 MONITORING_CSV_DIR=/Users/Synergy/synergy_process/NOTIFICATION_TO_BMI
-
+## interval in seconds 60 seconds = 1 minutes
+interval=1
+LOG_FILE=/Users/Synergy/synergy_process/logs/push_2_bmi_$(date -u +"%Y_%m_%d").log
 ## Dev
 ## MONITORING_CSV_DIR=$HOME/workspace/Nexus_Platform/workflows/realtime-closedloop/scripts/task-server/tmp
 
@@ -81,7 +83,7 @@ function pushOrIgnore() {
     local row="$myCksum,$csvFile,$( timeStamp )"
     scp2BMI "$csvFile" || return 1
     echo "$row" >> "$PROCESSED_CSV_LOG" && cp "$PROCESSED_CSV_LOG" "$PROCESSED_CSV_LOG".backup
-    move_2_completed "$csvFile"
+    move_2_completed "$csvFile" >> ${LOG_FILE}
 }
 
 function scp2BMI() {
@@ -107,19 +109,21 @@ function move_2_completed() {
 }
 
 function execMain() {
+    LOG_FILE=/Users/Synergy/synergy_process/logs/push_2_bmi_$(date -u +"%Y_%m_%d").log
     preProcess
     collectFiles
     while read line; do
+      echo "Processing file: ${line} " >> ${LOG_FILE}
       pushOrIgnore "$line"
     done < "${TMP_CSV}"
     rm -rf "${TMP_CSV}"
 }
 
 function start_loop() {
-  for i in {1..56}
+  while true
   do
     execMain
-    sleep 1
+    sleep ${interval}
   done
 }
 

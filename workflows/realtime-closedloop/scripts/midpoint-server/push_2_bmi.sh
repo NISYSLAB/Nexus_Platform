@@ -5,6 +5,8 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 LOCKDIR=/tmp/synergy/bmi_transfer_lock
 root_dir=/mnt/drive0/synergyfernsync/synergy_process
+## interval in seconds 60 seconds = 1 minutes
+interval=1
 
 cd ${root_dir}
 source ./app_settings.sh
@@ -94,10 +96,10 @@ function file_copy_check() {
 }
 
 function start_loop() {
-  for i in {1..55}
+  while true
   do
     exec_main_v1
-    sleep 1
+    sleep ${interval}
   done
 }
 
@@ -108,5 +110,4 @@ function start_main() {
 }
 
 #### Main starts
-
 start_main

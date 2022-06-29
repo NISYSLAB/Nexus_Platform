@@ -24,15 +24,13 @@ function print_info() {
 function dicom2nifti() {
     print_info "dicom2nifti() started"
     cd ${EXE_DIR}
-    mkdir -p ${DICOM_DIR} && mkdir -p ${NII_DIR} && cp ${dicom_input} ${DICOM_DIR}/${shortname}
+    mkdir -p ${DICOM_DIR} && mkdir -p ${NII_DIR}
+    rm -rf ${DICOM_DIR}/*.*
     rm -rf ${NII_DIR}/*.*
-    ##print_info "files under $PWD" && ls ./*
+    cp ${dicom_input} ${DICOM_DIR}/${shortname}
 
     cd ${DICOM_DIR} && tar -xvf ${shortname}
     rm -f ${shortname} && cd -
-
-    ##print_info "Files in directory: $(pwd)" && ls
-    ##print_info "Files in dicom directory: ${DICOM_DIR}" && ls ${DICOM_DIR}/
 
     cd ${CONTAINER_HOME}
     local command="./dcm2niix -o ${EXE_DIR}/${NII_DIR} -f D4_dcm2nii ${EXE_DIR}/${DICOM_DIR}"
@@ -42,8 +40,7 @@ function dicom2nifti() {
     ## time python dicom_pypreprocess.py --filepath ${EXE_DIR}/${DICOM_DIR} --savepath ${EXE_DIR}/${NII_DIR}
     rtn_code=$?
     print_info "dicom2nifti() user coding returned code=${rtn_code}"
-    ##print_info "Files in nii directory: ${EXE_DIR}/${NII_DIR}" && ls ${EXE_DIR}/${NII_DIR}
-    ##print_info "delete folder: ${EXE_DIR}/${DICOM_DIR}" && rm -rf ${EXE_DIR}/${DICOM_DIR}
+
     print_info "dicom2nifti(): Host:   OUTPUT=${HOST_EXEC_DIR}/${NII_DIR}"
     print_info "dicom2nifti(): Docker: OUTPUT=${EXE_DIR}/${NII_DIR}"
     print_info "dicom2nifti() completed"
@@ -52,6 +49,8 @@ function dicom2nifti() {
 function rtpreproc() {
   print_info "rtpreproc() started"
   mkdir -p ${EXE_DIR}/${CSV_DIR}
+  ## TODO: find out where prenii comes from?
+
   local pre_nii=${EXE_DIR}/4D_pre.nii
   cd ${CONTAINER_HOME}
   ##local cmd_line="./run_RT_Preproc.sh ${MATLAB_VER} ${EXE_DIR}/${NII_DIR}"
@@ -74,7 +73,6 @@ function optimizer() {
     local optimizer_output=optimizer_out.csv
     cd ${CONTAINER_HOME}
     mkdir -p ${EXE_DIR}/${CSV_DIR}
-    ## print_info "Files in directory: $(pwd)" && ls
 
     ## python fMRI_Bayesian_optimization.py --savepath <csv-output-folder> --savename <csv-output-filename).csv --objectivepath <path to objective.csv file>
     local cmd_line="python fMRI_Bayesian_optimization.py --savepath ${EXE_DIR}/${CSV_DIR} --savename ${optimizer_output} --objectivepath ${EXE_DIR}/${CSV_DIR}/${csv_output}"
@@ -94,6 +92,7 @@ function optimizer() {
 }
 
 function save_output() {
+  chmod -R a+w ${EXE_DIR}
   cd  ${EXE_DIR}
   local save_zip=saved_outputs_$(date -u +"%m%d%Y-%H-%M-%S").tar.gz
   print_info "tar -czf ${save_zip} ${DICOM_DIR} ${NII_DIR} ${CSV_DIR}"
