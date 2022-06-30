@@ -12,6 +12,7 @@ EXEC_SCRIPT=/home/pgu6/app/listener/fMri_realtime/listener_execution/non-wdl/exe
 DISK_MOUNTS="${MOUNT}"
 TASK_CALL_NAME=wf-rt-closedloop
 MAX_PROC=1
+PRE_4D_NII=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_dir.backup/4D_pre.nii
 
 ## TODO: following lines may not needed
 ## cd  /home/pgu6/app/listener/fMri_realtime/listener_execution/mount/wf-rt-closedloop/single-thread
@@ -46,12 +47,14 @@ function print_warning() {
 function submit_job(){
   local host_exec_dir=${MOUNT}/${TASK_CALL_NAME}/${WORKFLOW_ID}
   mkdir -p ${host_exec_dir}
+  cp ${PRE_4D_NII} ${host_exec_dir}/4D_pre.nii
   ## exec scrpt
   cp ${EXEC_SCRIPT} ${host_exec_dir}/exec_realtime_loop.sh
   ## dicom input
   cp ${imagePath} ${host_exec_dir}/${nameonly}
 
   local exe_dir=${CONTAINER_MOUNT}/${TASK_CALL_NAME}/${WORKFLOW_ID}
+
   local cmdArgs="${exe_dir}/exec_realtime_loop.sh ${exe_dir}/${nameonly} ${csvfilename} ${WORKFLOW_ID}"
   print_info "docker exec ${CONTAINER_NAME} ${cmdArgs}"
   docker exec ${CONTAINER_NAME} ${cmdArgs} 2>&1 | tee -a ${host_exec_dir}/process_$( date +'%m-%d-%Y' ).log

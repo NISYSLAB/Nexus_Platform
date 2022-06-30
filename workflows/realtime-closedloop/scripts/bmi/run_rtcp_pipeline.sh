@@ -89,57 +89,25 @@ function exec_main() {
 }
 
 function exec_main_single_thread() {
-    local actnum=$( find "${MONITORING_DIR}" -type f -name '*.*'  | wc -l | xargs )
-    [[ "$actnum" -eq 0 ]] && return 0
-
     uuid="single-thread"
     tmplist=${PROCESSED_DIR}/${uuid}/$(get_uid)
     log=${LOG_DIR}/submission_${uuid}_$( date +'%Y-%m-%d' ).log
     mkdir -p ${tmplist}
-    mv ${MONITORING_DIR}/*.* ${tmplist}/ || return 0
+    mv ${dicom_input} ${tmplist}/${dicom_input_nameonly}
 
     cd $EXE_ENTRY_DIR
-    echo "Y" > $LOCK_FILE
-    print_info "Set LOCK .............................."
     print_info "Files under ${tmplist}/ "
     ls ${tmplist}/
-    for FILE in $( ls -rt ${tmplist}/*.*)
-    do
-      ##print_info "Submit $FILE"
-      ##echo "Y" > $LOCK_FILE
-      local cmd="./${SUBMISSION_SCRIPT} ${FILE}"
-      print_info "${cmd} >> ${log}  2>&1"
-      ${cmd} >> ${log} 2>&1
-    done
-    echo "N"> $LOCK_FILE
-    print_info "Release LOCK ............................"
-}
 
-function start_loop() {
-
-    for i in {1..28}
-    do
-      exec_main_single_thread
-      sleep 2
-    done
-}
-
-function start_main() {
-    mkdir ${LOCKDIR} || exit 1
-    start_loop
-    rmdir $LOCKDIR || print_info "Failed to  remove lock dir $LOCKDIR" >&2
+    local cmd="./${SUBMISSION_SCRIPT} ${tmplist}/${dicom_input_nameonly}"
+    print_info "${cmd} >> ${log}  2>&1"
+    ${cmd} >> ${log} 2>&1
 }
 
 #### Main starts
-start_main
+msg="Calling: ${SCRIPT_NAME} $@"
+print_info "$msg"
+dicom_input=$1
+dicom_input_nameonly=$( basename "$dicom_input" )
+exec_main_single_thread
 
-test -f $LOCK_FILE || touch $LOCK_FILE
-IN_PROCESS=$( cat $LOCK_FILE )
-cd "$SCRIPT_DIR"
-for i in {1..30}
-do
-  ##print_info "loop: $i"
-  ##exec_main
-  exec_main_single_thread
-  sleep 2
-done

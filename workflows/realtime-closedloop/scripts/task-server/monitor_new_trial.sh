@@ -9,9 +9,12 @@ SCRIPT_NAME=$(basename -- "$0")
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 #### configurations  should be replaced with the real one in TASK server
+LOCKDIR=/tmp/synergy/bmi_transfer_lock
 ## Task
 MONITORING_CSV_DIR=/Users/Synergy/synergy_process/NOTIFICATION_TO_BMI
-
+## interval in seconds 60 seconds = 1 minutes
+interval=1
+LOG_FILE=/Users/Synergy/synergy_process/logs/push_2_bmi_$(date -u +"%Y_%m_%d").log
 ## Dev
 ## MONITORING_CSV_DIR=$HOME/workspace/Nexus_Platform/workflows/realtime-closedloop/scripts/task-server/tmp
 
@@ -72,12 +75,15 @@ function pushOrIgnore() {
     local myCksum=$( cksumFile "$csvFile" )
     ## printInfo "checksum=[$myCksum] for $csvFile"
     ##if grep $myCksum "$PROCESSED_CSV_LOG"; then
-    if grep -q $myCksum "$PROCESSED_CSV_LOG"; then
+    ## skip this check, should get confirmation
+    ## if grep -q $myCksum "$PROCESSED_CSV_LOG"; then
       ##echo "$myCksum found in $PROCESSED_CSV_LOG, $csvFile has not changed yet, skip"
-      return 0
-    fi
+      ## return 0
+    ## fi
     local row="$myCksum,$csvFile,$( timeStamp )"
-    scp2BMI "$csvFile" && echo "$row" >> "$PROCESSED_CSV_LOG" && cp "$PROCESSED_CSV_LOG" "$PROCESSED_CSV_LOG".backup
+    scp2BMI "$csvFile" || return 1
+    echo "$row" >> "$PROCESSED_CSV_LOG" && cp "$PROCESSED_CSV_LOG" "$PROCESSED_CSV_LOG".backup
+    move_2_completed "$csvFile" >> ${LOG_FILE}
 }
 
 function scp2BMI() {
@@ -91,21 +97,41 @@ function scp2BMI() {
     return $rtCode
 }
 
+function move_2_completed() {
+    local complete_dir=/Users/Synergy/synergy_process/DATA_PUSH_COMPLETED
+    local file=$1
+    local dir=$( dirname $file )
+    dir=${dir#"./"}
+    complete_dir=${complete_dir}/$dir
+    mkdir -p ${complete_dir}
+    printInfo "mv $file $complete_dir/"
+    mv "$file" "$complete_dir"/
+}
+
 function execMain() {
+    LOG_FILE=/Users/Synergy/synergy_process/logs/push_2_bmi_$(date -u +"%Y_%m_%d").log
     preProcess
     collectFiles
     while read line; do
+      printInfo "Processing file: ${line} " >> ${LOG_FILE}
       pushOrIgnore "$line"
     done < "${TMP_CSV}"
     rm -rf "${TMP_CSV}"
 }
 
+function start_loop() {
+  while true
+  do
+    execMain
+    sleep ${interval}
+  done
+}
+
+function start_main() {
+    mkdir ${LOCKDIR} || exit 1
+    start_loop
+    rmdir $LOCKDIR ||  echo "Failed to  remove lock dir $LOCKDIR" >&2
+}
 #### Main starts
-pidof -o %PPID -x $0 >/dev/null && echo "Script $0 already running, skip this run"  && exit 0
-for i in {1..56}
-do
-  printInfo "Loop: $i"
-  ##pidof -o %PPID -x $0 >/dev/null && echo "Script $0 already running, skip this run"  && sleep 1 && continue
-  execMain
-  sleep 1
-done
+start_main
+
