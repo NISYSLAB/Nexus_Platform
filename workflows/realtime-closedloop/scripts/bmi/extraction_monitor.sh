@@ -15,19 +15,14 @@ MONITORING_CSV_DIR=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_
 MONITORING_PROCESSED_DIR=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_dir_processed
 PIPELINE_LISTENER_DIR=/labs/mahmoudilab/synergy_remote_data1/rtcl_data_in_dir
 RUN_RTCP_PIPELINE_SCRIPT=${SCRIPT_DIR}/run_rtcp_pipeline.sh
+TMP_DIR=${MONITORING_PROCESSED_DIR}/tmp
 
-## Dev
-function setDevEnv() {
-  MONITORING_CSV_DIR=$PWD/tmp
-  MONITORING_PROCESSED_DIR=$PWD/processed
-  PIPELINE_LISTENER_DIR=$PWD/rtcl_data_in_dir
-}
-
-[[ "${ENV_PROFILE}" == "dev" ]] &&  echo "ENV_PROFILE is set to dev" && setDevEnv
+## interval in seconds 60 seconds = 1 minutes
+interval=1
 
 ## common
 PROCESS_ID=$( uuidgen )
-WORK_DIR=$PWD/tmp/worker_${PROCESS_ID}
+WORK_DIR=${TMP_DIR}/tmp/worker_${PROCESS_ID}
 PROCESSED_EXTRACTION_LOG=${MONITORING_CSV_DIR}/processed_extractions.csv
 TMP_CSV=$MONITORING_CSV_DIR/tmp_${PROCESS_ID}.txt
 PROCESS_HEADER='hash,imgStart,imgEnd,parseTime,wfStart,wfEnd,raw'
@@ -55,8 +50,6 @@ function whichHashCmd() {
 function preProcess() {
     whichHashCmd
     mkdir -p ${MONITORING_PROCESSED_DIR}
-
-    mkdir -p ${SCRIPT_DIR}/tmp
     
     if [ -s "$PROCESSED_EXTRACTION_LOG" ]
     then
@@ -72,8 +65,8 @@ function preProcess() {
 function collectFiles() {
     local TMP_CSV=$1
     ##find "${MONITORING_CSV_DIR}" -type f -name '*.csv' ! -name '*processed_extractions.csv*' > "${TMP_CSV}"
-    ls -rt $( find "${MONITORING_CSV_DIR}" -type f -name '*.zip') > "${TMP_CSV}"
-    ##ls -rt $( find "${MONITORING_CSV_DIR}" -type f -name '*.tar.gz' ) >> "${TMP_CSV}"
+    find "${MONITORING_CSV_DIR}" -type f -name '*.zip' > "${TMP_CSV}"
+    find "${MONITORING_CSV_DIR}" -type f -name '*.tar.gz' >> "${TMP_CSV}"
     ## only process one file each time
     local localtmp=tmp_${PROCESS_ID}.txt
     cat "${TMP_CSV}" | head -n 1 > ${localtmp}
@@ -118,7 +111,7 @@ function appendAllRecords() {
 function appendFile() {
     local rawFile=$1
     local tmpCSVFile=$2
-    local tmpDir=$PWD/tmp/app_$PROCESS_ID
+    local tmpDir=${TMP_DIR}/tmp/app_$PROCESS_ID
     local fileName=$( basename "${rawFile}" )
     mkdir -p "${tmpDir}"
     cp "${rawFile}" "${tmpDir}/${fileName}"
@@ -194,7 +187,7 @@ function extractAndSubmit() {
 
 function processRecord() {
     local file=$1
-    mkdir -p $PWD/tmp
+    mkdir -p ${TMP_DIR}/tmp
     local newRecordFile=${WORK_DIR}/new_trial_record.csv
     parseNewRecords "${file}" "${newRecordFile}"
     [[ ! -f $newRecordFile ]] && printInfo "No new extractions available, skip this run" && return 0
@@ -235,7 +228,7 @@ function submit2Pipeline() {
 
 function execMain() {
     PROCESS_ID=$( uuidgen )
-    WORK_DIR=$PWD/tmp/worker_${PROCESS_ID}
+    WORK_DIR=${TMP_DIR}/worker_${PROCESS_ID}
     mkdir -p ${WORK_DIR}
     TMP_CSV=${WORK_DIR}/filelist.txt
     collectFiles $TMP_CSV
@@ -251,24 +244,24 @@ function execMain() {
 }
 
 function start_loop() {
-
-    for i in {1..55}
+    while true
     do
+      local log=/labs/mahmoudilab/synergy-wf-executions/logs/rt-closedloop/extraction_monitor_`date +\%Y\%m\%d`.log
       ##printInfo "Loop: $i"
-      execMain
-      sleep 1
+      execMain >> "${log}" 2>&1
+      sleep ${interval}
     done
 }
 
 function start_main() {
     mkdir ${LOCKDIR} || exit 1
+    mkdir -p ${TMP_DIR}
 
     printConfig
     cd ${SCRIPT_DIR}
-    mkdir -p tmp
     preProcess
     start_loop
-    rmdir $LOCKDIR || print_info "Failed to  remove lock dir $LOCKDIR" >&2
+    rmdir $LOCKDIR || printInfo "Failed to  remove lock dir $LOCKDIR" >&2
 }
 
 #### Main starts

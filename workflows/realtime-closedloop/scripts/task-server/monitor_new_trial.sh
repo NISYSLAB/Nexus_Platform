@@ -104,7 +104,7 @@ function move_2_completed() {
     dir=${dir#"./"}
     complete_dir=${complete_dir}/$dir
     mkdir -p ${complete_dir}
-    echo "mv $file $complete_dir/"
+    printInfo "mv $file $complete_dir/"
     mv "$file" "$complete_dir"/
 }
 
@@ -113,7 +113,7 @@ function execMain() {
     preProcess
     collectFiles
     while read line; do
-      echo "Processing file: ${line} " >> ${LOG_FILE}
+      printInfo "Processing file: ${line} " >> ${LOG_FILE}
       pushOrIgnore "$line"
     done < "${TMP_CSV}"
     rm -rf "${TMP_CSV}"
