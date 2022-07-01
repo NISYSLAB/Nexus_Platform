@@ -25,11 +25,8 @@ public class CommonProcess {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommonProcess.class);
 
-    public final String NEXUS_SCHEDULER_EXECUTOR = "nexusSchedulerExecutor";
-    public final String GRA_PIPELINE_EXECUTOR = "graPipelineExecutor";
-
-    @Value("${mount_disk}")
-    String mountDisk;
+    @Value("${execution_folder}")
+    String executionFolder;
 
     @Autowired
     RuntimeExecutionService runtimeExecutionService;
@@ -39,7 +36,7 @@ public class CommonProcess {
     }
 
     public String createProcessFolder(String subfolder) {
-        String mountFolder = mountDisk + "/" + subfolder + "_" + UtilHelper.getTimestampStr(16) + UtilHelper.getRandomNumber(1000, 9999);
+        String mountFolder = executionFolder + "/" + subfolder + "_" + UtilHelper.getTimestampStr(16) + UtilHelper.getRandomNumber(1000, 9999);
         mountFolder = mountFolder.replace("//", "/");
         try {
             FileUtils.forceMkdir(new File(mountFolder));
@@ -50,18 +47,20 @@ public class CommonProcess {
         return mountFolder;
     }
 
-    public void execSys(String mountFolder, String[] commandArr) {
+    public void execSys(String executionFolder, String[] commandArr) {
         final String methodName = "[" + Thread.currentThread().getName() + "] execSys():";
-        if (mountFolder == null || mountFolder.isEmpty()) {
-            LOGGER.error("{} Failed to create directory {}. Unable to process", methodName, mountFolder);
+        if (executionFolder == null || executionFolder.isEmpty()) {
+            LOGGER.error("{} Failed to create directory {}. Unable to process", methodName, executionFolder);
             return;
         }
 
-        LOGGER.info("{} started process in folder={}: {}", methodName, mountFolder, commandArr);
+        LOGGER.info("{} started process in folder={}: {}", methodName, executionFolder, commandArr);
         long start = System.currentTimeMillis();
-        SystemCommandOutput systemCommandOutput = runtimeExecutionService.execSystemCommand(commandArr, null, new File(mountFolder));
+        SystemCommandOutput systemCommandOutput = runtimeExecutionService.execSystemCommand(commandArr, null, new File(executionFolder));
         long end = System.currentTimeMillis();
-        LOGGER.info("{} {} second or {} minutes taken for process: {}. Output={}", methodName, (end - start) / 1000.0, (System.currentTimeMillis() - start) / (1000 * 60.0), commandArr, mountFolder + "/process.log");
-        UtilHelper.writeStringToFile(mountFolder + "/server_process.log", systemCommandOutput.toString());
+        LOGGER.info("{} process details\n{}", methodName, systemCommandOutput.toString());
+        LOGGER.info("{} {} second or {} minutes taken for process: {}", methodName, (end - start) / 1000.0, (System.currentTimeMillis() - start) / (1000 * 60.0), commandArr);
+
+        //UtilHelper.writeStringToFile(executionFolder + "/server_process.log", systemCommandOutput.toString());
     }
 }
