@@ -8,9 +8,9 @@ echo "VERSION=$VERSION"
 echo "SCRIPT_DIR=$SCRIPT_DIR"
 echo "SCRIPT_NAME=$SCRIPT_NAME"
 
-remote_dest=/labs/mahmoudilab/synergy_remote_data1/taskserver
-APP_JAR=taskserver-directory-monitor-${VERSION}.jar
-files=local_taskserver.zip
+remote_dest=/labs/mahmoudilab/synergy_remote_data1/midpointserver
+APP_JAR=midpoint-directory-monitor-${VERSION}.jar
+files=local_midpointserver.zip
 
 #### Main starts
 cd ${SCRIPT_DIR}

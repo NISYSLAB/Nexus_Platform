@@ -7,9 +7,9 @@ cd ${SCRIPT_DIR}
 source ./common_settings.sh
 
 function kill_monitor_instance() {
-    echo "ps -eaf | grep taskserver-directory-monitor | grep java | grep jar"
-    ps -eaf | grep taskserver-directory-monitor | grep java | grep jar
-    process_id=$( ps -eaf | grep taskserver-directory-monitor | grep java | grep jar | awk '{print $2}' )
+    echo "ps -eaf | grep midpoint-directory-monitor | grep java | grep jar"
+    ps -eaf | grep midpoint-directory-monitor | grep java | grep jar
+    process_id=$( ps -eaf | grep midpoint-directory-monitor | grep java | grep jar | awk '{print $2}' )
     echo "current  monitor instance process_id=$process_id"
     [[ ! -z "$process_id" ]] && echo "process_id Not empty, kill it" && kill -9 "${process_id}"
 }
