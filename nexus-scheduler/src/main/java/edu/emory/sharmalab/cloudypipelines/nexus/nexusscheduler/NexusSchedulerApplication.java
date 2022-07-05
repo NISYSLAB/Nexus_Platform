@@ -30,16 +30,6 @@ public class NexusSchedulerApplication {
     @Value("${executor_queue_capacity}")
     private Integer executorQueueCapacity;
 
-    // for GRA Pipeline
-    @Value("${gra_core_pool_size}")
-    private Integer graCorePoolSize;
-
-    @Value("${gra_max_pool_size}")
-    private Integer graMaxPoolSize;
-
-    @Value("${gra_queue_capacity}")
-    private Integer graQueueCapacity;
-
     public static void main(String[] args) {
         SpringApplication.run(NexusSchedulerApplication.class, args);
         // close the application context to shut down the custom ExecutorService
@@ -52,9 +42,6 @@ public class NexusSchedulerApplication {
         LOGGER.info("{} executorCorePoolSize={}", methodName, executorCorePoolSize);
         LOGGER.info("{} executorMaxPoolSize={}", methodName, executorMaxPoolSize);
         LOGGER.info("{} executorQueueCapacity={}", methodName, executorQueueCapacity);
-        LOGGER.info("{} graCorePoolSize={}", methodName, graCorePoolSize);
-        LOGGER.info("{} graMaxPoolSize={}", methodName, graMaxPoolSize);
-        LOGGER.info("{} graQueueCapacity={}", methodName, graQueueCapacity);
     }
 
     @Bean(name = "nexusSchedulerExecutor")
@@ -64,17 +51,6 @@ public class NexusSchedulerApplication {
         executor.setMaxPoolSize(executorMaxPoolSize);
         executor.setQueueCapacity(executorQueueCapacity);
         executor.setThreadNamePrefix("nexusScheduler-");
-        executor.initialize();
-        return executor;
-    }
-
-    @Bean(name = "graPipelineExecutor")
-    public Executor graExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(graCorePoolSize);
-        executor.setMaxPoolSize(graMaxPoolSize);
-        executor.setQueueCapacity(graQueueCapacity);
-        executor.setThreadNamePrefix("graScheduler-");
         executor.initialize();
         return executor;
     }

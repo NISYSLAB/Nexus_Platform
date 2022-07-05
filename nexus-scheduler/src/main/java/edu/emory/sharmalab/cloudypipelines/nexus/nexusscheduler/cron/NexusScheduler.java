@@ -32,7 +32,7 @@ public class NexusScheduler {
 
     }
 
-    @Scheduled(cron = "${nexus_monitoring_cron}")
+    //@Scheduled(cron = "${nexus_monitoring_cron}")
     public void monitoring() {
         final String methodName = "monitoring():";
         LOGGER.info("{} run at: {}", methodName, dateFormat.format(new Date()));
