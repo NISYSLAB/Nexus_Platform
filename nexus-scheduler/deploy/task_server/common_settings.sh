@@ -1,13 +1,8 @@
+## Do not modify this file, it is created by other scripts
+
 ## release version
 
-## 20220630_IO_monitor
 VERSION=2.0
-
-## 20220106_dan_pipeline
-## VERSION=1.3
-
-## onFileChange=onFileNew
-## VERSION=1.2
 
 APP_JAR=taskserver-directory-monitor-${VERSION}.jar
 APP_LOG=/Users/Synergy/synergy_process/logs/monitor-$(date -u +"%Y-%m-%d").log

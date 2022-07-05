@@ -8,7 +8,7 @@ tmp_dir=/tmp/synergy
 ## remote settings
 export REMOTE_BMI_USER=synergysync
 export REMOTE_BMI_HOST=datalink.bmi.emory.edu
-export REMOTE_RECEIVING_DIR=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_dir
+export REMOTE_RECEIVING_DIR=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_dir/csv
 
 #### functions
 function timeStamp() {
