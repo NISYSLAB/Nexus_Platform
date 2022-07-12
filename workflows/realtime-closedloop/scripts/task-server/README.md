@@ -10,15 +10,14 @@
 * User ```Synergy``` with admin/sudo privilege
 
 
-### Monitoring Environments
+### Configurations & Environments
 
 * IP: ```170.140.61.168``` (subject to changes)
-
-* Work directory: ```/Users/Synergy/synergy_process```
-
-* Monitoring or Listening Folder: ```/Users/Synergy/synergy_process/NOTIFICATION_TO_BMI```
-
+* Working directory: ```/Users/Synergy/synergy_process```
+* Monitoring Folder & Sub folders: ```/Users/Synergy/synergy_process/NOTIFICATION_TO_BMI```
 * Monitoring Script: ```/Users/Synergy/synergy_process/start_monitor.sh```
+* Optimizer CSV file pushed from BMI:
+```/Users/Synergy/synergy_process/DATA_FROM_BMI/optimizer_out.csv```
 
 ### Events 
 
