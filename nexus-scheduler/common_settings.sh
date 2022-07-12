@@ -1,7 +1,7 @@
 ## release version
 
 ## 20220630_IO_monitor
-VERSION=2.0
+VERSION=2.1
 
 ## 20220106_dan_pipeline
 ## VERSION=1.3
@@ -27,5 +27,8 @@ export executor_max_pool_size=1
 export executor_queue_capacity=1
 ## The amount of time in miliseconds to wait between checks of the file system
 export executor_check_interval=1000
+
+## check file final
+export check_file_stable=false
 
 
