@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class DirectoryIOMonitor {
@@ -32,6 +33,11 @@ public class DirectoryIOMonitor {
 
     @Value("${executor_check_interval}")
     int executorCheckInterval;
+
+    @Value("${check_file_stable}")
+    boolean checkFileStable;
+
+    ConcurrentHashMap<String, Long> fileHashMap = new ConcurrentHashMap<>();
 
     @Autowired
     DirectoryIOMonitorAction directoryIOMonitorAction;
@@ -70,10 +76,47 @@ public class DirectoryIOMonitor {
         LOGGER.info("init(): eventOnFileChange={}", eventOnFileChange);
         LOGGER.info("init(): eventOnFileDelete={}", eventOnFileDelete);
         LOGGER.info("init(): executorCheckInterval={}", executorCheckInterval);
+        LOGGER.info("init(): checkFileStable={}", checkFileStable);
+
         startDirectoryIOMonitor();
     }
 
     public void takeAction(File file) {
+        if (!checkFileStable) {
+            directoryIOMonitorAction.process(file);
+            return;
+        }
+        try {
+            waitAndTakeAction(file);
+            return;
+        } catch (InterruptedException e) {
+            fileHashMap.remove(file.getAbsolutePath());
+            LOGGER.error("takeAction(): InterruptedException: ", e.getMessage());
+        }
+    }
+
+    private void waitAndTakeAction(File file) throws InterruptedException {
+        final String methodName = "waitAndTakeAction(): ";
+        LOGGER.info("{} processing: {}", methodName, file);
+        long fileLength = file.length();
+        String hashKey = file.getAbsolutePath();
+        fileHashMap.putIfAbsent(hashKey, fileLength);
+
+        for (int i = 0; i < 100; i++) {
+            Thread.sleep(500);
+            long oldLen = fileHashMap.getOrDefault(hashKey, 0l);
+            long newLen = file.length();
+            if (oldLen != newLen) {
+                LOGGER.info("{} Index {}: file is changing: oldLen={}, newLen={}, {}", methodName, i, oldLen, newLen, file.getAbsolutePath());
+                fileHashMap.replace(hashKey, newLen);
+                Thread.sleep(500);
+            } else {
+                LOGGER.info("{} Index {}: file is stable: oldLen={}, newLen={}, {}", methodName, i, oldLen, newLen, file.getAbsolutePath());
+                directoryIOMonitorAction.process(file);
+                fileHashMap.remove(hashKey);
+                return;
+            }
+        }
         directoryIOMonitorAction.process(file);
     }
 
