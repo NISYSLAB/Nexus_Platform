@@ -10,7 +10,7 @@ NII_DIR="nii"
 CSV_DIR="csv"
 NII_OUTPUT="nii.tar.gz"
 
-MOUNT=/home/pgu6/app/listener/fMri_realtime/listener_execution/mount
+MOUNT=/labs/mahmoudilab/synergy_rtcl_app/mount
 CONTAINER_MOUNT=/mount
 CONTAINER_HOME=/home/pgu6/realtime-closedloop
 TASK_CALL_NAME=wf-rt-closedloop

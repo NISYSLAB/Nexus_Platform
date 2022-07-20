@@ -5,24 +5,23 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 #### global settings
 CONTAINER_NAME=realtime-closedloop-prod
-MOUNT=/home/pgu6/app/listener/fMri_realtime/listener_execution/mount
+MOUNT=/labs/mahmoudilab/synergy_rtcl_app/mount
 CONTAINER_MOUNT=/mount
 CONTAINER_HOME=/home/pgu6/realtime-closedloop
-EXEC_SCRIPT=/home/pgu6/app/listener/fMri_realtime/listener_execution/non-wdl/exec_one.sh
+EXEC_SCRIPT=/labs/mahmoudilab/synergy_rtcl_app/exec_one.sh
 DISK_MOUNTS="${MOUNT}"
 TASK_CALL_NAME=wf-rt-closedloop
 MAX_PROC=1
 PRE_4D_NII=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_dir.backup/4D_pre.nii
 
-## TODO: following lines may not needed
-## cd  /home/pgu6/app/listener/fMri_realtime/listener_execution/mount/wf-rt-closedloop/single-thread
-## ln -s /labs/mahmoudilab/synergy-rt-preproc/4D_pre.nii 4D_pre.nii
 ## cd $SCRIPT_DIR
 
 #### functions
 function push_2_remote() {
    local REMOTE_USER=Synergy
-   local REMOTE_HOST_IP=170.140.61.150
+   ##local REMOTE_HOST_IP=10.44.106.72
+   local REMOTE_HOST_IP=10.44.86.87
+   ##local REMOTE_HOST_IP=170.140.61.150
    local REMOTE_TASK_RECEIVING_DIR=/Users/Synergy/synergy_process/DATA_FROM_BMI
    local datafile=$1
    local shortname=$( basename ${datafile} )

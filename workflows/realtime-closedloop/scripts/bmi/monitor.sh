@@ -3,7 +3,7 @@
 SCRIPT_NAME=$(basename -- "$0")
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-EXEC_DIR=/home/pgu6/app/listener/fMri_realtime/listener_execution/non-wdl
+EXEC_DIR=/labs/mahmoudilab/synergy_rtcl_app
 #### Main start
 cd ${EXEC_DIR}
 ps -eaf | grep extraction_monitor.sh | grep bash

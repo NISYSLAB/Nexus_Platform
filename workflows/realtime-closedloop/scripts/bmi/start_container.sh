@@ -7,16 +7,18 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 IMAGE=gcr.io/cloudypipelines-com/rt-closedloop:2.1
 CONTAINER_NAME=realtime-closedloop-prod
 
-MOUNT=/home/pgu6/app/listener/fMri_realtime/listener_execution/mount
+MOUNT=/labs/mahmoudilab/synergy_rtcl_app/mount
 CONTAINER_MOUNT=/mount
 CONTAINER_HOME=/home/pgu6/realtime-closedloop
-EXEC_SCRIPT=exec_one.sh
 DISK_MOUNTS="${MOUNT}"
 TASK_CALL_NAME=wf-rt-closedloop
 
 #### functions
 function cleanup() {
+  echo "docker stop ${CONTAINER_NAME}"
   docker stop "${CONTAINER_NAME}" || (echo "${CONTAINER_NAME} not existing or running ...")
+
+  echo "docker rm -f -v ${CONTAINER_NAME}"
   docker rm -f -v "${CONTAINER_NAME}" || (echo "${CONTAINER_NAME} not existing or running ...")
 }
 
@@ -43,13 +45,17 @@ cleanup
 prep
 time create_container
 sleep 2
+echo "- - - - - - - - - - - - - - - - - - - "
 docker ps -a
-
+echo "- - - - - - - - - - - - - - - - - - - "
 echo "Home directory"
 docker exec "${CONTAINER_NAME}" pwd
+echo "- - - - - - - - - - - - - - - - - - - "
 
 echo "Files in ${CONTAINER_HOME}"
 docker exec "${CONTAINER_NAME}" bash -c "ls ${CONTAINER_HOME}/"
+echo "- - - - - - - - - - - - - - - - - - - "
 
 echo "Files in ${CONTAINER_MOUNT}"
 docker exec "${CONTAINER_NAME}" bash -c "ls ${CONTAINER_MOUNT}/"
+echo "- - - - - - - - - - - - - - - - - - - "

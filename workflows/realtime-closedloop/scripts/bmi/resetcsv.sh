@@ -8,7 +8,7 @@ echo "Remove $file"
 rm -rf $file
 echo ""
 
-file=/home/pgu6/app/listener/fMri_realtime/listener_execution/mount/wf-rt-closedloop/single-thread/csv/*.csv
+file=/labs/mahmoudilab/synergy_rtcl_app/mount/wf-rt-closedloop/single-thread/csv/*.csv
 echo "Remove $file"
-rm -rf $file
+rm -rf "$file"
 echo ""

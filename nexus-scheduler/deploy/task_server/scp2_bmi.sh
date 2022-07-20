@@ -16,6 +16,8 @@ function timeStamp() {
 }
 
 function scp2_bmi() {
+    mkdir -p ${tmp_dir}
+
     local file=$1
     local nameonly=$( basename "$file" )
     cp ${file} ${tmp_dir}/${nameonly}
@@ -31,6 +33,12 @@ function scp2_bmi() {
 }
 
 #### Main starts
+#### Main starts
 file=$1
-scp2_bmi "${file}"
+echo "Received $file"
+allow=1
+[[ $file == *csv ]] && allow=0
+[[ $file == *txt ]] && allow=0
+[[ $file == *log ]] && allow=0
+[[ $allow == 0 ]] && scp2_bmi "${file}"
 

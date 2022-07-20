@@ -18,8 +18,8 @@ MONITORING_IMAGE_DIR=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanne
 MONITORING_PROCESSED_DIR=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_dir_processed
 PIPELINE_LISTENER_DIR=/labs/mahmoudilab/synergy_remote_data1/rtcl_data_in_dir
 TMP_DIR=${MONITORING_PROCESSED_DIR}/rtcl_call
-WF_LOG_DIR=/labs/mahmoudilab/synergy_remote_data1/logs/rtcl/workflow
-EXE_ENTRY_DIR=/home/pgu6/app/listener/fMri_realtime/listener_execution/non-wdl
+WF_LOG_DIR=/labs/mahmoudilab/synergy_remote_data1/logs/rtcl
+EXE_ENTRY_DIR=/labs/mahmoudilab/synergy_rtcl_app
 RUN_RTCP_PIPELINE_SCRIPT=submit_non_cromwell.sh
 
 ## interval in seconds 60 seconds = 1 minutes
@@ -27,7 +27,7 @@ interval=1
 
 ## common
 PROCESS_ID=$( uuidgen )
-WORK_DIR=${TMP_DIR}/worker_${PROCESS_ID}
+WORK_DIR=${TMP_DIR}/submit_and_run_${PROCESS_ID}
 PROCESSED_EXTRACTION_LOG=${MONITORING_PROCESSED_DIR}/processed_extractions.csv
 TMP_CSV=${MONITORING_PROCESSED_DIR}/tmp_${PROCESS_ID}.txt
 PROCESS_HEADER='hash,imgStart,imgEnd,parseTime,wfStart,wfEnd,raw'
@@ -208,7 +208,7 @@ function submit2Pipeline() {
     printInfo "Files under WORK_DIR folder: ${WORK_DIR}"
     ls "${WORK_DIR}"
 
-    local log=${WF_LOG_DIR}/worker_${PROCESS_ID}.log
+    local log=${WF_LOG_DIR}/submit_and_run_${PROCESS_ID}.log
 
     cd "${EXE_ENTRY_DIR}"
     local cmd="./${RUN_RTCP_PIPELINE_SCRIPT} ${WORK_DIR}/${tmpName}.tar.gz"
@@ -220,7 +220,7 @@ function execMain() {
     local inputFile=$1
     local nameonly=$( basename $inputFile )
     PROCESS_ID=$( uuidgen )
-    WORK_DIR=${TMP_DIR}/worker_${PROCESS_ID}
+    WORK_DIR=${TMP_DIR}/submit_and_run_${PROCESS_ID}
     mkdir -p ${WORK_DIR}
     local allRecordsFile=${WORK_DIR}/all.csv
     appendFile ${inputFile} ${allRecordsFile}

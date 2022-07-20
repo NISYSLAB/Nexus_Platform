@@ -8,7 +8,7 @@ echo "VERSION=$VERSION"
 echo "SCRIPT_DIR=$SCRIPT_DIR"
 echo "SCRIPT_NAME=$SCRIPT_NAME"
 
-remote_dest=/home/pgu6/app/listener/fMri_realtime/listener_execution/non-wdl
+remote_dest=/labs/mahmoudilab/synergy_rtcl_app
 APP_JAR=rtcl-directory-monitor-${VERSION}.jar
 files=local_bmi_java.zip
 

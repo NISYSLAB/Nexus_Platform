@@ -1,6 +1,6 @@
 #!/bin/bash
 
-remote_dest=/home/pgu6/app/listener/fMri_realtime/listener_execution/non-wdl
+remote_dest=/labs/mahmoudilab/synergy_rtcl_app
 dev_src=$HOME/workspace/Nexus_Platform/workflows/realtime-closedloop/scripts/bmi
 files=local_bmi.zip
 

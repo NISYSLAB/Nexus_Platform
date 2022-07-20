@@ -7,9 +7,10 @@ source ./common_settings.sh
 
 function get_log() {
     local log_dir=$(dirname ${APP_LOG} )
-    ls -t "${log_dir}"/*.log | head -1
+    ls -t "${log_dir}"/*rtcl-directory-monitor*.log | head -1
 }
 
 #### Main starts
-get_log
+log=$(get_log)
+tail -f "${log}"
 

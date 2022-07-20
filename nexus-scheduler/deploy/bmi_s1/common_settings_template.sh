@@ -2,14 +2,14 @@
 VERSION=VERSION_TOBE_REPLACED
 
 APP_JAR=rtcl-directory-monitor-${VERSION}.jar
-APP_LOG=/labs/mahmoudilab/synergy_remote_data1/logs/monitor-$(date -u +"%Y-%m-%d").log
+APP_LOG=/labs/mahmoudilab/synergy_remote_data1/logs/rtcl-directory-monitor-$(date -u +"%Y-%m-%d").log
 
 ####### ENV
 export monitoring_directory=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_dir/csv
 export event_on_file_change=true
 export event_on_file_delete=false
 export event_on_file_create=true
-export execution_script=/home/pgu6/app/listener/fMri_realtime/listener_execution/non-wdl/parse_and_submit.sh
+export execution_script=/labs/mahmoudilab/synergy_rtcl_app/parse_and_submit.sh
 export execution_folder=/tmp/synergy/executions
 
 ## Make sure only one thread
