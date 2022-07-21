@@ -1,48 +1,27 @@
-function completed = rtPreproc(niifullname,prefullname,outfullname)
-% This function preprocesses the data in the real-time experiment 
-% Based on neu3ca_rt: https://doi.org/10.1016/j.pscychresns.2018.09.008
-% Shabnam Hossein 
-% May 2022
-% Modified by Yusen Zhu
-% Inputs:
-% niifullname: full path and filename of the 4d trial nii image
-% prefullname: full path and filename of the 4d_pre.nii image, provided
-% outfullname: full path and filename of the output, ~/.../average_ROI.csv
-% before the workflow is run
-% modifications: commented out some unused parts and made it a function
-
-%% 
+function completed = rtPreproc(niifullname,prefullname,maskfullname,outfullname)
+% This script preprocesses the data in the real-time experiment 
+%Based on neu3ca_rt: https://doi.org/10.1016/j.pscychresns.2018.09.008
+%Shabnam Hossein 
+%July 2022
 %--------------------------------------------------------------------------
 % INITIALISATION 
 %--------------------------------------------------------------------------
+% Specify SPM installation directory
+%spm_dir             =   ...;
 % Specify parent directory that contains all data
-% Specify functional and structural filenames 
-% functional4D_fn     = [sub_dir filesep '4D_pre.nii'];
-functional0_fn      =   [prefullname ',1'];
-% structural_fn = [sub_dir filesep 'Struct' filesep 'highres.nii']; -- not
-% used for now
+% functional data from the pre pre-processing
+functional4D_fn     = prefullname;
+functional0_fn      =   [functional4D_fn ',1'];
+wROI_mask = maskfullname;
 
 %%
-%Task Design
+%Scan Parameters
 TR = 1.0;
 timing_units = 'secs';
 voxel_size = [3 3 3];
-%First functionall image of that trial
-% functional4D_trial     = [sub_dir filesep filesep '4D_trial.nii'];
+%First functional image of the current trial
 vol = spm_vol(niifullname);
 trial_length = size(vol,1);
-%ROI mask path
-% ROI_mask = [data_dir 'Wager_ACC_cluster8.nii'];
-% mask is packaged with the file in compiler
-p = which('Wager_ACC_cluster8.nii');  %soooooomhow matlab which function miss a filesep
-if (p(end-22) ~= '/') && (p(end-22) ~= '\')
-    ROI_mask = [p(1:end-22) filesep 'Wager_ACC_cluster8.nii'];
-else
-    ROI_mask = p;
-end
-% cd(data_dir);
-% preproc = load('preproc.mat');
-% preproc_data = preproc.preproc_data;
 %--------------------------------------------------------------------------
 % DATA INITIALIZATION
 %--------------------------------------------------------------------------
@@ -52,7 +31,8 @@ funcref_3D  = spm_read_vols(funcref_spm);
 [Ni, Nj, Nk] = size(funcref_3D);
 N_vox = Ni*Nj*Nk;
 
-% Masking -- not used, why is it here and what is preproc.mat?
+%Not using the masking
+% Masking
 % [GM_img_bin, WM_img_bin, CSF_img_bin] = neu3ca_rt_getSegments(preproc_data.rgm_fn, preproc_data.rwm_fn, preproc_data.rcsf_fn, 0.1);
 % I_GM = find(GM_img_bin);
 % I_WM = find(WM_img_bin);
@@ -75,22 +55,14 @@ R(1,1).mat = funcref_spm.mat;
 R(1,1).dim = funcref_spm.dim;
 R(1,1).Vol = funcref_3D;
 N_skip = 0;
-
-
-
-% Predefine some matrices/structures
+% Pre-define some matrices/structures
 F = zeros(Ni*Nj*Nk,trial_length);
 rF = F;
-srF = F;
 MP = zeros(trial_length,6);
-T = zeros(trial_length,8);
-
 %%
 %--------------------------------------------------------------------------
-
 % REAL-TIME ANALYSIS
 %--------------------------------------------------------------------------
-
 for i = 1:trial_length
     % STEP 1: LOAD CURRENT VOLUME
     % Using SPM
@@ -114,12 +86,10 @@ for i = 1:trial_length
         offsetMCParam = tmpMCParam(1:6);
     end
     MP(i,:) = tmpMCParam(1:6) - offsetMCParam;
-
     % Reslice to reference image grid
     rf = spm_reslice_rt(R, flagsSpmReslice);
     rF(:,i) = rf(:);    
 end
-
 % % STEP 4: GLM 
 % Correcting for movement parameter residuals and drifts
 X_t = [MP (1:trial_length)' (1:trial_length)'.^2]; % Regressors include movement parameters and linear and quadratic drift terms
@@ -129,7 +99,7 @@ X_t = [X_t ones(trial_length,1)]; % Add a DC regressor
 rF_corrected = rF' - X_t*(X_t\rF'); % Regressing out the above corrections
 
 % % STEP 5: ROI mask
-ROI_mask_fmri_data = fmri_data(ROI_mask);
+ROI_mask_fmri_data = fmri_data(wROI_mask);
 ROI_averages = {};
 for i=1:trial_length
 %     cd(sub_dir);  % works on the directory of the executable
@@ -140,8 +110,7 @@ for i=1:trial_length
     test.fname='rf_corrected.nii';
     spm_write_vol(test,rf_corrected);
     rf_corrected_fn = [pwd filesep 'rf_corrected.nii'];
-    %%%
-    %converting the corrected data and the mask to fmri_data objects using Canlacore
+    %converting the corrected data and the mask to fmri_data objects using Canlabcore
     rf_corrected_fn_fmri_data = fmri_data(rf_corrected_fn);
     r = extract_roi_averages(rf_corrected_fn_fmri_data, ROI_mask_fmri_data);
     ROI_averages{i} = mean(r.dat);
