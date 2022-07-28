@@ -10,7 +10,7 @@ NII_DIR="nii"
 CSV_DIR="csv"
 NII_OUTPUT="nii.tar.gz"
 
-MOUNT=/labs/mahmoudilab/synergy_rtcl_app/mount
+MOUNT=/home/pgu6/app/listener/fMri_realtime/listener_execution/mount
 CONTAINER_MOUNT=/mount
 CONTAINER_HOME=/home/pgu6/realtime-closedloop
 TASK_CALL_NAME=wf-rt-closedloop
@@ -30,7 +30,7 @@ function dicom2nifti() {
     cp ${dicom_input} ${DICOM_DIR}/${shortname}
 
     cd ${DICOM_DIR} && tar -xvf ${shortname}
-    rm -f ${shortname} && cd -
+    rm -f ${shortname} && cd ${EXE_DIR}
 
     cd ${CONTAINER_HOME}
     local command="./dcm2niix -o ${EXE_DIR}/${NII_DIR} -f D4_dcm2nii ${EXE_DIR}/${DICOM_DIR}"
@@ -54,7 +54,7 @@ function rtpreproc() {
   local pre_nii=${EXE_DIR}/4D_pre.nii
   cd ${CONTAINER_HOME}
   ##local cmd_line="./run_RT_Preproc.sh ${MATLAB_VER} ${EXE_DIR}/${NII_DIR}"
-  local cmd_line="./run_rtPreprocessing_simple_new.sh ${MATLAB_VER} ${EXE_DIR}/${NII_DIR}/D4_dcm2nii.nii ${pre_nii} ${EXE_DIR}/${CSV_DIR}/${csv_output}"
+  local cmd_line="./run_RT_Preproc.sh ${MATLAB_VER} ${EXE_DIR}/${NII_DIR}/D4_dcm2nii.nii ${pre_nii} ${EXE_DIR}/${CSV_DIR}/${csv_output}"
   print_info "Calling: time ${cmd_line}"
   time ${cmd_line}
   rtn_code=$?

@@ -5,15 +5,19 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 #### global settings
 CONTAINER_NAME=realtime-closedloop-prod
-MOUNT=/labs/mahmoudilab/synergy_rtcl_app/mount
+MOUNT=/home/pgu6/app/listener/fMri_realtime/listener_execution/mount
 CONTAINER_MOUNT=/mount
 CONTAINER_HOME=/home/pgu6/realtime-closedloop
-EXEC_SCRIPT=/labs/mahmoudilab/synergy_rtcl_app/exec_one.sh
+EXEC_SCRIPT=/home/pgu6/app/listener/fMri_realtime/listener_execution/non-wdl/exec_one.sh
 DISK_MOUNTS="${MOUNT}"
 TASK_CALL_NAME=wf-rt-closedloop
 MAX_PROC=1
 PRE_4D_NII=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_dir.backup/4D_pre.nii
+SUBJECT_MASK_NII=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_dir.backup/Wager_ACC_cluster8.nii
 
+## TODO: following lines may not needed
+## cd  /home/pgu6/app/listener/fMri_realtime/listener_execution/mount/wf-rt-closedloop/single-thread
+## ln -s /labs/mahmoudilab/synergy-rt-preproc/4D_pre.nii 4D_pre.nii
 ## cd $SCRIPT_DIR
 
 #### functions
@@ -47,16 +51,18 @@ function submit_job(){
   local host_exec_dir=${MOUNT}/${TASK_CALL_NAME}/${WORKFLOW_ID}
   mkdir -p ${host_exec_dir}
   cp ${PRE_4D_NII} ${host_exec_dir}/4D_pre.nii
+  cp ${SUBJECT_MASK_NII} ${host_exec_dir}/subject_mask.nii
   ## exec scrpt
-  cp ${EXEC_SCRIPT} ${host_exec_dir}/exec_realtime_loop.sh
+  local nameonly_exec_script=$( basename ${EXEC_SCRIPT} )
+  cp ${EXEC_SCRIPT} ${host_exec_dir}/${nameonly_exec_script}
   ## dicom input
   cp ${imagePath} ${host_exec_dir}/${nameonly}
 
   local exe_dir=${CONTAINER_MOUNT}/${TASK_CALL_NAME}/${WORKFLOW_ID}
 
-  local cmdArgs="${exe_dir}/exec_realtime_loop.sh ${exe_dir}/${nameonly} ${csvfilename} ${WORKFLOW_ID}"
+  local cmdArgs="${exe_dir}/${nameonly_exec_script} ${exe_dir}/${nameonly} ${csvfilename} ${WORKFLOW_ID}"
   print_info "docker exec ${CONTAINER_NAME} ${cmdArgs}"
-  docker exec ${CONTAINER_NAME} ${cmdArgs} 2>&1 | tee -a ${host_exec_dir}/process_$( date +'%m-%d-%Y' ).log
+  docker exec ${CONTAINER_NAME} ${cmdArgs} 2>&1 | tee -a ${host_exec_dir}/process_$( date +'%Y-%m-%d' ).log
   print_info "finalOutput=${host_exec_dir}/csv/${optimizer_output}"
   push_2_remote ${host_exec_dir}/csv/${optimizer_output}
 }

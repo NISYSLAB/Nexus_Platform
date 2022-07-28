@@ -1,7 +1,7 @@
 % % modify the paths to be the actual path when you run it
 spm_path = '/home/pgu6/realtime-closedloop/spm12';
 CanlabCore_path = '/home/pgu6/realtime-closedloop/CanlabCore/CanlabCore';
-Neu3CA_RT_path = '/home/pgu6/realtime-closedloop';
+Neu3CA_RT_path = '/home/pgu6/realtime-closedloop/Neu3CA-RT';
 addpath(genpath(spm_path)) 
 addpath(genpath(CanlabCore_path))
 addpath(genpath(Neu3CA_RT_path))
@@ -93,13 +93,16 @@ mask_canlab = [CanlabCore_path filesep 'canlab_canonical_brains' filesep 'Canoni
 %==========================================================================
 %-Compilation
 %==========================================================================
+a1 = [spm('dir') filesep '*mex*'];
+a2 = [spm('dir') filesep 'Contents.txt'];
+a3 = [spm('dir') filesep '*.mat'];
 Nopts = {'-p',fullfile(matlabroot,'toolbox','signal'),'-p',fullfile(matlabroot,'toolbox','stats')};
 Ropts = {'-R','-singleCompThread'} ;
 if ~ismac && spm_check_version('matlab','8.4') >= 0
     Ropts = [Ropts, {'-R','-softwareopengl'}];
 end
-mcc('-m', '-v', 'rtPreprocessing_simple_new.m',...
+mcc('-m', '-v', 'RT_Preproc.m',...
     '-N',Nopts{:},Ropts{:},...
-    '-a',spm('dir'),'-a',mask_canlab,...
-    '-a','Wager_ACC_cluster8.nii',...
+    '-a',a1,'-a',a2,'-a',a3,...
+    '-a',mask_canlab,...
     '-a',[CanlabCore_path filesep '@fmri_data' filesep '*.m'])
