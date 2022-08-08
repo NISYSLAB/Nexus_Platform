@@ -7,6 +7,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 export REMOTE_BMI_USER=synergysync
 export REMOTE_BMI_HOST=datalink.bmi.emory.edu
 export REMOTE_RECEIVING_DIR=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_dir/image
+export REMOTE_CONFIG_RECEIVING_DIR=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_dir/csv
 
 #### functions
 function timeStamp() {
@@ -37,10 +38,27 @@ function file_ready_check() {
   fi
 }
 
+function get_file_extention() {
+  local filepath=$1
+  local filename=$( basename "$filepath" )
+  echo "${filename##*.}"
+}
+
+function get_remote_dest() {
+    local file=$1
+    local ext=$( get_file_extention "$file" )
+    if [ "$ext" == "dcm" ]; then
+      echo $REMOTE_RECEIVING_DIR
+    else
+      echo $REMOTE_CONFIG_RECEIVING_DIR
+  fi
+}
+
 function scp2_bmi() {
     local file=$1
-    echo "scp $file $REMOTE_BMI_USER@$REMOTE_BMI_HOST:$REMOTE_RECEIVING_DIR/"
-    scp "$file" "$REMOTE_BMI_USER"@"$REMOTE_BMI_HOST":"$REMOTE_RECEIVING_DIR"/
+    local remote_dest=$( get_remote_dest "$file" )
+    echo "scp $file $REMOTE_BMI_USER@$REMOTE_BMI_HOST:$remote_dest/"
+    scp "$file" "$REMOTE_BMI_USER"@"$REMOTE_BMI_HOST":"$remote_dest"/
 }
 
 #### Main starts
