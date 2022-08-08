@@ -3,6 +3,15 @@
 SCRIPT_NAME=$(basename -- "$0")
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
+#### for runtime configurations
+RTCP_RUNTIME_DEFAULT_SETTINGS=/home/pgu6/app/listener/fMri_realtime/listener_execution/non-wdl/rtcp_default_settings.conf
+RTCP_RUNTIME_USER_SETTINGS=/home/pgu6/app/listener/fMri_realtime/listener_execution/non-wdl/RTCP_RUNTIME_USER_SETTINGS.conf
+
+cd ${SCRIPT_DIR}
+source ${RTCP_RUNTIME_DEFAULT_SETTINGS}
+source ${RTCP_RUNTIME_USER_SETTINGS}
+env |grep "RTCP_"
+
 #### global settings
 CONTAINER_NAME=realtime-closedloop-prod
 MOUNT=/home/pgu6/app/listener/fMri_realtime/listener_execution/mount
@@ -12,8 +21,11 @@ EXEC_SCRIPT=/home/pgu6/app/listener/fMri_realtime/listener_execution/non-wdl/exe
 DISK_MOUNTS="${MOUNT}"
 TASK_CALL_NAME=wf-rt-closedloop
 MAX_PROC=1
-PRE_4D_NII=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_dir.backup/4D_pre.nii
-SUBJECT_MASK_NII=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_dir.backup/Wager_ACC_cluster8.nii
+PRE_4D_NII=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_dir/image/${RTCP_PRE_4D_NII}
+SUBJECT_MASK_NII=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_dir/image/${RTCP_SUBJECT_MASK_NII}
+
+##PRE_4D_NII=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_dir.backup/4D_pre.nii ??
+##SUBJECT_MASK_NII=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_dir.backup/Wager_ACC_cluster8.nii ??
 
 ## TODO: following lines may not needed
 ## cd  /home/pgu6/app/listener/fMri_realtime/listener_execution/mount/wf-rt-closedloop/single-thread
@@ -23,8 +35,7 @@ SUBJECT_MASK_NII=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in
 #### functions
 function push_2_remote() {
    local REMOTE_USER=Synergy
-   ##local REMOTE_HOST_IP=10.44.106.72
-   local REMOTE_HOST_IP=10.44.86.87
+   local REMOTE_HOST_IP=${RTCP_TASK_SERVER_IP}
    ##local REMOTE_HOST_IP=170.140.61.150
    local REMOTE_TASK_RECEIVING_DIR=/Users/Synergy/synergy_process/DATA_FROM_BMI
    local datafile=$1
@@ -93,3 +104,4 @@ print_info "WORKFLOW_ID=${WORKFLOW_ID}"
 optimizer_output=optimizer_out.csv
 
 submit_job
+

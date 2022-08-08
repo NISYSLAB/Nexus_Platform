@@ -31,7 +31,7 @@ mkdir -p ${tmp_dir}
 cp ${config_file} ${tmp_dir}/${nameonly}
 cd ${tmp_dir}
 unzip ${nameonly} || tar -xzvf ${nameonly}
-rm -rf ${nameonly}
+rm -rf *.zip || rm -rf *.tar.gz
 for FILE in *.*;
 do
   parse "${FILE}"

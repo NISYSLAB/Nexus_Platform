@@ -45,8 +45,8 @@ RAW_HEADER_TRIM=$( echo $RAW_HEADER | tr ',' ' ')
 ##RTCP_IMAGE_NAME_PART2=000003
 
 ## max waiting time for the images from the midpoint server
-## e.g 10 minutes = 600 seconds
-WAITING_TIME_IN_SECONDS=600
+## e.g 6 minutes = 360 seconds
+WAITING_TIME_IN_SECONDS=360
 WAITING_INTERVAL_IN_SECONDS=2
 
 #### functions
@@ -269,11 +269,11 @@ function execMain() {
 
 function parseConfig() {
     local file=$1
+    echo "parseConfig(): received file $file"
     local SUB='.csv_'
-    if [[ "$file" == *"$SUB"* ]]; then
-      printInfo "$file is csv file"
-      return
-    fi
+    [[ "$file" == *".csv_"* ]] && return
+    [[ "$file" == *".csv-"* ]] && return
+    [[ $file == *csv ]] && return
 
     echo "$file is configuration file"
     cd ${SCRIPT_DIR}
