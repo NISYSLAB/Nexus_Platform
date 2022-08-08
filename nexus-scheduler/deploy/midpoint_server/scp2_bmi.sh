@@ -47,11 +47,10 @@ function get_file_extention() {
 function get_remote_dest() {
     local file=$1
     local ext=$( get_file_extention "$file" )
-    if [ "$ext" == "dcm" ]; then
-      echo $REMOTE_RECEIVING_DIR
-    else
-      echo $REMOTE_CONFIG_RECEIVING_DIR
-  fi
+    local dest=$REMOTE_CONFIG_RECEIVING_DIR
+    [[ "$ext" == "dcm" ]] && dest=$REMOTE_RECEIVING_DIR
+    [[ "$ext" == "nii" ]] && dest=$REMOTE_RECEIVING_DIR
+    echo $dest
 }
 
 function scp2_bmi() {
