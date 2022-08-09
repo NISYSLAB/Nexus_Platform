@@ -1,5 +1,3 @@
-
-
 ## Matlab script notes:
 
 Compiling the file:
