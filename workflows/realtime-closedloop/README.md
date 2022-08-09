@@ -18,6 +18,7 @@ The file 4D_pre.nii and wWager_ACC_cluster8_thresholded.nii is a reference image
 
 The size of the compiled program is culled a bit. Hopefully this will make it faster.
 
+
 ## Task Server
 
 ### Prerequisites
@@ -303,3 +304,4 @@ RTCP_SUBJECT_MASK_NII=Wager_ACC_cluster8.nii
 ## Pre 4D NII file and Mask NII file
 
 if you want to use the new NII files, you can also put the NII files in the listener folder either in Task server or Midpoint server, they will be pushed to BMI network immediately, if you use the different names, you can modify ```rtcp_default_settings.conf```, the configuration varilables is ```RTCP_PRE_4D_NII``` and ```RTCP_PRE_4D_NII``` respectively.
+
