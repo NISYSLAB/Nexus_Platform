@@ -5,8 +5,8 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 ####
 TO_LOG=/labs/mahmoudilab/synergy-wf-executions/logs/rt-closedloop
-PROCESS_LOG=/home/pgu6/app/listener/fMri_realtime/listener_execution/mount/wf-rt-closedloop/single-thread
-FROM_EXEC=/home/pgu6/app/listener/fMri_realtime/listener_execution/mount/wf-rt-closedloop
+PROCESS_LOG=/labs/mahmoudilab/synergy_rtcl_app/mount/wf-rt-closedloop/single-thread
+FROM_EXEC=/labs/mahmoudilab/synergy_rtcl_app/mount/wf-rt-closedloop
 TO_EXEC=/labs/mahmoudilab/synergy-wf-executions/runtime/rt-closedloop
 LOCKDIR=/tmp/synergy/sync_copy_lock
 ####

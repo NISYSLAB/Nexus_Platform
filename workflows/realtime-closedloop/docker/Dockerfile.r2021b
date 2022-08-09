@@ -20,14 +20,14 @@ RUN pip install -r requirements.txt && \
 ## for rt_preproc
 COPY CanlabCore.tar.gz ${BASE_DIR}/
 COPY spm12.tar.gz ${BASE_DIR}/
-COPY rtPreprocessing_simple_new ${BASE_DIR}/
-COPY run_rtPreprocessing_simple_new.sh ${BASE_DIR}/
+COPY RT_Preproc ${BASE_DIR}/
+COPY run_RT_Preproc.sh ${BASE_DIR}/
 
-## COPY run_RT_Preproc.sh ${BASE_DIR}/
-## COPY RT_Preproc ${BASE_DIR}/
+##COPY rtPreprocessing_simple_new ${BASE_DIR}/
+##COPY run_rtPreprocessing_simple_new.sh ${BASE_DIR}/
 
 RUN cd ${BASE_DIR} && tar -xzf CanlabCore.tar.gz && rm -rf CanlabCore.tar.gz \
-    && tar -xzf spm12.tar.gz && rm -rf spm12.tar.gz
+    && tar -xzf spm12.tar.gz && rm -rf spm12.tar.gz && chmod a+x run_RT_Preproc.sh && chmod a+x RT_Preproc
 
 #### matlab code: rt_preproc
 ## https://ssd.mathworks.com/supportfiles/downloads/R2021b/Release/2/deployment_files/installer/complete/glnxa64/MATLAB_Runtime_R2021b_Update_2_glnxa64.zip

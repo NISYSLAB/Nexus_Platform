@@ -2,24 +2,28 @@
 
 SCRIPT_NAME=$(basename -- "$0")
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+####
 
 MATLAB_VER=R2021b
+
 function download_spm12() {
+  echo "Run download_spm12()"
   FILE=spm12.zip
-  [[ -f "${FILE}" ]] && return 0
+  [[ -f "${FILE}" ]] && echo "${FILE} exists, skip this step" && return 0
   wget https://www.fil.ion.ucl.ac.uk/spm/download/restricted/eldorado/${FILE}
   unzip ${FILE}
 }
 
 function download_canlabcore() {
+  echo "Run download_canlabcore()"
   CANLABCORE_DIR=CanlabCore
-  [[ -d "${CANLABCORE_DIR}" ]] && return 0
+  [[ -d "${CANLABCORE_DIR}" ]] && echo "${CANLABCORE_DIR} exists, skip this step" && return 0
   git clone https://github.com/canlab/CanlabCore.git
 }
 
 function download_Neu3CA_RT() {
     local dir=Neu3CA-RT
-    [[ -d "${dir}" ]] && return 0
+    [[ -d "${dir}" ]] && echo "${dir} exists, skip this step" && return 0
     git clone https://github.com/jsheunis/Neu3CA-RT.git
 }
 

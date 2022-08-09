@@ -2,7 +2,7 @@
 VERSION=VERSION_TOBE_REPLACED
 
 APP_JAR=rtcl-directory-monitor-${VERSION}.jar
-APP_LOG=/labs/mahmoudilab/synergy_remote_data1/logs/monitor-$(date -u +"%Y-%m-%d").log
+APP_LOG=/labs/mahmoudilab/synergy_remote_data1/logs/rtcl-directory-monitor-$(date -u +"%Y-%m-%d").log
 
 ####### ENV
 export monitoring_directory=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_dir/csv

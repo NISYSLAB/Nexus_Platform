@@ -15,6 +15,7 @@ function kill_monitor_instance() {
 }
 
 #### Main starts
+mkdir -p "${execution_folder}"
 kill_monitor_instance
 java -jar "${APP_JAR}" > "${APP_LOG}" 2>&1 &
 echo "LOG: ${APP_LOG}"

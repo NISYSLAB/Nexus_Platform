@@ -4,7 +4,7 @@ SCRIPT_NAME=$(basename -- "$0")
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 #### global settings
-IMAGE=gcr.io/cloudypipelines-com/rt-closedloop:2.1
+IMAGE=gcr.io/cloudypipelines-com/rt-closedloop:2.5
 CONTAINER_NAME=realtime-closedloop-prod
 
 MOUNT=/home/pgu6/app/listener/fMri_realtime/listener_execution/mount
