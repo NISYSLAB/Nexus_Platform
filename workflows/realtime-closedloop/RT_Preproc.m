@@ -2,7 +2,7 @@ function completed = rtPreproc(niifullname,prefullname,maskfullname,outfullname)
 % This script preprocesses the data in the real-time experiment 
 %Based on neu3ca_rt: https://doi.org/10.1016/j.pscychresns.2018.09.008
 %Shabnam Hossein 
-%July 2022
+%August 2022
 %--------------------------------------------------------------------------
 % INITIALISATION 
 %--------------------------------------------------------------------------
@@ -16,7 +16,7 @@ wROI_mask = maskfullname;
 
 %%
 %Scan Parameters
-TR = 1.0;
+TR = 2.0;
 timing_units = 'secs';
 voxel_size = [3 3 3];
 %First functional image of the current trial
@@ -30,7 +30,6 @@ funcref_spm = spm_vol(functional0_fn);
 funcref_3D  = spm_read_vols(funcref_spm);
 [Ni, Nj, Nk] = size(funcref_3D);
 N_vox = Ni*Nj*Nk;
-
 %Not using the masking
 % Masking
 % [GM_img_bin, WM_img_bin, CSF_img_bin] = neu3ca_rt_getSegments(preproc_data.rgm_fn, preproc_data.rwm_fn, preproc_data.rcsf_fn, 0.1);
@@ -98,11 +97,11 @@ X_t = X_t./repmat(std(X_t),trial_length,1); % Normalise the design matrix for st
 X_t = [X_t ones(trial_length,1)]; % Add a DC regressor
 rF_corrected = rF' - X_t*(X_t\rF'); % Regressing out the above corrections
 
-% % STEP 5: ROI mask
-ROI_mask_fmri_data = fmri_data(wROI_mask);
-ROI_averages = {};
+% % STEP 5: Reward Signature
+obj = fmri_data(wROI_mask);
+Reward_sig_averages = {};
 for i=1:trial_length
-%     cd(sub_dir);  % works on the directory of the executable
+%     cd(sub_dir);
     rf_corrected = reshape(rF_corrected(i,:), [size(rf,1),size(rf,2),size(rf,3)]);
     %converting the corrected data to nifti file using the same metadata as of the first image of the trial
     test=f_spm;
@@ -112,10 +111,11 @@ for i=1:trial_length
     rf_corrected_fn = [pwd filesep 'rf_corrected.nii'];
     %converting the corrected data and the mask to fmri_data objects using Canlabcore
     rf_corrected_fn_fmri_data = fmri_data(rf_corrected_fn);
-    r = extract_roi_averages(rf_corrected_fn_fmri_data, ROI_mask_fmri_data);
-    ROI_averages{i} = mean(r.dat);
+    cs = apply_mask(rf_corrected_fn_fmri_data, obj, 'pattern_expression', 'cosine_similarity');
+    Reward_sig_averages{i} = cs;
 end
-mat = cell2mat(ROI_averages);
-csvwrite(outfullname, mean(mat,2));
+mat = cell2mat(Reward_sig_averages);
+csvwrite('average_Reward_sig.csv', mean(mat,2));
 completed = 1;
 end
+
