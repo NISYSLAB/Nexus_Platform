@@ -18,16 +18,19 @@ MONITORING_IMAGE_DIR=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanne
 MONITORING_PROCESSED_DIR=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_dir_processed
 PIPELINE_LISTENER_DIR=/labs/mahmoudilab/synergy_remote_data1/rtcl_data_in_dir
 TMP_DIR=${MONITORING_PROCESSED_DIR}/rtcl_call
-WF_LOG_DIR=/labs/mahmoudilab/synergy_remote_data1/logs/rtcl/workflow
+WF_LOG_DIR=/labs/mahmoudilab/synergy_remote_data1/logs/rtcl
 EXE_ENTRY_DIR=/home/pgu6/app/listener/fMri_realtime/listener_execution/non-wdl
 RUN_RTCP_PIPELINE_SCRIPT=submit_non_cromwell.sh
+RTCP_RUNTIME_DEFAULT_SETTINGS=/home/pgu6/app/listener/fMri_realtime/listener_execution/non-wdl/rtcp_default_settings.conf
+RTCP_RUNTIME_USER_SETTINGS=/home/pgu6/app/listener/fMri_realtime/listener_execution/non-wdl/RTCP_RUNTIME_USER_SETTINGS.conf
+RESET_CSV_SCRIPT=/home/pgu6/app/listener/fMri_realtime/listener_execution/non-wdl/reset_csv.sh
 
 ## interval in seconds 60 seconds = 1 minutes
 interval=1
 
 ## common
 PROCESS_ID=$( uuidgen )
-WORK_DIR=${TMP_DIR}/worker_${PROCESS_ID}
+WORK_DIR=${TMP_DIR}/submit_and_run_${PROCESS_ID}
 PROCESSED_EXTRACTION_LOG=${MONITORING_PROCESSED_DIR}/processed_extractions.csv
 TMP_CSV=${MONITORING_PROCESSED_DIR}/tmp_${PROCESS_ID}.txt
 PROCESS_HEADER='hash,imgStart,imgEnd,parseTime,wfStart,wfEnd,raw'
@@ -37,9 +40,14 @@ RAW_HEADER="subject,effortDelay,run,runStart,trial,Cue1_Onset,Cue2_Onset,CueAll_
 RAW_HEADER_TRIM=$( echo $RAW_HEADER | tr ',' ' ')
 
 ## sample: 001_000003_000001.dcm
-PADDING_ZEROS=6
-NAME_PART1=001
-NAME_PART2=000003
+##RTCP_IMAGE_NAME_PART3_LENGTH=6
+##RTCP_IMAGE_NAME_PART1=001
+##RTCP_IMAGE_NAME_PART2=000003
+
+## max waiting time for the images from the midpoint server
+## e.g 6 minutes = 360 seconds
+WAITING_TIME_IN_SECONDS=360
+WAITING_INTERVAL_IN_SECONDS=2
 
 #### functions
 function timeStamp() {
@@ -153,7 +161,7 @@ function getCeil() {
 
 function padding() {
     local num=$1
-    printf "%0${PADDING_ZEROS}d\n" $num
+    printf "%0${RTCP_IMAGE_NAME_PART3_LENGTH}d\n" $num
 }
 
 function extractAndSubmit() {
@@ -176,6 +184,36 @@ function extractAndSubmit() {
       submit2Pipeline ${ceilStart} ${ceilEnd}
     done < $fileToBeRead
 }
+function checkFileSize() {
+    local file=$1
+    local oldsize=$(wc -c <"$file")
+    sleep 1
+    local newsize=$(wc -c <"$file")
+    while [ "$oldsize" -lt "$newsize" ]
+    do
+       oldsize=$(wc -c <"$file")
+       sleep 1
+       newsize=$(wc -c <"$file")
+    done
+}
+
+function waitFileReady() {
+    local file=$1
+    local timer=0
+    echo "check if $file is available"
+    while [[ ! -f "$file" ]]
+    do
+        sleep $WAITING_INTERVAL_IN_SECONDS
+        timer=$(($timer + $WAITING_INTERVAL_IN_SECONDS))
+        if [ $timer -gt $WAITING_TIME_IN_SECONDS ]
+        then
+          echo "$file not available after waiting $WAITING_TIME_IN_SECONDS seconds, give up"
+          return
+        fi
+    done
+    echo "$file is available, waitingTime=$timer seconds"
+    checkFileSize $file
+}
 
 ## submit2Pipeline ${ceilStart} ${ceilEnd}
 ## cd ${dicomDir} && tar -xvf ${shortname}
@@ -189,11 +227,10 @@ function submit2Pipeline() {
     local x=${ceilStart}
     while [ $x -le ${ceilEnd} ]
     do
-      local dicomfile=${NAME_PART1}_${NAME_PART2}_$(padding ${x}).dcm
+      local dicomfile=${RTCP_IMAGE_NAME_PART1}_${RTCP_IMAGE_NAME_PART2}_$(padding ${x}).dcm
       echo "Copy dicom file:${dicomfile}"
-      ## TODO: might wait until images are availabe
+      waitFileReady ${MONITORING_IMAGE_DIR}/${dicomfile}
       cp ${MONITORING_IMAGE_DIR}/${dicomfile} ${tmpName}/
-      ##mv ${MONITORING_IMAGE_DIR}/${dicomfile} ${tmpName}/
       x=$(( $x + 1 ))
     done
 
@@ -208,7 +245,7 @@ function submit2Pipeline() {
     printInfo "Files under WORK_DIR folder: ${WORK_DIR}"
     ls "${WORK_DIR}"
 
-    local log=${WF_LOG_DIR}/worker_${PROCESS_ID}.log
+    local log=${WF_LOG_DIR}/submit_and_run_${PROCESS_ID}.log
 
     cd "${EXE_ENTRY_DIR}"
     local cmd="./${RUN_RTCP_PIPELINE_SCRIPT} ${WORK_DIR}/${tmpName}.tar.gz"
@@ -220,7 +257,7 @@ function execMain() {
     local inputFile=$1
     local nameonly=$( basename $inputFile )
     PROCESS_ID=$( uuidgen )
-    WORK_DIR=${TMP_DIR}/worker_${PROCESS_ID}
+    WORK_DIR=${TMP_DIR}/submit_and_run_${PROCESS_ID}
     mkdir -p ${WORK_DIR}
     local allRecordsFile=${WORK_DIR}/all.csv
     appendFile ${inputFile} ${allRecordsFile}
@@ -230,6 +267,28 @@ function execMain() {
     extractAndSubmit "${newRecordFile}"
 }
 
+function parseConfig() {
+    local file=$1
+    echo "parseConfig(): received file $file"
+    local SUB='.csv_'
+    [[ "$file" == *".csv_"* ]] && return
+    [[ "$file" == *".csv-"* ]] && return
+    [[ $file == *csv ]] && return
+
+    echo "$file is configuration file"
+    cd ${SCRIPT_DIR}
+    touch ${RTCP_RUNTIME_USER_SETTINGS}
+    ./parse_config.sh ${file} ${RTCP_RUNTIME_USER_SETTINGS}
+    source ${RTCP_RUNTIME_DEFAULT_SETTINGS}
+    source ${RTCP_RUNTIME_USER_SETTINGS}
+    echo "User new configurations"
+    env |grep "RTCP_"
+    if [ "$RTCP_RESET_OPTIMIZER_CSV" = "true" ] ; then
+        echo "RTCP_RESET_OPTIMIZER_CSV is set to $RTCP_RESET_OPTIMIZER_CSV, invoke it one time only"
+        bash $RESET_CSV_SCRIPT
+    fi
+    exit 0
+}
 #### Main starts
 msg="Calling: ${SCRIPT_NAME} $@"
 echo "${msg}"
@@ -240,6 +299,11 @@ if [[ "$#" -ne "${argct}" ]]; then
 fi
 file=$1
 preProcess
+parseConfig "${file}"
+source ${RTCP_RUNTIME_DEFAULT_SETTINGS}
+source ${RTCP_RUNTIME_USER_SETTINGS}
+echo "User configurations"
+env |grep "RTCP_"
 execMain "${file}"
 
 

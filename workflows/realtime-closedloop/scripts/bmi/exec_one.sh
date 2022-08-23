@@ -30,7 +30,7 @@ function dicom2nifti() {
     cp ${dicom_input} ${DICOM_DIR}/${shortname}
 
     cd ${DICOM_DIR} && tar -xvf ${shortname}
-    rm -f ${shortname} && cd -
+    rm -f ${shortname} && cd ${EXE_DIR}
 
     cd ${CONTAINER_HOME}
     local command="./dcm2niix -o ${EXE_DIR}/${NII_DIR} -f D4_dcm2nii ${EXE_DIR}/${DICOM_DIR}"
@@ -52,9 +52,10 @@ function rtpreproc() {
   ## TODO: find out where prenii comes from?
 
   local pre_nii=${EXE_DIR}/4D_pre.nii
+  local subject_mask_nii=${EXE_DIR}/subject_mask.nii
   cd ${CONTAINER_HOME}
   ##local cmd_line="./run_RT_Preproc.sh ${MATLAB_VER} ${EXE_DIR}/${NII_DIR}"
-  local cmd_line="./run_rtPreprocessing_simple_new.sh ${MATLAB_VER} ${EXE_DIR}/${NII_DIR}/D4_dcm2nii.nii ${pre_nii} ${EXE_DIR}/${CSV_DIR}/${csv_output}"
+  local cmd_line="./run_RT_Preproc.sh ${MATLAB_VER} ${EXE_DIR}/${NII_DIR}/D4_dcm2nii.nii ${pre_nii} ${subject_mask_nii} ${EXE_DIR}/${CSV_DIR}/${csv_output}"
   print_info "Calling: time ${cmd_line}"
   time ${cmd_line}
   rtn_code=$?
@@ -94,7 +95,7 @@ function optimizer() {
 function save_output() {
   chmod -R a+w ${EXE_DIR}
   cd  ${EXE_DIR}
-  local save_zip=saved_outputs_$(date -u +"%m%d%Y-%H-%M-%S").tar.gz
+  local save_zip=saved_outputs_$(date -u +"%Y-%m-%d-%H-%M-%S").tar.gz
   print_info "tar -czf ${save_zip} ${DICOM_DIR} ${NII_DIR} ${CSV_DIR}"
   tar -czf ${save_zip} ${DICOM_DIR} ${NII_DIR} ${CSV_DIR}
 

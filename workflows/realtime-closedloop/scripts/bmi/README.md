@@ -94,3 +94,8 @@ The logs are located in folders
 which is actually a softlink to 
 ```/home/pgu6/app/listener/fMri_realtime/listener_execution/mount/wf-rt-closedloop/single-thread/process_<datetime>.log```
 
+
+### Docker 
+$ docker ps
+CONTAINER ID   IMAGE                                          COMMAND       CREATED       STATUS       PORTS                                       NAMES
+73c2e0b7a6cd   gcr.io/cloudypipelines-com/rt-closedloop:2.1   "/bin/bash"   4 weeks ago   Up 4 weeks   0.0.0.0:9666->8080/tcp, :::9666->8080/tcp   realtime-closedloop-prod
