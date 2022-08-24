@@ -115,7 +115,7 @@ for i=1:trial_length
     Reward_sig_averages{i} = cs;
 end
 mat = cell2mat(Reward_sig_averages);
-csvwrite('average_Reward_sig.csv', mean(mat,2));
+csvwrite(outfullname, mean(mat,2));
 completed = 1;
 end
 
