@@ -101,5 +101,8 @@ Go to directory `/labs/mahmoudilab/dev-synergy-rtcl-app/workflow`
 type `exit` to exit the pipeline
 
 #### Volume Mounting Options
-To make some host directories visible to the container or vice versa, the following volume is mounted in the current directory when the pipeline starts: 
- `mount (host) - /mount (container)`
+To make some host directories visible to the container or vice versa, the following volumes are mounted in the current directory when the pipeline starts: 
+
+* `data_mount (host) - /data_mount (container)`
+* `log_mount (host) - /log_mount (container)`
+* `process_mount (host) - /process_mount (container)`

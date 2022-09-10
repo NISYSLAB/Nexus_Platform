@@ -9,7 +9,7 @@ SCRIPT_NAME=$(basename -- "$0")
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 cd ${SCRIPT_DIR}
-source ./$( basename ${SCRIPT_DIR} )_common_settings.sh
+source ./workflow_common_settings.sh
 
 ####
 PROFILE=DEV
