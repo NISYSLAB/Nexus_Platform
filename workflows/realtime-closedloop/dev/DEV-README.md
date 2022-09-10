@@ -83,3 +83,26 @@ If local testing succeeds, move to next step  `Docker build`
 The build details will output to the log file `build_push_docker.log`
 * If build succeeds, the new docker image should be created as `gcr.io/cloudypipelines-com/rt-closedloop` with new tag, 
 for example: `gcr.io/cloudypipelines-com/rt-closedloop:4.0`  for `IMAGE_TAG=4.0`
+
+
+## Workflow Pipeline
+
+Go to directory `/labs/mahmoudilab/dev-synergy-rtcl-app/workflow`
+
+#### Start Pipeline
+`$ ./start_pipeline.sh`
+
+#### Stop Pipeline
+`$ ./stop_pipeline.sh`
+
+#### Enter Pipeline
+`$ ./enter_pipeline.sh`
+
+type `exit` to exit the pipeline
+
+#### Volume Mounting Options
+To make some host directories visible to the container or vice versa, the following volumes are mounted in the current directory when the pipeline starts: 
+
+* `data_mount (host) - /data_mount (container)`
+* `log_mount (host) - /log_mount (container)`
+* `process_mount (host) - /process_mount (container)`
