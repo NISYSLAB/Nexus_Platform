@@ -1,13 +1,13 @@
 # RealTime-CloseLoop Dev Environment
 
-### VM
+#### VM
 `mahmoudilab-dev.priv.bmi.emory.edu`
 
-### Directory
+#### Directory
 `/labs/mahmoudilab/dev-synergy-rtcl-app`
 
 
-## Directory Monitor (Listener)
+## Monitor (Listener)
 Go to directory `/labs/mahmoudilab/dev-synergy-rtcl-app/monitor`
 
 * Start monitor
@@ -20,16 +20,25 @@ Go to directory `/labs/mahmoudilab/dev-synergy-rtcl-app/monitor`
  Optimizer source code is under directory `/labs/mahmoudilab/dev-synergy-rtcl-app/src/optimizer`
 If there are any libaries, packages, naming , etc. changes, the Dockerfile `Dockerfile.r2021b` requires modifications accordingly.
 
-## Matlab RT_Prepro Build and Testing in Host Environment
+## Matlab RT_Prepro 
+
+The folder is under `/labs/mahmoudilab/dev-synergy-rtcl-app/docker/rt_prepro`
+
+Developers' need to
+* Provide all required Matlab scripts, libraries, etc. 
+* Compile Matlab Scripts successfully
+* Provide test scripts together with necessay data
+* Run test scripts successfully, so others are able to run the same scripts and produce the same outputs successfully.
+  
 ### Compilation
 * Go to directory `/labs/mahmoudilab/dev-synergy-rtcl-app/docker/rt_prepro`
 * Make sure the PATH in `compile_files.m` is set to
-`/labs/mahmoudilab/dev-synergy-rtcl-app/src/rt_prepro`
+`/labs/mahmoudilab/dev-synergy-rtcl-app/src/rt_prepro` or leave them empty  ( Developers to verify which way is correct ??)
 * Enter Matlab Console by the command 
   
   `$ matlab -nodisplay -nosplash`
 
-or
+  or the script
 
   `$ ./enter_matlab_console.sh`
 * Comile Matlab scripts inside the Console by the command 
@@ -46,6 +55,11 @@ or
 ### Testing Scripts (Developers to provide)
 
 #### Testing in Host VM (Developers to provide)
+
+**Developers: please provide testing scripts to test Matlab binary to make sure it works in the host VM**
+
+Here is the sample of testing script, you can create yours.
+
 * Copy the `nii` files converted by `dicom2nii` process in the `nii` foler
 * Run the command
 
@@ -53,11 +67,14 @@ or
 
 If local testing succeeds, move to next step  `Docker build` 
 
+
 ## Docker Build
+
+* Go to the directory `/labs/mahmoudilab/dev-synergy-rtcl-app`, modify `IMAGE_TAG` to a new relase number, for example: `IMAGE_TAG=4.0` in file `common_settings.sh` and save the changes
 
 * Go to diretory `/labs/mahmoudilab/dev-synergy-rtcl-app/src`
 * Modify `Dockerfile.r2021b` accordingly when necessary
-* Modify `IMAGE_TAG` to a new relase number, for example: `IMAGE_TAG=4.0` in file `src_common_settings.sh` and save the changes
+
 * Build new Docker image in Dev by the script
 
   `$ ./build_in_background.sh`

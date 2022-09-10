@@ -1,9 +1,5 @@
 
-#### monitor release version
-MONITOR_VERSION=2.1
-
-#### Do Not  modify below!!!
-PROFILE=DEV
+source ../common_settings.sh
 
 MONITOR_APP_JAR=rtcl-directory-monitor-${PROFILE}-${MONITOR_VERSION}.jar
 MONITOR_APP_LOG=/labs/mahmoudilab/synergy_remote_data1/logs/rtcl-directory-monitor-${PROFILE}-$(date -u +"%Y-%m-%d").log
