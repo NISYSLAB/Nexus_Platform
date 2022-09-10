@@ -3,10 +3,12 @@
 SCRIPT_NAME=$(basename -- "$0")
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
+cd ${SCRIPT_DIR}
+source ./common_setting.sh
+
 #### global settings
-IMAGE=gcr.io/cloudypipelines-com/rt-closedloop:3.0
-##IMAGE=gcr.io/cloudypipelines-com/rt-closedloop:2.5
-CONTAINER_NAME=realtime-closedloop-prod
+IMAGE=${CONTAINER_REGISTRY}/${GCR_PATH}/${IMAGE_NAME}:${IMAGE_TAG}
+CONTAINER_NAME=realtime-closedloop-test
 
 MOUNT=/home/pgu6/app/listener/fMri_realtime/listener_execution/mount
 CONTAINER_MOUNT=/mount
