@@ -45,11 +45,10 @@ function check_and_get() {
     cd ${SCRIPT_DIR}
     if [[ ! -f rt_prepro/${folder}.tar.gz ]]
     then
-        echo "rt_prepro/${folder}.tar.gz does not exist"
-	cd rt_prepro
-	echo "tar -czvf ${folder}.tar.gz ${folder}"
-	tar -czvf ${folder}.tar.gz ${folder}
-
+      echo "rt_prepro/${folder}.tar.gz does not exist"
+      cd rt_prepro
+      echo "tar -czvf ${folder}.tar.gz ${folder}"
+      tar -czvf ${folder}.tar.gz ${folder}
     fi	    
     cd ${SCRIPT_DIR}
 }
@@ -61,31 +60,11 @@ function get_dependencies(){
     check_and_get spm12
 }
 
-
 function build_on_cloudypipelines() {
   GCR_PATH=cloudypipelines-com
   echo "Build and push to ${GCR_PATH}"
   time build_push_image ${image_name} ${image_tag} Dockerfile.r2021b
   ##time build_push_image ${image_name} ${image_tag} Dockerfile
-}
-
-function copy_rtcpreproc() {
-  cp ${rt_preproc_dir}/CanlabCore.tar.gz .
-  cp ${rt_preproc_dir}/spm12.tar.gz .
-  cp ${rt_preproc_dir}/*RT_Preproc* .
-
-  ##cp ${rt_preproc_dir}/run_RT_Preproc.sh .
-  ##cp ${rt_preproc_dir}/RT_Preproc .
-}
-
-function remove_rtcpreproc() {
-  rm ./CanlabCore.tar.gz
-  rm ./spm12.tar.gz
-  ##rm ./rtPreprocessing_simple_new
-  rm ./*RT_Preproc*
-
-  ##rm ./run_RT_Preproc.sh
-  ##rm ./RT_Preproc
 }
 
 function check_release() {
@@ -97,7 +76,7 @@ function check_release() {
     if [ -f "$target" ]
     then
         echo "${target} is found, you must chnage 'image_tag' setting"
-	exit 1
+	      exit 1
     else
         echo "${target} not found, OK to proceed "
     fi

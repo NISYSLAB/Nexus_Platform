@@ -4,15 +4,15 @@ SCRIPT_NAME=$(basename -- "$0")
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 cd ${SCRIPT_DIR}
-source ./common_setting.sh
+source ./src_common_settings.sh
 
 #### global settings
 IMAGE=${CONTAINER_REGISTRY}/${GCR_PATH}/${IMAGE_NAME}:${IMAGE_TAG}
-CONTAINER_NAME=realtime-closedloop-test
+CONTAINER_NAME=realtime-closedloop-TEST
 
-MOUNT=/home/pgu6/app/listener/fMri_realtime/listener_execution/mount
-CONTAINER_MOUNT=/mount
-CONTAINER_HOME=/home/pgu6/realtime-closedloop
+MOUNT=${PWD}/data_mount
+CONTAINER_MOUNT=/data_mount
+CONTAINER_HOME=/synergy-rtcl-app
 EXEC_SCRIPT=exec_one.sh
 DISK_MOUNTS="${MOUNT}"
 TASK_CALL_NAME=wf-rt-closedloop
@@ -26,7 +26,6 @@ function cleanup() {
 function create_container() {
   echo "Creating container: ${CONTAINER_NAME}"
   docker run --entrypoint /bin/bash \
-        -p 9666:8080 \
         -v "${MOUNT}/":${CONTAINER_MOUNT}/ \
         --name ${CONTAINER_NAME}  \
         -e "DISK_MOUNTS=${DISK_MOUNTS}" \
