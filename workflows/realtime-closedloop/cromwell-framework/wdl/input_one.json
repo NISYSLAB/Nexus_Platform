@@ -1,5 +1,0 @@
-{
-  "wf_realtime_v1.dicomFileInput": "/home/pgu6/app/listener/fMri_realtime/listener_execution/dicom2nifti/dicom/test_dicom.tar.gz",
-  "wf_realtime_v1.script": "/home/pgu6/app/listener/fMri_realtime/listener_execution/wdl/exec_one.sh",
-  "wf_realtime_v1.csvFileName": "dummy_test.csv"
-}
