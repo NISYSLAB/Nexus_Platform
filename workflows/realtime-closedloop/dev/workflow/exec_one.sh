@@ -61,10 +61,16 @@ function rtpreproc() {
   time ${cmd_line}
   rtn_code=$?
   print_info "rtpreproc() user coding returned code=${rtn_code}"
-  print_info "mv /home/pgu6/realtime-closedloop/$CSV_OUTPUT /mount/wf-rt-closedloop/single-thread/csv/${CSV_OUTPUT}"
-  mv /home/pgu6/realtime-closedloop/$CSV_OUTPUT /mount/wf-rt-closedloop/single-thread/csv/${CSV_OUTPUT}
+  ## ??print_info "mv /home/pgu6/realtime-closedloop/$CSV_OUTPUT /mount/wf-rt-closedloop/single-thread/csv/${CSV_OUTPUT}"
+  ##  ?? mv /home/pgu6/realtime-closedloop/$CSV_OUTPUT /mount/wf-rt-closedloop/single-thread/csv/${CSV_OUTPUT}
   ## generate NII_OUTPUT
+  echo "File under CONTAINER_HOME=${CONTAINER_HOME}"
+  ls ${CONTAINER_HOME}/
+
+  echo "File list under EXE_DIR=${EXE_DIR}"
+  ls ${EXE_DIR}/*
   cd ${EXE_DIR}
+
   ##tar -czf ${NII_OUTPUT} ${NII_DIR} && rm -rf ${NII_DIR}
   chmod a+w ${EXE_DIR}/${CSV_DIR}/*.*
   print_info "rtpreproc(): Host:  OUTPUT=${HOST_EXEC_DIR}/${CSV_DIR}/${CSV_OUTPUT}"
@@ -128,7 +134,7 @@ chmod -R a+r ${EXE_DIR}
 HOST_EXEC_DIR=${HOST_MOUNT}/${WORKFLOW_ID}
 
 dicom2nifti
-exit 0
 rtpreproc
+exit 0
 optimizer
 save_output

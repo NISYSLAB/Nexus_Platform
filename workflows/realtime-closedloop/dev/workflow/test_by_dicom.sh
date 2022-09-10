@@ -11,18 +11,22 @@ IMAGE=${CONTAINER_REGISTRY}/${GCR_PATH}/${IMAGE_NAME}:${IMAGE_TAG}
 CONTAINER_NAME=realtime-closedloop-${PROFILE}
 
 ####
-function preset() {
+function pre_process() {
     echo "Received dicom tar.gz file: ${DICOM_TAR}"
     mkdir -p ${HOST_MOUNT}/test
     cp ${DICOM_TAR} ${HOST_MOUNT}/test
     cp ${PWD}/${EXEC_SCRIPT} ${HOST_MOUNT}/test/
+    local container_exe_dir=${CONTAINER_MOUNT}/${WORKFLOW_ID}
+    docker cp /labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_dir/image/4D_pre.nii ${CONTAINER_NAME}:${container_exe_dir}/
+    docker cp /labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_dir/image/Wager_ACC_cluster8.nii ${CONTAINER_NAME}:${container_exe_dir}/subject_mask.nii
+    ## docker cp /labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_dir/image/RewSig_Z_map.nii ${CONTAINER_NAME}:${container_exe_dir}/
+    ## dockercp /labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_dir/image/wRewSig_Z_map.nii ${CONTAINER_NAME}:${container_exe_dir}/
 }
 
 function main_run() {
     local exe_dir=${CONTAINER_MOUNT}/test
     local nameonly=$( basename ${DICOM_TAR} )
     local csvfilename=D4_dcm2nii.nii
-    local WORKFLOW_ID=test-executions
     local cmdArgs="${exe_dir}/${EXEC_SCRIPT} ${exe_dir}/${nameonly} ${csvfilename} ${WORKFLOW_ID}"
     echo "docker exec ${CONTAINER_NAME} ${cmdArgs}"
     docker exec ${CONTAINER_NAME} ${cmdArgs}
@@ -37,5 +41,6 @@ if [[ "$#" -ne ${argCt} ]]; then
 fi
 
 DICOM_TAR=$1
-preset
+WORKFLOW_ID=test-executions
+pre_process
 main_run
