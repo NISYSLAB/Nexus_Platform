@@ -101,19 +101,8 @@ Go to directory `/labs/mahmoudilab/dev-synergy-rtcl-app/workflow`
 type `exit` to exit the pipeline
 
 #### Volume Mounting Options
-To make some host directories visible to the container or vice versa, the following volume is mounted in the current directory when the pipeline starts: 
- `mount (host) - /mount (container)`
+To make some host directories visible to the container or vice versa, the following volumes are mounted in the current directory when the pipeline starts: 
 
- #### Testing 
-
- There is one testing script `test_by_dicom.sh` under directory `/labs/mahmoudilab/dev-synergy-rtcl-app/workflow`. This script can be used to test and troubleshoot the pipeline (dicom2nii - > RT_Prepro --> Optimizer).
-
-Developers can create your testing scripts and supply correct test data such as dicom files, 4D_pre.nii, subject_mask.nii, etc.
-
-## Tips
-
-* `docker build` takes time, during the development, you can copy the binaries, scripts into the docker container by the command [docker cp](https://docs.docker.com/engine/reference/commandline/cp/)
-
-* The docker container name in Dev is called `realtime-closedloop-DEV`. 
-* All execution scripts and libraries inside the container are under the directory `/synergy-rtcl-app`, such as `CanlabCore,  dcm2niix,  dicom_pypreprocess.py,  fMRI_Bayesian_optimization.py,  Neu3CA-RT,  output_randomcsv.py,  requirements.txt,  RT_Preproc,  run_RT_Preproc.sh, and   spm12`
-* You can also enter the docker container by the command `$ docker exec -it realtime-closedloop-DEV /bin/bash` or by the script `./enter_pipeline.sh` under directory workflow.
+* `data_mount (host) - /data_mount (container)`
+* `log_mount (host) - /log_mount (container)`
+* `process_mount (host) - /process_mount (container)`
