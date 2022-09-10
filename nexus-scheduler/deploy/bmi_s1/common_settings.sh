@@ -11,7 +11,7 @@ export monitoring_directory=/labs/mahmoudilab/synergy_remote_data1/emory_siemens
 export event_on_file_change=true
 export event_on_file_delete=false
 export event_on_file_create=true
-export execution_script=/labs/mahmoudilab/synergy_rtcl_app/parse_and_submit.sh
+export execution_script=/home/pgu6/app/listener/fMri_realtime/listener_execution/non-wdl/parse_and_submit.sh
 export execution_folder=/tmp/synergy/executions
 
 ## Make sure only one thread

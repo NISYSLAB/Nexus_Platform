@@ -1,7 +1,0 @@
-{
-  "wf_realtim_closedloop.csvFileName": "test.csv",
-  "wf_realtim_closedloop.dicom2nifti.exeScript": "/home/pgu6/app/listener/fMri_realtime/listener_execution/wdl/exec_dicom2nifti.sh",
-  "wf_realtim_closedloop.dicom2nifti.dicomInput": "/home/pgu6/app/listener/fMri_realtime/listener_execution/dicom2nifti/dicom/test_dicom.tar.gz",
-  "wf_realtim_closedloop.rtpreproc.exeScript": "/home/pgu6/app/listener/fMri_realtime/listener_execution/wdl/exec_rtpreproc.sh",
-  "wf_realtim_closedloop.rtpreproc.matlabScript": "/labs/mahmoudilab/synergy-rt-preproc/run_RT_Preproc.sh"
-}
