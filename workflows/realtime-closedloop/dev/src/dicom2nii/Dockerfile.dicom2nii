@@ -1,0 +1,20 @@
+FROM centos/python-38-centos7:20210726-fad62e9
+
+ENV BASE_DIR /synergy-rtcl-app
+WORKDIR ${BASE_DIR}
+
+ENV DCM2NII_INSTALLER https://github.com/rordenlab/dcm2niix/releases/download/v1.0.20211006/dcm2niix_lnx.zip
+
+USER root
+#### Main starts
+
+RUN pip install numpy dicom_numpy && \
+    pip install -U pip setuptools && \
+    pip --no-cache-dir install pydicom nibabel
+
+RUN yum -y update \
+    && yum install -y wget curl xorg unzip which mesa-libGL libgl1-mesa-glx libxtst6 libxt6 libglu1 libxrandr2 libXt libsndfile \
+    && yum -y update \
+    && wget -O ${BASE_DIR}/dcm2niix_lnx.zip ${DCM2NII_INSTALLER} \
+    && cd ${BASE_DIR} && unzip dcm2niix_lnx.zip && rm -rf dcm2niix_lnx.zip \
+    && echo "Files in ${BASE_DIR}" && ls ${BASE_DIR}

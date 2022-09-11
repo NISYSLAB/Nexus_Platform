@@ -1,26 +1,55 @@
 # RealTime-CloseLoop Dev Environment
 
 #### VM
-`mahmoudilab-dev.priv.bmi.emory.edu`
+  `mahmoudilab-dev.priv.bmi.emory.edu`
 
-#### Directory
-`/labs/mahmoudilab/dev-synergy-rtcl-app`
+#### Scripting and Execution Directory
+  `/labs/mahmoudilab/dev-synergy-rtcl-app`
 
+## Directory Listener( Monitor )
 
-## Monitor (Listener)
-Go to directory `/labs/mahmoudilab/dev-synergy-rtcl-app/monitor`
+#### Listening directory
+  `/labs/mahmoudilab/synergy_remote_data1/DEV-emory_siemens_scanner_in_dir/csv`
 
-* Start monitor
+#### Start listener (monitor)
+  Go to directory `/labs/mahmoudilab/dev-synergy-rtcl-app/monitor`
+
   `$ ./start_monitor.sh`
 
-* Stop monitor
+#### Stop listener (monitor)
+Go to directory `/labs/mahmoudilab/dev-synergy-rtcl-app/monitor`
+
   `$ ./stop_monitor.sh`
 
-## Optimizer
+## Application Components
+
+### 1. dicom2nii
+  The supporting scripts are under the directory `/labs/mahmoudilab/dev-synergy-rtcl-app/src/dicom2nii`
+
+#### Start dicom2nii container
+  `$ ./start_dicom2nii.sh`
+
+The name of the instance is `dicom2nii-DEV`, you can enter the container 
+by the command:
+
+`$ docker exec -it dicom2nii-DEV /bin/bash`
+
+#### Stop dicom2nii container
+  `$./stop_dicom2nii.sh`
+
+#### Testing 
+  `unit_test_docker.sh` can be an example to test dicom2nii container, `dicom` and `nii` folders 
+are mounted  to `/synergy-rtcl-app/dicom` and `/synergy-rtcl-app/nii`
+inside the container.
+
+**Developers** : Please create your testing scripts for your changes together with 
+required data files, so others can run your scripts successfully!!!
+
+###2. Optimizer
  Optimizer source code is under directory `/labs/mahmoudilab/dev-synergy-rtcl-app/src/optimizer`
 If there are any libaries, packages, naming , etc. changes, the Dockerfile `Dockerfile.r2021b` requires modifications accordingly.
 
-## Matlab RT_Prepro 
+###3. Matlab RT_Prepro 
 
 The folder is under `/labs/mahmoudilab/dev-synergy-rtcl-app/docker/rt_prepro`
 
@@ -30,7 +59,7 @@ Developers' need to
 * Provide test scripts together with necessay data
 * Run test scripts successfully, so others are able to run the same scripts and produce the same outputs successfully.
   
-### Compilation
+#### Compilation
 * Go to directory `/labs/mahmoudilab/dev-synergy-rtcl-app/docker/rt_prepro`
 * Make sure the PATH in `compile_files.m` is set to
 `/labs/mahmoudilab/dev-synergy-rtcl-app/src/rt_prepro` or leave them empty  ( Developers to verify which way is correct ??)
@@ -52,7 +81,7 @@ Developers' need to
 
   `>> exit`
 
-### Testing Scripts (Developers to provide)
+#### Testing Scripts (Developers to provide)
 
 #### Testing in Host VM (Developers to provide)
 
@@ -67,14 +96,11 @@ Here is the sample of testing script, you can create yours.
 
 If local testing succeeds, move to next step  `Docker build` 
 
-
-## Docker Build
+## Pipeline Docker Build
 
 * Go to the directory `/labs/mahmoudilab/dev-synergy-rtcl-app`, modify `IMAGE_TAG` to a new relase number, for example: `IMAGE_TAG=4.0` in file `common_settings.sh` and save the changes
-
 * Go to diretory `/labs/mahmoudilab/dev-synergy-rtcl-app/src`
 * Modify `Dockerfile.r2021b` accordingly when necessary
-
 * Build new Docker image in Dev by the script
 
   `$ ./build_in_background.sh`
@@ -84,18 +110,17 @@ The build details will output to the log file `build_push_docker.log`
 * If build succeeds, the new docker image should be created as `gcr.io/cloudypipelines-com/rt-closedloop` with new tag, 
 for example: `gcr.io/cloudypipelines-com/rt-closedloop:4.0`  for `IMAGE_TAG=4.0`
 
-
 ## Workflow Pipeline
 
 Go to directory `/labs/mahmoudilab/dev-synergy-rtcl-app/workflow`
 
-#### Start Pipeline
+#### Start pipeline
 `$ ./start_pipeline.sh`
 
-#### Stop Pipeline
+#### Stop pipeline
 `$ ./stop_pipeline.sh`
 
-#### Enter Pipeline
+#### Enter pipeline
 `$ ./enter_pipeline.sh`
 
 type `exit` to exit the pipeline
@@ -104,7 +129,7 @@ type `exit` to exit the pipeline
 To make some host directories visible to the container or vice versa, the following volume is mounted in the current directory when the pipeline starts: 
  `mount (host) - /mount (container)`
 
- #### Testing 
+#### Testing 
 
  There is one testing script `test_by_dicom.sh` under directory `/labs/mahmoudilab/dev-synergy-rtcl-app/workflow`. This script can be used to test and troubleshoot the pipeline (dicom2nii - > RT_Prepro --> Optimizer).
 
@@ -113,7 +138,6 @@ Developers can create your testing scripts and supply correct test data such as 
 ## Tips
 
 * `docker build` takes time, during the development, you can copy the binaries, scripts into the docker container by the command [docker cp](https://docs.docker.com/engine/reference/commandline/cp/)
-
 * The docker container name in Dev is called `realtime-closedloop-DEV`. 
 * All execution scripts and libraries inside the container are under the directory `/synergy-rtcl-app`, such as `CanlabCore,  dcm2niix,  dicom_pypreprocess.py,  fMRI_Bayesian_optimization.py,  Neu3CA-RT,  output_randomcsv.py,  requirements.txt,  RT_Preproc,  run_RT_Preproc.sh, and   spm12`
 * You can also enter the docker container by the command `$ docker exec -it realtime-closedloop-DEV /bin/bash` or by the script `./enter_pipeline.sh` under workflow directory.
