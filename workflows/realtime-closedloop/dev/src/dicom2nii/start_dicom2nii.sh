@@ -13,6 +13,7 @@ IMAGE=gcr.io/cloudypipelines-com/${IMAGE_NAME}:${IMAGE_TAG}
 CONTAINER_MOUNT="/synergy-rtcl-app"
 #### functions
 function cleanup() {
+  echo "Stop running instance ..."
   docker stop "${CONTAINER_NAME}" || (echo "${CONTAINER_NAME} not existing or running ...")
   docker rm -f -v "${CONTAINER_NAME}" || (echo "${CONTAINER_NAME} not existing or running ...")
 }
@@ -34,5 +35,6 @@ cleanup
 time create_container
 sleep 2
 docker ps -a
-
+echo ""
 echo "Enter container: docker exec -it ${CONTAINER_NAME} /bin/bash"
+echo ""
