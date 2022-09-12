@@ -21,18 +21,15 @@ MONITORING_IMAGE_DIR=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanne
 MONITORING_PROCESSED_DIR=/labs/mahmoudilab/synergy_remote_data1/${PROFILE}-emory_siemens_scanner_in_dir_processed
 mkdir -p ${MONITORING_PROCESSED_DIR}
 
-PIPELINE_LISTENER_DIR=/labs/mahmoudilab/synergy_remote_data1/${PROFILE}-rtcl_data_in_dir
-mkdir -p ${PIPELINE_LISTENER_DIR}
-
 TMP_DIR=${MONITORING_PROCESSED_DIR}/rtcl_call
 mkdir -p ${TMP_DIR}
 
-WF_LOG_DIR=/labs/mahmoudilab/synergy_remote_data1/logs/rtcl
-EXE_ENTRY_DIR=/home/pgu6/app/listener/fMri_realtime/listener_execution/non-wdl
+WF_LOG_DIR=/labs/mahmoudilab/synergy_remote_data1/${PROFILE}-logs/rtcl
+EXE_ENTRY_DIR=/labs/mahmoudilab/dev-synergy-rtcl-app/workflow
 RUN_RTCP_PIPELINE_SCRIPT=submit_non_cromwell.sh
-RTCP_RUNTIME_DEFAULT_SETTINGS=/home/pgu6/app/listener/fMri_realtime/listener_execution/non-wdl/rtcp_default_settings.conf
-RTCP_RUNTIME_USER_SETTINGS=/home/pgu6/app/listener/fMri_realtime/listener_execution/non-wdl/RTCP_RUNTIME_USER_SETTINGS.conf
-RESET_CSV_SCRIPT=/home/pgu6/app/listener/fMri_realtime/listener_execution/non-wdl/reset_csv.sh
+RTCP_RUNTIME_DEFAULT_SETTINGS=${EXE_ENTRY_DIR}/rtcp_default_settings.conf
+RTCP_RUNTIME_USER_SETTINGS=${EXE_ENTRY_DIR}/RTCP_RUNTIME_USER_SETTINGS.conf
+RESET_CSV_SCRIPT=${EXE_ENTRY_DIR}/reset_csv.sh
 
 ## interval in seconds 60 seconds = 1 minutes
 interval=1
@@ -112,7 +109,6 @@ function printConfig() {
    printInfo "SCRIPT_DIR=$SCRIPT_DIR"
    printInfo "MONITORING_IMAGE_DIR=$MONITORING_IMAGE_DIR"
    printInfo "MONITORING_PROCESSED_DIR=$MONITORING_PROCESSED_DIR"
-   printInfo "PIPELINE_LISTENER_DIR=$PIPELINE_LISTENER_DIR"
 }
 
 ## appendFile "${notefile}" "${allRecordsFile}"

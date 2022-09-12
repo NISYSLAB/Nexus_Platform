@@ -26,6 +26,8 @@ function dicom2nifti() {
     print_info "dicom2nifti() started"
     cd ${EXE_DIR}
     mkdir -p ${DICOM_DIR} && mkdir -p ${NII_DIR}
+    chmod -R a+rw ${DICOM_DIR}
+    chmod -R a+rw ${NII_DIR}
     rm -rf ${DICOM_DIR}/*.*
     rm -rf ${NII_DIR}/*.*
     cp ${DICOM_INPUT} ${DICOM_DIR}/${DICOM_NAMEONLY}
@@ -37,11 +39,8 @@ function dicom2nifti() {
     local command="./dcm2niix -o ${EXE_DIR}/${NII_DIR} -f D4_dcm2nii ${EXE_DIR}/${DICOM_DIR}"
     print_info "Calling: ${command}"
     time ${command}
-    ## print_info "Calling: time python dicom_pypreprocess.py --filepath ${EXE_DIR}/${DICOM_DIR} --savepath ${EXE_DIR}/${NII_DIR}"
-    ## time python dicom_pypreprocess.py --filepath ${EXE_DIR}/${DICOM_DIR} --savepath ${EXE_DIR}/${NII_DIR}
     rtn_code=$?
     print_info "dicom2nifti() user coding returned code=${rtn_code}"
-
     print_info "dicom2nifti(): Host:   OUTPUT=${HOST_EXEC_DIR}/${NII_DIR}"
     print_info "dicom2nifti(): Docker: OUTPUT=${EXE_DIR}/${NII_DIR}"
     print_info "dicom2nifti() completed"
@@ -50,6 +49,7 @@ function dicom2nifti() {
 function rtpreproc() {
   print_info "rtpreproc() started"
   mkdir -p ${EXE_DIR}/${CSV_DIR}
+  chmod -R a+rw ${EXE_DIR}/${CSV_DIR}
   ## TODO: find out where prenii comes from?
 
   local pre_nii=${EXE_DIR}/4D_pre.nii
@@ -61,8 +61,10 @@ function rtpreproc() {
   time ${cmd_line}
   rtn_code=$?
   print_info "rtpreproc() user coding returned code=${rtn_code}"
-  ## ??print_info "mv /home/pgu6/realtime-closedloop/$CSV_OUTPUT /mount/wf-rt-closedloop/single-thread/csv/${CSV_OUTPUT}"
-  ##  ?? mv /home/pgu6/realtime-closedloop/$CSV_OUTPUT /mount/wf-rt-closedloop/single-thread/csv/${CSV_OUTPUT}
+  ## Per Yusen request to add following lines before the last real test
+  ## print_info "mv ${CONTAINER_HOME}/$CSV_OUTPUT /mount/wf-rt-closedloop/single-thread/csv/${CSV_OUTPUT}"
+  ## Yusen to verify following line
+  ##  ?? mv ${CONTAINER_HOME}/$CSV_OUTPUT ${EXE_DIR}/${CSV_DIR}/${CSV_OUTPUT}/${CSV_OUTPUT}
   ## generate NII_OUTPUT
   echo "File under CONTAINER_HOME=${CONTAINER_HOME}"
   ls ${CONTAINER_HOME}/
@@ -83,6 +85,7 @@ function optimizer() {
     local optimizer_output=optimizer_out.csv
     cd ${CONTAINER_HOME}
     mkdir -p ${EXE_DIR}/${CSV_DIR}
+    chmod -R a+rw ${EXE_DIR}/${CSV_DIR}
 
     ## python fMRI_Bayesian_optimization.py --savepath <csv-output-folder> --savename <csv-output-filename).csv --objectivepath <path to $CSV_OUTPUT  file>
     local cmd_line="python fMRI_Bayesian_optimization.py --savepath ${EXE_DIR}/${CSV_DIR} --savename ${optimizer_output} --objectivepath ${EXE_DIR}/${CSV_DIR}/${CSV_OUTPUT}"
@@ -130,11 +133,10 @@ DICOM_NAMEONLY=$( basename ${DICOM_INPUT} )
 WORKFLOW_ID=$3
 EXE_DIR=${CONTAINER_MOUNT}/${WORKFLOW_ID}
 mkdir -p ${EXE_DIR}
-chmod -R a+r ${EXE_DIR}
+chmod -R a+rw ${EXE_DIR}
 HOST_EXEC_DIR=${HOST_MOUNT}/${WORKFLOW_ID}
 
 dicom2nifti
 rtpreproc
-exit 0
 optimizer
 save_output

@@ -45,11 +45,11 @@ inside the container.
 **Developers** : Please create your testing scripts for your changes together with 
 required data files, so others can run your scripts successfully!!!
 
-###2. Optimizer
+### 2. Optimizer
  Optimizer source code is under directory `/labs/mahmoudilab/dev-synergy-rtcl-app/src/optimizer`
 If there are any libaries, packages, naming , etc. changes, the Dockerfile `Dockerfile.r2021b` requires modifications accordingly.
 
-###3. Matlab RT_Prepro 
+### 3. Matlab RT_Prepro 
 
 The folder is under `/labs/mahmoudilab/dev-synergy-rtcl-app/docker/rt_prepro`
 
@@ -110,7 +110,7 @@ The build details will output to the log file `build_push_docker.log`
 * If build succeeds, the new docker image should be created as `gcr.io/cloudypipelines-com/rt-closedloop` with new tag, 
 for example: `gcr.io/cloudypipelines-com/rt-closedloop:4.0`  for `IMAGE_TAG=4.0`
 
-## Workflow Pipeline
+## Pipeline Start, Stop, and Test
 
 Go to directory `/labs/mahmoudilab/dev-synergy-rtcl-app/workflow`
 
@@ -131,9 +131,15 @@ To make some host directories visible to the container or vice versa, the follow
 
 #### Testing 
 
- There is one testing script `test_by_dicom.sh` under directory `/labs/mahmoudilab/dev-synergy-rtcl-app/workflow`. This script can be used to test and troubleshoot the pipeline (dicom2nii - > RT_Prepro --> Optimizer).
+* Test by supplying dicom tar.gz file
 
-Developers can create your testing scripts and supply correct test data such as dicom files, 4D_pre.nii, subject_mask.nii, etc.
+  `$ ./test_by_dicom.sh`
+
+* Test by supplying csv configuration file
+
+  `$ ./test_by_csv_config.sh`  ( under development )
+
+**Developers**  Please create your testing scripts and supply correct test data such as dicom files, 4D_pre.nii, subject_mask.nii, etc., thus others can run your scripts successfully!!!
 
 ## Tips
 
