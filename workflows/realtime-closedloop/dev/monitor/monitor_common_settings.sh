@@ -1,5 +1,12 @@
+#!/bin/bash
 
+SCRIPT_NAME=$(basename -- "$0")
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+cd ${SCRIPT_DIR}
 source ../common_settings.sh
+
+echo "PROFILE=${PROFILE}"
 
 MONITOR_APP_JAR=rtcl-directory-monitor-${PROFILE}-${MONITOR_VERSION}.jar
 MONITOR_APP_LOG=/labs/mahmoudilab/synergy_remote_data1/logs/rtcl-directory-monitor-${PROFILE}-$(date -u +"%Y-%m-%d").log

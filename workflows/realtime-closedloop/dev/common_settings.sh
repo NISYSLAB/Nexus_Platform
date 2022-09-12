@@ -1,12 +1,16 @@
 
+export PROFILE=DEV
+
 #### Set IMAGE_TAG to new value for each new changes!!!
-IMAGE_TAG=4.0
-MONITOR_VERSION=2.1
-PROFILE=DEV
+export IMAGE_TAG=4.0
+export MONITOR_VERSION=2.1
+
 ####
-RELEASE_DIR=/labs/mahmoudilab/synergy-rtcl-app-release/docker-image
-CONTAINER_REGISTRY=gcr.io
-GCR_PATH=cloudypipelines-com
-IMAGE_NAME=rt-closedloop
+export RELEASE_DIR=/labs/mahmoudilab/synergy-rtcl-app-release/docker-image
+export CONTAINER_REGISTRY=gcr.io
+export GCR_PATH=cloudypipelines-com
+export IMAGE_NAME=rt-closedloop
+
+
 
 
