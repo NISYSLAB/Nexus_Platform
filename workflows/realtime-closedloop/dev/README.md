@@ -1,4 +1,4 @@
-# RealTime-CloseLoop Dev Environment
+# RealTime ClosedLoop Dev Environment
 
 #### VM
   `mahmoudilab-dev.priv.bmi.emory.edu`
