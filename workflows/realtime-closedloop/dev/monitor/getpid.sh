@@ -11,7 +11,8 @@ function get_monitor_instance() {
     echo "ps -eaf | grep rtcl-directory-monitor-DEV | grep java | grep jar"
     ps -eaf | grep rtcl-directory-monitor-DEV | grep java | grep jar
     process_id=$( ps -eaf | grep rtcl-directory-monitor-DEV | grep java | grep jar | awk '{print $2}' )
-    echo "current  monitor instance process_id=$process_id"
+    [[ -z "$process_id" ]] && { echo "Monitor is not running"; return 0; }
+    echo "Monitor is running, process_id=$process_id"
 }
 
 #### Main starts

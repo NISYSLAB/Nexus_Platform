@@ -1,5 +1,6 @@
-
 export PROFILE=DEV
+whichhost=$(hostname)
+[[ ${whichhost} != "mahmoudilab-dev.priv.bmi.emory.edu" ]] && { echo ""; echo "Run ${PROFILE} Service is Prohibited in ${whichhost}!!!"; echo ""; exit 1; }
 
 #### Set IMAGE_TAG to new value for each new changes!!!
 export IMAGE_TAG=4.0

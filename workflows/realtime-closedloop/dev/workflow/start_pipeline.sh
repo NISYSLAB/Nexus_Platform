@@ -17,10 +17,11 @@ function cleanup() {
 
 function create_container() {
   echo "Creating container: ${CONTAINER_NAME}"
-  mkdir -p ${HOST_MOUNT}
-  chmod -R a+rw ${HOST_MOUNT}
+  ## mkdir -p ${HOST_MOUNT}/rt_prepro
+  ## chmod -R a+rw ${HOST_MOUNT}/rt_prepro
   docker run --entrypoint /bin/bash \
         -v "${HOST_MOUNT}/":${CONTAINER_MOUNT}/ \
+        -v "/labs/mahmoudilab/dev-synergy-rtcl-app/src/rt_prepro":/labs/mahmoudilab/dev-synergy-rtcl-app/src/rt_prepro \
         --name ${CONTAINER_NAME}  \
         -e "DISK_MOUNTS=${DISK_MOUNTS}" \
         -e TASK_CALL_NAME=${TASK_CALL_NAME} \
