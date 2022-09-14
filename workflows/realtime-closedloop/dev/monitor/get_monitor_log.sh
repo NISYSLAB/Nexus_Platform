@@ -10,6 +10,6 @@ source ./monitor_common_settings.sh
 dir="$( dirname "${MONITOR_APP_LOG}" )"
 echo "Monitor Log Directory: ${dir}"
 whichone=$( ls -t ${dir}/rtcl-directory-monitor-${PROFILE}*.log )
-echo "Latest Log: ${whichone}"
+echo "Latest Monitor Log: ${whichone}"
 echo "Run: tail -f ${whichone}"
 

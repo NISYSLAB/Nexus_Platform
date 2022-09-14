@@ -21,6 +21,10 @@ Go to directory `/labs/mahmoudilab/dev-synergy-rtcl-app/monitor`
 
   `$ ./stop_monitor.sh`
 
+#### Configurations
+The Listener's runtime behaviors can be managed through the configurations. 
+The configurations can be changed in configurations file `/labs/mahmoudilab/dev-synergy-rtcl-app/monitor/monitor_common_settings.sh`
+
 ## Application Components
 
 ### 1. dicom2nii
@@ -33,6 +37,9 @@ The name of the instance is `dicom2nii-DEV`, you can enter the container
 by the command:
 
 `$ docker exec -it dicom2nii-DEV /bin/bash`
+
+or the script
+`$ ./enter_d2n_container.sh`
 
 #### Stop dicom2nii container
   `$./stop_dicom2nii.sh`
@@ -127,7 +134,21 @@ type `exit` to exit the pipeline
 
 #### Volume Mounting Options
 To make some host directories visible to the container or vice versa, the following volume is mounted in the current directory when the pipeline starts: 
- `mount (host) - /mount (container)`
+ * `mount (host) - /mount (container)`
+ 
+  this mounting is used for data file input and outputs
+
+ * `/labs/mahmoudilab/dev-synergy-rtcl-app/src/rt_prepro (host) - /labs/mahmoudilab/dev-synergy-rtcl-app/src/rt_prepro (container)`
+ 
+  this mounting is ued for debugging/troubleshooting
+
+#### Make files in the host directory available inside the container
+Take the Matlab binary `RT_Preproc` as an example
+* Inside the container: 
+  `cp /labs/mahmoudilab/dev-synergy-rtcl-app/src/rt_prepro/RT_Preproc /synergy-rtcl-app/`
+* Outside the container
+  `docker cp /labs/mahmoudilab/dev-synergy-rtcl-app/src/rt_prepro/RT_Preproc realtime-closedloop-DEV:/synergy-rtcl-app/`
+ 
 
 #### Testing 
 
@@ -147,3 +168,19 @@ To make some host directories visible to the container or vice versa, the follow
 * The docker container name in Dev is called `realtime-closedloop-DEV`. 
 * All execution scripts and libraries inside the container are under the directory `/synergy-rtcl-app`, such as `CanlabCore,  dcm2niix,  dicom_pypreprocess.py,  fMRI_Bayesian_optimization.py,  Neu3CA-RT,  output_randomcsv.py,  requirements.txt,  RT_Preproc,  run_RT_Preproc.sh, and   spm12`
 * You can also enter the docker container by the command `$ docker exec -it realtime-closedloop-DEV /bin/bash` or by the script `./enter_pipeline.sh` under workflow directory.
+* Useful docker commands https://docs.docker.com/engine/reference/commandline/docker/
+  * List containers: `docker ps` or `docker ps -a`
+  * List images `docker images`
+  * Stop one or more running containers: `docker stop my-container`
+  * Remove one or more containers: `docker rm my-contaiber`
+  * Run a command in a running container : `docker exec ...`
+
+## Design Principles
+There are many principles in software/systems designs, here are some:
+* Single Responsibility
+* Divide and Conquer
+* Design for Testability
+* Design for Portability
+* Design for Flexibility
+* Increase Reusability
+* and more ...
