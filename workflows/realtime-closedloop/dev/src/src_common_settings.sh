@@ -1,3 +1,3 @@
 
-source ../common_settings.
+source ../common_settings.sh
 
