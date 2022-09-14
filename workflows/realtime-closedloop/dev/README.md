@@ -134,21 +134,23 @@ type `exit` to exit the pipeline
 
 #### Volume Mounting Options
 To make some host directories visible to the container or vice versa, the following volume is mounted in the current directory when the pipeline starts: 
+
+For data file input and outputs
  * `mount (host) - /mount (container)`
  
-  this mounting is used for data file input and outputs
+ For debugging/troubleshooting
 
  * `/labs/mahmoudilab/dev-synergy-rtcl-app/src/rt_prepro (host) - /labs/mahmoudilab/dev-synergy-rtcl-app/src/rt_prepro (container)`
- 
-  this mounting is ued for debugging/troubleshooting
 
 #### Make files in the host directory available inside the container
 Take the Matlab binary `RT_Preproc` as an example
-* Inside the container: 
+* Inside the container
+
   `cp /labs/mahmoudilab/dev-synergy-rtcl-app/src/rt_prepro/RT_Preproc /synergy-rtcl-app/`
+
 * Outside the container
+
   `docker cp /labs/mahmoudilab/dev-synergy-rtcl-app/src/rt_prepro/RT_Preproc realtime-closedloop-DEV:/synergy-rtcl-app/`
- 
 
 #### Testing 
 
@@ -176,11 +178,11 @@ Take the Matlab binary `RT_Preproc` as an example
   * Run a command in a running container : `docker exec ...`
 
 ## Design Principles
-There are many principles in software/systems designs, here are some:
+Some principles in software/systems designs
 * Single Responsibility
 * Divide and Conquer
-* Design for Testability
-* Design for Portability
-* Design for Flexibility
+* Testability
+* Portability
+* Flexibility
 * Increase Reusability
-* and more ...
+* and  ...
