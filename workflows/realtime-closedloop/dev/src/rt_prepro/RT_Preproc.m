@@ -2,7 +2,8 @@ function completed = rtPreproc(niifullname,prefullname,maskfullname,outfullname)
 % This script preprocesses the data in the real-time experiment 
 %Based on neu3ca_rt: https://doi.org/10.1016/j.pscychresns.2018.09.008
 %Shabnam Hossein 
-%August 2022
+%September 2022
+%I have issues with the motion GLM so this version is bypassing that.
 %--------------------------------------------------------------------------
 % INITIALISATION 
 %--------------------------------------------------------------------------
@@ -13,7 +14,6 @@ function completed = rtPreproc(niifullname,prefullname,maskfullname,outfullname)
 functional4D_fn     = prefullname;
 functional0_fn      =   [functional4D_fn ',1'];
 wROI_mask = maskfullname;
-
 %%
 %Scan Parameters
 TR = 2.0;
@@ -91,14 +91,17 @@ for i = 1:trial_length
 end
 % % STEP 4: GLM 
 % Correcting for movement parameter residuals and drifts
-X_t = [MP (1:trial_length)' (1:trial_length)'.^2]; % Regressors include movement parameters and linear and quadratic drift terms
-X_t = X_t - repmat(mean(X_t),trial_length,1); % Demean the design matrix
-X_t = X_t./repmat(std(X_t),trial_length,1); % Normalise the design matrix for std
-X_t = [X_t ones(trial_length,1)]; % Add a DC regressor
-rF_corrected = rF' - X_t*(X_t\rF'); % Regressing out the above corrections
+%X_t = [MP (1:trial_length)' (1:trial_length)'.^2]; % Regressors include movement parameters and linear and quadratic drift terms
+%X_t = X_t - repmat(mean(X_t),trial_length,1); % Demean the design matrix
+%X_t = X_t./repmat(std(X_t),trial_length,1); % Normalise the design matrix for std
+%X_t = [X_t ones(trial_length,1)]; % Add a DC regressor
+%X_t = [MP];
+%rF_corrected = rF' - X_t*(X_t\rF'); % Regressing out the above corrections
+rF_corrected=rF';
 
 % % STEP 5: Reward Signature
-obj = fmri_data(wROI_mask);
+Reward_sig = [data_dir filesep 'wRewSig_Z_map.nii'];
+obj = fmri_data(wROI_mask, dynamic_fn);
 Reward_sig_averages = {};
 for i=1:trial_length
 %     cd(sub_dir);
@@ -110,12 +113,9 @@ for i=1:trial_length
     spm_write_vol(test,rf_corrected);
     rf_corrected_fn = [pwd filesep 'rf_corrected.nii'];
     %converting the corrected data and the mask to fmri_data objects using Canlabcore
-    rf_corrected_fn_fmri_data = fmri_data(rf_corrected_fn);
+    rf_corrected_fn_fmri_data = fmri_data(rf_corrected_fn, dynamic_fn);
     cs = apply_mask(rf_corrected_fn_fmri_data, obj, 'pattern_expression', 'cosine_similarity');
     Reward_sig_averages{i} = cs;
 end
 mat = cell2mat(Reward_sig_averages);
-csvwrite('average_Reward_sig.csv', mean(mat,2));
-completed = 1;
-end
-
+csvwrite(outfullname, mean(mat,2));
