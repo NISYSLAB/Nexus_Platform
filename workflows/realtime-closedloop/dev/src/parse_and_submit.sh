@@ -2,7 +2,8 @@
 
 ###########################################################################
 ## This script is to monitor any new csv file added to the folder or subfolders
-## or any changes to the existing csv files
+## or any changes to the existing csv files, then try to parse the file to see 
+## if it is config, and gather input files & submit to workflow if format agrees
 ###########################################################################
 
 SCRIPT_NAME=$(basename -- "$0")
@@ -14,7 +15,7 @@ source ./workflow_common_settings.sh
 ####
 PROFILE=DEV
 
-#### configurations  should be replaced with the real one in TASK server
+#### configurations should be replaced with the real one in TASK server
 ## BMI
 
 MONITORING_IMAGE_DIR_ROOT=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_dir/samba_emory_siemens_scanner
@@ -25,7 +26,7 @@ TMP_DIR=${MONITORING_PROCESSED_DIR}/rtcl_call
 mkdir -p ${TMP_DIR}
 
 WF_LOG_DIR=/labs/mahmoudilab/synergy_remote_data1/${PROFILE}-logs/rtcl
-EXE_ENTRY_DIR=/home/yzhu382/dev-synergy-rtcl-app/components/workflows/rtfmri_2docker
+EXE_ENTRY_DIR=/home/yzhu382/dev-synergy-rtcl-app/workflow
 RUN_RTCP_PIPELINE_SCRIPT=submit_non_cromwell.sh
 RTCP_RUNTIME_DEFAULT_SETTINGS=${EXE_ENTRY_DIR}/rtcp_default_settings.conf
 RTCP_RUNTIME_USER_SETTINGS=${EXE_ENTRY_DIR}/RTCP_RUNTIME_USER_SETTINGS.conf

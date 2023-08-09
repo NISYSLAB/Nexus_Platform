@@ -10,11 +10,11 @@ NII_DIR="nii"
 CSV_DIR="csv"
 NII_OUTPUT="nii.tar.gz"
 
-HOST_MOUNT="/home/yzhu382/dev-synergy-rtcl-app/workflow/mount"
-CONTAINER_MOUNT="/mount"
+CONTAINER_MOUNT="/mount_rtpreprocess"
 
 CONTAINER_HOME=/home/yzhu382/dev-synergy-rtcl-app/src/rt_prepro
-TASK_CALL_NAME=wf-rt-closedloop
+
+source ${CONTAINER_MOUNT}/rtpreprocess_SETTINGS.conf
 
 #### functions
 function print_info() {
@@ -30,10 +30,10 @@ function dicom2nifti() {
     chmod -R a+rw ${NII_DIR}
     rm -rf ${DICOM_DIR}/*.*
     rm -rf ${NII_DIR}/*.*
-    cp ${DICOM_INPUT} ${DICOM_DIR}/${DICOM_NAMEONLY}
+    cp ${DICOM_INPUT} ${DICOM_DIR}/${DICOM_INPUT}
 
-    cd ${DICOM_DIR} && tar -xvf ${DICOM_NAMEONLY}
-    rm -f ${DICOM_NAMEONLY}
+    cd ${DICOM_DIR} && tar -xvf ${DICOM_INPUT}
+    rm -f ${DICOM_INPUT}
 
     cd ${CONTAINER_HOME}
     local command="./dcm2niix -o ${EXE_DIR}/${NII_DIR} -f D4_dcm2nii ${EXE_DIR}/${DICOM_DIR}"
@@ -41,7 +41,6 @@ function dicom2nifti() {
     time ${command}
     rtn_code=$?
     print_info "dicom2nifti() user coding returned code=${rtn_code}"
-    print_info "dicom2nifti(): Host:   OUTPUT=${HOST_EXEC_DIR}/${NII_DIR}"
     print_info "dicom2nifti(): Docker: OUTPUT=${EXE_DIR}/${NII_DIR}"
     print_info "dicom2nifti() completed"
 }
@@ -75,33 +74,8 @@ function rtpreproc() {
 
   ##tar -czf ${NII_OUTPUT} ${NII_DIR} && rm -rf ${NII_DIR}
   chmod a+w ${EXE_DIR}/${CSV_DIR}/*.*
-  print_info "rtpreproc(): Host:  OUTPUT=${HOST_EXEC_DIR}/${CSV_DIR}/${CSV_OUTPUT}"
   print_info "rtpreproc(): Docker:OUTPUT=${EXE_DIR}/${CSV_DIR}/${CSV_OUTPUT}"
   print_info "rtpreproc(): completed"
-}
-
-function optimizer() {
-    print_info "optimizer() started"
-    local optimizer_output=optimizer_out.csv
-    cd ${CONTAINER_HOME}
-    mkdir -p ${EXE_DIR}/${CSV_DIR}
-    chmod -R a+rw ${EXE_DIR}/${CSV_DIR}
-
-    ## python fMRI_Bayesian_optimization.py --savepath <csv-output-folder> --savename <csv-output-filename).csv --objectivepath <path to $CSV_OUTPUT  file>
-    local cmd_line="python fMRI_Bayesian_optimization.py --savepath ${EXE_DIR}/${CSV_DIR} --savename ${optimizer_output} --objectivepath ${EXE_DIR}/${CSV_DIR}/${CSV_OUTPUT}"
-
-    print_info "Calling: time ${cmd_line}"
-    time ${cmd_line}
-    ## time python output_randomcsv.py --savepath ${EXE_DIR}/${CSV_DIR} --savename ${CSV_OUTPUT}
-    rtn_code=$?
-    print_info "optimizer() user coding returned code=${rtn_code}"
-    print_info "Files in directory: ${EXE_DIR}/${CSV_DIR}/" && ls ${EXE_DIR}/${CSV_DIR}
-
-    ## print_info "CSV_OUTPUT=${HOST_EXEC_DIR}/${CSV_DIR}/${CSV_OUTPUT}"
-    chmod a+w ${EXE_DIR}/${CSV_DIR}/*.*
-    print_info "optimizer(): Host:   OUTPUT=${HOST_EXEC_DIR}/${CSV_DIR}/${optimizer_output}"
-    print_info "optimizer(): Docker: OUTPUT=${EXE_DIR}/${CSV_DIR}/${optimizer_output}"
-    print_info "optimizer() completed"
 }
 
 function save_output() {
@@ -111,7 +85,6 @@ function save_output() {
   print_info "tar -czf ${save_zip} ${DICOM_DIR} ${NII_DIR} ${CSV_DIR}"
   tar -czf ${save_zip} ${DICOM_DIR} ${NII_DIR} ${CSV_DIR}
 
-  print_info "save_output(): Host:   OUTPUT=${HOST_EXEC_DIR}/${save_zip}"
   print_info "save_output(): Docker: OUTPUT=${EXE_DIR}/${save_zip}"
 }
 
@@ -129,15 +102,13 @@ fi
 
 DICOM_INPUT=$1
 CSV_OUTPUT=$2
-DICOM_NAMEONLY=$( basename ${DICOM_INPUT} )
 WORKFLOW_ID=$3
 EXE_DIR=${CONTAINER_MOUNT}/${TASK_CALL_NAME}/${WORKFLOW_ID}
 mkdir -p ${EXE_DIR}
 chmod -R a+rw ${EXE_DIR}
-TASK_CALL_NAME=wf-rt-closedloop
-HOST_EXEC_DIR=${HOST_MOUNT}/${TASK_CALL_NAME}/${WORKFLOW_ID}
+## This is set in component config
+# TASK_CALL_NAME=wf-rt-closedloop
 
 dicom2nifti
 rtpreproc
-optimizer
 save_output

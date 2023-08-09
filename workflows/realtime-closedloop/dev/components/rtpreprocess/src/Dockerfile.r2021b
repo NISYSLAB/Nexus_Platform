@@ -7,28 +7,24 @@ ENV MCRROOT /opt/mcr/${MCR_NUM}
 ENV BASE_DIR /home/yzhu382/dev-synergy-rtcl-app/src/rt_prepro
 WORKDIR ${BASE_DIR}
 
-ENV DCM2NII_INSTALLER https://github.com/rordenlab/dcm2niix/releases/download/v1.0.20211006/dcm2niix_lnx.zip
-
 USER root
 #### Main starts
 
-## for optimizer
-COPY ["optimizer/*.py","optimizer/requirements.txt", "${BASE_DIR}/"]
-RUN pip install -r requirements.txt && \
-    pip install numpy dicom_numpy && \
-    pip install -U pip setuptools && \
-    pip --no-cache-dir install pydicom nibabel
+## execution script
+COPY exec_one.sh ${BASE_DIR}/
 
-## for rt_preproc
-#COPY rt_prepro/CanlabCore.tar.gz ${BASE_DIR}/
-#COPY rt_prepro/spm12.tar.gz ${BASE_DIR}/
+## for rt_preproc - we dont need the libraries in the docker
+# COPY rt_prepro/CanlabCore.tar.gz ${BASE_DIR}/
+# COPY rt_prepro/spm12.tar.gz ${BASE_DIR}/
 COPY rt_prepro/RT_Preproc ${BASE_DIR}/
 COPY rt_prepro/run_RT_Preproc.sh ${BASE_DIR}/
-#COPY rt_prepro/Neu3CA-RT.tar.gz ${BASE_DIR}/
+# OPY rt_prepro/Neu3CA-RT.tar.gz ${BASE_DIR}/
 
-#RUN cd ${BASE_DIR} && tar -xzf CanlabCore.tar.gz && rm -rf CanlabCore.tar.gz \
+# RUN cd ${BASE_DIR} && tar -xzf CanlabCore.tar.gz && rm -rf CanlabCore.tar.gz \
 #    && tar -xzf spm12.tar.gz && rm -rf spm12.tar.gz && chmod a+x run_RT_Preproc.sh && chmod a+x RT_Preproc \
 #    && tar -xzf Neu3CA-RT.tar.gz && rm -rf Neu3CA-RT.tar.gz
+
+# RUN mv ./CanlabCore/CanlabCore ./
 
 #### matlab code: rt_preproc
 ## https://ssd.mathworks.com/supportfiles/downloads/R2021b/Release/2/deployment_files/installer/complete/glnxa64/MATLAB_Runtime_R2021b_Update_2_glnxa64.zip

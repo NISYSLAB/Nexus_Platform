@@ -1,0 +1,25 @@
+FROM centos/python-38-centos7:20210726-fad62e9
+
+# ENV MCR_VERSION R2021b
+# ENV MCR_NUM     v911
+ENV MCRROOT /opt/mcr/${MCR_NUM}
+#ENV BASE_DIR /synergy-rtcl-app
+ENV BASE_DIR /home/yzhu382/dev-synergy-rtcl-app/src/rt_prepro
+WORKDIR ${BASE_DIR}
+
+USER root
+#### Main starts
+
+## execution script
+COPY exec_one.sh ${BASE_DIR}/
+
+## for optimizer
+COPY ["optimizer/*.py","optimizer/requirements.txt", "${BASE_DIR}/"]
+## copy execution file here
+RUN yum -y update \
+    && yum install -y wget curl xorg unzip which mesa-libGL libgl1-mesa-glx libxtst6 libxt6 libglu1 libxrandr2 libXt libsndfile \
+    && yum -y update \
+    && pip install -r requirements.txt \
+    && pip install numpy dicom_numpy \
+    && pip install -U pip setuptools \
+    && pip --no-cache-dir install pydicom nibabel

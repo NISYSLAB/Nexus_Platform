@@ -17,7 +17,7 @@ mkdir -p ${monitoring_directory}
 export event_on_file_change=true
 export event_on_file_delete=false
 export event_on_file_create=true
-export execution_script=/labs/mahmoudilab/dev-synergy-rtcl-app/workflow/parse_and_submit.sh
+export execution_script=/home/yzhu382/dev-synergy-rtcl-app/workflow/parse_and_submit.sh
 export execution_folder=/tmp/synergy/executions
 
 ## Make sure only one thread

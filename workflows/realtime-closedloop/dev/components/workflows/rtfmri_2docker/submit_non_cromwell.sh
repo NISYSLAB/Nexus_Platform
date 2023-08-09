@@ -4,7 +4,7 @@ SCRIPT_NAME=$(basename -- "$0")
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 #### for runtime configurations
-SUBMIT_EXE_DIR=/home/yzhu382/dev-synergy-rtcl-app/workflow
+SUBMIT_EXE_DIR=${SCRIPT_DIR}
 RTCP_RUNTIME_DEFAULT_SETTINGS=${SUBMIT_EXE_DIR}/rtcp_default_settings.conf
 RTCP_RUNTIME_USER_SETTINGS=${SUBMIT_EXE_DIR}/RTCP_RUNTIME_USER_SETTINGS.conf
 
@@ -13,14 +13,21 @@ source ${RTCP_RUNTIME_DEFAULT_SETTINGS}
 source ${RTCP_RUNTIME_USER_SETTINGS}
 env |grep "RTCP_"
 
+source ./workflow_common_settings.sh
+
 #### global settings
-CONTAINER_NAME=realtime-closedloop-DEV
-MOUNT=${SUBMIT_EXE_DIR}/mount
-CONTAINER_MOUNT=/mount
-CONTAINER_HOME=/home/yzhu382/dev-synergy-rtcl-app/src/rt_prepro
-EXEC_SCRIPT=${SUBMIT_EXE_DIR}/exec_one.sh
-DISK_MOUNTS="${MOUNT}"
+COMP1_NAME="rtpreprocess"
+COMP2_NAME="bayes_opt_simple"
+CONTAINER_NAME_COMP1=${WORKFLOW_NAME}-${COMP1_NAME}-${PROFILE}
+CONTAINER_NAME_COMP2=${WORKFLOW_NAME}-${COMP2_NAME}-${PROFILE}
+MOUNT_COMP1=${SUBMIT_EXE_DIR}/mount_${COMP1_NAME}
+MOUNT_COMP2=${SUBMIT_EXE_DIR}/mount_${COMP2_NAME}
+CONTAINER_MOUNT_COMP1=/mount_${COMP1_NAME}
+CONTAINER_MOUNT_COMP2=/mount_${COMP2_NAME}
+COMP1_SETTINGS=${SUBMIT_EXE_DIR}/${COMP1_NAME}_SETTINGS.conf
+COMP2_SETTINGS=${SUBMIT_EXE_DIR}/${COMP2_NAME}_SETTINGS.conf
 TASK_CALL_NAME=wf-rt-closedloop
+
 MAX_PROC=1
 PRE_4D_NII=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_dir/image/${RTCP_PRE_4D_NII}
 SUBJECT_MASK_NII=/labs/mahmoudilab/synergy_remote_data1/emory_siemens_scanner_in_dir/image/${RTCP_SUBJECT_MASK_NII}
@@ -61,22 +68,52 @@ function print_warning() {
 }
 
 function submit_job(){
-  local host_exec_dir=${MOUNT}/${TASK_CALL_NAME}/${WORKFLOW_ID}
+  ## logic: copy input and config to container 1, call container 1 exec script with input/ output, copy to container 2, call, push
+  local host_exec_dir=${SUBMIT_EXE_DIR}/execution/${TASK_CALL_NAME}/${WORKFLOW_ID}
   mkdir -p ${host_exec_dir} && chmod a+wx ${host_exec_dir}
   cp ${PRE_4D_NII} ${host_exec_dir}/4D_pre.nii
   cp ${SUBJECT_MASK_NII} ${host_exec_dir}/subject_mask.nii
-  ## exec scrpt
-  local nameonly_exec_script=$( basename ${EXEC_SCRIPT} )
-  cp ${EXEC_SCRIPT} ${host_exec_dir}/${nameonly_exec_script}
+  local comp1_host_exec_dir=${MOUNT_COMP1}/${TASK_CALL_NAME}/${WORKFLOW_ID}
+  local comp2_host_exec_dir=${MOUNT_COMP2}/${TASK_CALL_NAME}/${WORKFLOW_ID}
+  local comp1_exec_dir=${CONTAINER_MOUNT_COMP1}/${TASK_CALL_NAME}/${WORKFLOW_ID}
+  local comp2_exec_dir=${CONTAINER_MOUNT_COMP2}/${TASK_CALL_NAME}/${WORKFLOW_ID}
+  mkdir -p ${comp1_host_exec_dir} && chmod a+wx ${host_exec_dir}
+  mkdir -p ${comp2_host_exec_dir} && chmod a+wx ${host_exec_dir}
+
+
   ## dicom input
   cp ${imagePath} ${host_exec_dir}/${nameonly}
 
-  local exe_dir=${CONTAINER_MOUNT}/${TASK_CALL_NAME}/${WORKFLOW_ID}
+  ## copy mask files to container 1
+  cp ${host_exec_dir}/4D_pre.nii ${comp1_host_exec_dir}/4D_pre.nii
+  cp ${host_exec_dir}/subject_mask.nii ${comp1_host_exec_dir}/subject_mask.nii
+  cp ${COMP1_SETTINGS} ${MOUNT_COMP1}
 
-  local cmdArgs="${exe_dir}/${nameonly_exec_script} ${exe_dir}/${nameonly} ${csvfilename} ${WORKFLOW_ID}"
-  print_info "docker exec ${CONTAINER_NAME} ${cmdArgs}"
-  docker exec ${CONTAINER_NAME} ${cmdArgs} 2>&1 | tee -a ${host_exec_dir}/process_$( date +'%Y-%m-%d' ).log
-  print_info "finalOutput=${host_exec_dir}/csv/${optimizer_output}"
+  ## copy input to container 1
+  cp ${host_exec_dir}/${nameonly} ${comp1_host_exec_dir}/${nameonly}
+  
+  ## call container 1
+  local cmdArgs="${CONTAINER_HOME}/${EXEC_SCRIPT} ${nameonly} ${csvfilename} ${WORKFLOW_ID}"
+  print_info "docker exec ${CONTAINER_NAME_COMP1} ${cmdArgs}"
+  echo "calling container 1"
+  time docker exec ${CONTAINER_NAME_COMP1} ${cmdArgs} 2>&1 | tee -a ${host_exec_dir}/process_$( date +'%Y-%m-%d' ).log 
+
+  ## copy config files to container 2
+  cp ${COMP2_SETTINGS} ${MOUNT_COMP2}
+
+  ## copy input to container 2
+  cp ${comp1_host_exec_dir}/csv/${csvfilename} ${comp2_host_exec_dir}/csv/${csvfilename}
+  
+  ## call container 2
+  local cmdArgs="${CONTAINER_HOME}/${EXEC_SCRIPT} ${csvfilename} ${optimizer_output} ${WORKFLOW_ID}"
+  print_info "docker exec ${CONTAINER_NAME_COMP2} ${cmdArgs}"
+  echo "calling container 2"
+  time docker exec ${CONTAINER_NAME_COMP2} ${cmdArgs} 2>&1 | tee -a ${host_exec_dir}/process_$( date +'%Y-%m-%d' ).log 
+  
+  ## copy container 2 output
+  cp ${comp2_host_exec_dir}/csv/${optimizer_output} ${host_exec_dir}/csv/${optimizer_output}
+
+  ## push
   push_2_remote ${host_exec_dir}/csv/${optimizer_output}
 }
 
@@ -94,8 +131,6 @@ fi
 
 imagePath=$1
 nameonly=$(basename -- "$imagePath")
-##csvfilename="${nameonly%.*}"
-##csvfilename="${csvfilename%.*}".csv
 csvfilename=average_Reward_sig.csv
 WORKFLOW_ID=$(uuidgen)
 [[ "$MAX_PROC" == 1 ]] && WORKFLOW_ID="single-thread"

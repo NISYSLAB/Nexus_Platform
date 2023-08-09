@@ -6,7 +6,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 cd ${SCRIPT_DIR}
 
-source ./src_common_settings.sh
+source ./src_settings.sh
 
 ####
 function build_image() {
@@ -55,9 +55,10 @@ function check_and_get() {
 
 function get_dependencies(){
     cd ${SCRIPT_DIR}
-    check_and_get CanlabCore
-    check_and_get Neu3CA-RT
-    check_and_get spm12
+    ## these libraries should be packed into compiled matlab executable
+    # check_and_get CanlabCore
+    # check_and_get Neu3CA-RT
+    # check_and_get spm12
 }
 
 function build_on_cloudypipelines() {
