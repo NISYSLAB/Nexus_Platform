@@ -34,3 +34,6 @@ keras_uniform0.npy
 .gitignore
 workflows/neurolib_simulation.7z
 .vscode/settings.json
+workflows/neurolib_simulation/*.err
+workflows/neurolib_simulation/*.out
+workflows/neurolib_simulation/neurolib_simulation.7z

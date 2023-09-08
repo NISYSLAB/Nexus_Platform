@@ -2,11 +2,12 @@ import os
 import numpy as np
 import scipy
 import neurolib
+from collections import deque
 from neurolib.models.aln import ALNModel
 import neurolib.utils.functions as func
 from neurolib.utils.loadData import Dataset
 ds = Dataset("gw")
-num_subjects = 10  # number of subjects in each group
+num_subjects = 100  # number of subjects in each group
 subject_sigma = 0.002  # right now we use percentage based variance on all connections
 rng = np.random.default_rng()
 
@@ -30,7 +31,7 @@ cmat_base = [cmat_healthy,cmat_patient]
 dmat_base = [dmat_healthy,dmat_patient]
 labels = [0,1]
 num_groups = len(cmat_base)
-subject_list = []
+subject_list = deque((),num_subjects*num_groups)
 for i in range(num_groups):
     for j in range(num_subjects):
         subject_list.append(subject(cmat_base[i],dmat_base[i],labels[i],subject_sigma))
@@ -39,7 +40,7 @@ output_bold = np.empty((len(subject_list),len(ds.Cmat)))
 output_label = np.empty((len(subject_list)))     
 for i in range(len(subject_list)):
     print('Creating subject {}'.format(i))
-    s = subject_list[i]
+    s = subject_list.popleft()
     model = s.model
     # model = ALNModel(Cmat = ds.Cmat, Dmat = ds.Dmat)
 
@@ -58,6 +59,9 @@ for i in range(len(subject_list)):
     bold = np.average(bold[:,-15:],1)  # bold is 0.5hz in neurolib, we take the average of last 30 secs
     output_bold[i,:] = bold
     output_label[i]=s.label
+    # Seems like memory might be problematic
+    del model
+    del s
 
 
 # shape of output: num_subject*num_groups, fmri_dimension

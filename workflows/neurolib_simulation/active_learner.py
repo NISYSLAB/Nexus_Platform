@@ -13,10 +13,10 @@ from tensorflow.python.keras.backend import eager_learning_phase_scope
 X = np.load('output_bold.npy')
 y = np.load('output_label.npy')
 num_classes = 2
-num_init = 5  # amount of initial sample from each class
+num_init = 10  # amount of initial sample from each class
 num_MCsamples = 100  # amount of repeats for mc sampling
-num_epochs = 1000   # amount of epochs to go through the training set
-num_queries = 5     # amount of new queries to add to training set
+num_epochs = 500   # amount of epochs to go through the training set
+num_queries = 20     # amount of new queries to add to training set
 num_batch = 1       # batch size
 num_instances = 1   # amount of new sample each query
 # 10-fold cross validation with 20% test
@@ -130,24 +130,24 @@ for i, (train_index, test_index) in enumerate(sss.split(X, y)):
     X_test = X[test_index,:]
     y_test = y[test_index]
 
-    ## train on entire training set as maximum 
-    # model = build_model()
-    # # 300 epochs seem good for num_subject = 10
-    # history = model.fit(X_train, y_train, epochs=1000, validation_data=(X_test, y_test),verbose=1)
-    # np.save("entire_set_fold{0}.npy".format(i),history)
+    # train on entire training set as maximum 
+    model = build_model()
+    # 300 epochs seem good for num_subject = 10
+    history = model.fit(X_train, y_train, epochs=1000, validation_data=(X_test, y_test),verbose=1)
+    np.save("entire_set_fold{0}.npy".format(i),history)
 
-    # ## random sampling
-    # X_initial,y_initial,X_pool,y_pool = init_sample(X_train,y_train)
-    # estimator = KerasClassifier(build_model)
-    # uniform_perf_hist = active_learning_procedure(uniform,
-    #                                             X_test,
-    #                                             y_test,
-    #                                             X_pool,
-    #                                             y_pool,
-    #                                             X_initial,
-    #                                             y_initial,
-    #                                             estimator,)
-    # np.save("keras_uniform{0}.npy".format(i), uniform_perf_hist)
+    ## random sampling
+    X_initial,y_initial,X_pool,y_pool = init_sample(X_train,y_train)
+    estimator = KerasClassifier(build_model)
+    uniform_perf_hist = active_learning_procedure(uniform,
+                                                X_test,
+                                                y_test,
+                                                X_pool,
+                                                y_pool,
+                                                X_initial,
+                                                y_initial,
+                                                estimator,)
+    np.save("keras_uniform{0}.npy".format(i), uniform_perf_hist)
 
     ## maximum entropy
     X_initial,y_initial,X_pool,y_pool = init_sample(X_train,y_train)
