@@ -29,11 +29,13 @@
 **/tmp
 **/my_*
 **/my-*
-entire_set_fold0.npy
-keras_uniform0.npy
+**/__pycache__
 .gitignore
 workflows/neurolib_simulation.7z
 .vscode/settings.json
 workflows/neurolib_simulation/*.err
 workflows/neurolib_simulation/*.out
 workflows/neurolib_simulation/neurolib_simulation.7z
+workflows/neurolib_simulation/subjects
+workflows/neurolib_simulation/*.npz
+workflows/neurolib_simulation/*.keras

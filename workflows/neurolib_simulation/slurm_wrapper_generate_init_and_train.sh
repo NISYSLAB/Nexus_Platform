@@ -57,7 +57,7 @@
 ###
 ### The format can be "minutes", "hours:minutes:seconds", "days-hours", or "days-hours:minutes:seconds".
 ### By default, jobs will run for 8 hours if this isn't specified.
-#SBATCH -t 18:0:0
+#SBATCH -t 20:0:0
 
 
 ### (optional) Output and error file definitions. To have all output in a file named
@@ -75,7 +75,7 @@
 ###                       your job's available memory will be limited to a default value
 ###                       which may not be high enough for your code to run successfully.
 ###                       This value is for the amount of RAM per computational node.
-#SBATCH --mem 4G
+#SBATCH --mem 20G
 
 ### (REQUIRED)
 ### Request 4 cpus/threads - Specify a value for this function if you know your code uses
@@ -85,7 +85,7 @@
 ###                          that Matlab is limited to using up to 15 threads per node due to
 ###                          licensing restrictions imposed by the Matlab software.
 
-#SBATCH -n 2
+#SBATCH -n 4
 
 ### (optional)
 ### Request 2 cpus/threads per task - This differs from the "-n" parameter above in that it
@@ -94,7 +94,7 @@
 ###                                   parameter if you need to dedicate multiple threads to a
 ###                                   single program/application rather than running multiple
 ###                                   separate applications which require a single thread each.
-##SBATCH -c 2
+##SBATCH -c 1
 
 ### (very optional; leave as '1-1' unless you know what you're doing)
 ### Request 1 node - Only specify a value other than 1-1 for this option when you know that
@@ -122,4 +122,4 @@
 hostname
 ## 
 source /home/yzhu382/Nexus_simulation/bin/activate
-source /labs/mahmoudilab/Nexus_simulation_yusen/run_experiment.sh
+source /labs/mahmoudilab/Nexus_simulation_yusen/generate_init_and_train.sh

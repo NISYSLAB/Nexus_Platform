@@ -75,7 +75,7 @@
 ###                       your job's available memory will be limited to a default value
 ###                       which may not be high enough for your code to run successfully.
 ###                       This value is for the amount of RAM per computational node.
-#SBATCH --mem 4G
+#SBATCH --mem 6G
 
 ### (REQUIRED)
 ### Request 4 cpus/threads - Specify a value for this function if you know your code uses
@@ -122,4 +122,4 @@
 hostname
 ## 
 source /home/yzhu382/Nexus_simulation/bin/activate
-source /labs/mahmoudilab/Nexus_simulation_yusen/run_experiment.sh
+source /labs/mahmoudilab/Nexus_simulation_yusen/run_learner.sh
