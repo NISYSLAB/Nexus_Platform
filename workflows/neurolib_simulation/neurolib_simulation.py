@@ -62,11 +62,24 @@ def response_mask_patient(stim1,stim2,num_dims=80):
     mask_idx = np.array(list(range(15,25)))
     stim1_center = 0.1
     stim2_center = 0.1
-    distance_attenuation_rate = 9
-    d = (np.log10(stim1+1e-4)-np.log10(stim1_center))**2+(np.log10(stim2+1e-4)-np.log10(stim2_center))**2
+    def distance_attenuation_filter(d):
+        ## linear attenuation
+        on = 0.5
+        off = 1
+        f = 0
+        if d < on:
+            f = 1
+        elif d < off:
+            f = (off-d)/(off-on)
+        ## gaussian attenuation
+        # rate = 9
+        # f = np.exp(-d**2*rate)
+        return f
+    d = np.sqrt((np.log10(stim1+1e-4)-np.log10(stim1_center))**2+(np.log10(stim2+1e-4)-np.log10(stim2_center))**2)
     # a random reduction with a strength of 0.05*exp(-d*distance_attenuation_rate)
     # print(np.exp(-d*distance_attenuation_rate))
-    mask[mask_idx] = mask[mask_idx] - 0.05*np.exp(-d*distance_attenuation_rate)*rng.random(mask_idx.shape[0])
+    mask[mask_idx] = mask[mask_idx] - 0.05*distance_attenuation_filter(d)*rng.random(mask_idx.shape[0])
+    ## we instead make the distance scaling linear to better controll on and off
     return mask
 ## creating groups and subjects
 class subject:

@@ -89,7 +89,7 @@ def uniform(MC_samples):
 def max_entropy(MC_samples):
     expected_p = np.mean(MC_samples, axis=0)    # stim_size by modelout_shape
     acquisition = - np.sum(expected_p * np.log(expected_p + 1e-10), axis=-1)  # [batch size]
-    return -acquisition     # we use -acquisition to fine the stimulus giving the most certain prediction
+    return acquisition     # we use -acquisition to fine the stimulus giving the most certain prediction
 
 # BALD
 def bald(MC_samples):
@@ -97,7 +97,7 @@ def bald(MC_samples):
     expected_p = np.mean(MC_samples, axis=0)
     entropy_expected_p = - np.sum(expected_p * np.log(expected_p + 1e-10), axis=-1)  # [batch size]
     acquisition = entropy_expected_p - expected_entropy
-    return -acquisition
+    return acquisition
 
 # penalty
 def proxPenalty(stim_history, output_stim, penalty_weight, penalty_decay):
