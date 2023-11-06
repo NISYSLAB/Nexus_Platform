@@ -7,7 +7,6 @@ from neurolib.models.aln import ALNModel
 import neurolib.utils.functions as func
 import neurolib.utils.stimulus as stim
 from neurolib.utils.loadData import Dataset
-from matplotlib import pyplot as plt
 ds = Dataset("hcp")
 subject_sigma = 0.05  # right now we use percentage based variance on all connections
 stim_start = 30
@@ -34,6 +33,7 @@ parser.add_argument('--size', type=str, default= None, help="Size of the dataset
 parser.add_argument('--gridsize', type=str, default= None, help="Size of stimuli grid (x by x) in dataset mode")
 parser.add_argument('--subject', type=str, default= None, help="Name of the subject to generate new trial")
 parser.add_argument('--stimuli', type=str, default= None, help="Name of the stimuli file to generate new trial")
+parser.add_argument('--group', type=str, default= None, help="Group of the new subject")
 
 working_directory = os.getcwd()
 
@@ -42,8 +42,10 @@ mode = args.mode
 if mode == "Dataset":
     dataset_size = int(args.size)
     grid_size = int(args.gridsize)
+    name_header = args.subject
 elif mode == "New":
     subject_name = args.subject
+    group = args.group
 elif mode == "Trial":
     subject_name = args.subject
     stimuli_file = args.stimuli
@@ -144,7 +146,7 @@ def new_data():
     subject_list = deque((),dataset_size*num_groups)
     for i in range(num_groups):
         for j in range(dataset_size):
-            subject_list.append(subject(cmat_base[i],dmat_base[i],labels[i],subject_sigma,"subject_train_{}".format(i*dataset_size+j)))
+            subject_list.append(subject(cmat_base[i],dmat_base[i],labels[i],subject_sigma,"{}_{}".format(name_header,i*dataset_size+j)))
 
     # the greatest evil of all times
     import multiprocessing as mp
@@ -202,8 +204,15 @@ def mp_new_subject(s,working_directory,stim1,stim2,grid_size,min_amp,amp):
     del s
 
 def new_subject():
-    # pull a subject from a random group, we may change group weightings at some time but for now its equal weighted
-    subject_group = rng.integers(low=0,high=num_groups)
+    if group=="random":
+        # pull a subject from a random group, we may change group weightings at some time but for now its equal weighted
+        subject_group = rng.integers(low=0,high=num_groups)
+    elif group=="healthy":
+        subject_group = 0
+    elif group=="patient":
+        subject_group = 1
+    else:
+        raise IOError('Invalid group name')
     s = subject(cmat_base[subject_group],dmat_base[subject_group],labels[subject_group],subject_sigma,subject_name)
     s.buildmodel()
     model = s.model

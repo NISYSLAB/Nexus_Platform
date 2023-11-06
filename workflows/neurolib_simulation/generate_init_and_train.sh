@@ -10,7 +10,7 @@ SCRIPT_NAME=$(basename -- "$0")
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 EXPR_NAME='Initial_dataset'
 cd ${SCRIPT_DIR}
-SIZE=10
+SIZE=20
 GRIDSIZE=7
 
 function print_info() {
@@ -21,7 +21,7 @@ function print_info() {
 ####
 function generateData() {
     mkdir subjects
-    local cmd_line="python -u ${SCRIPT_DIR}/neurolib_simulation.py --mode Dataset --size ${SIZE} --gridsize ${GRIDSIZE}"
+    local cmd_line="python -u ${SCRIPT_DIR}/neurolib_simulation.py --mode Dataset --size ${SIZE} --gridsize ${GRIDSIZE} --subject subject_train"
     print_info "Calling: time ${cmd_line}"
     time ${cmd_line}
     rtn_code=$?

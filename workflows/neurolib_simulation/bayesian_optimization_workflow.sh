@@ -23,7 +23,7 @@ function generateSubject(){
     expr_name=$1
     subject_id=$2
     ## generate the subject with the current model
-    local cmd_line="python -u ${SCRIPT_DIR}/neurolib_simulation.py --mode New --subject ${expr_name}-${subject_id}"
+    local cmd_line="python -u ${SCRIPT_DIR}/neurolib_simulation.py --mode New --subject ${expr_name}-${subject_id} --group patient"
     print_info "Calling: time ${cmd_line}"
     time ${cmd_line}
     rtn_code=$?
