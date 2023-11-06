@@ -8,7 +8,7 @@ import neurolib.utils.functions as func
 import neurolib.utils.stimulus as stim
 from neurolib.utils.loadData import Dataset
 ds = Dataset("hcp")
-subject_sigma = 0.05  # right now we use percentage based variance on all connections
+subject_sigma = 0.01  # right now we use percentage based variance on all connections
 stim_start = 30
 stim_end = 40
 expr_duration = 50
@@ -57,10 +57,11 @@ else:
 ## directly masking the BOLD signal based on the stimuli
 def response_mask_healthy(stim1,stim2,num_dims=80):
     ## maybe we just dont mask healthy subjects
-    return rng.lognormal(0,0.05,num_dims)
+    # return np.ones(num_dims)
+    return rng.lognormal(0,0.001,num_dims)
 
 def response_mask_patient(stim1,stim2,num_dims=80):
-    mask = rng.lognormal(0,0.05,num_dims)
+    mask = rng.lognormal(0,0.001,num_dims)
     mask_idx = np.array(list(range(15,25)))
     stim1_center = 0.1
     stim2_center = 0.1
@@ -80,7 +81,8 @@ def response_mask_patient(stim1,stim2,num_dims=80):
     d = np.sqrt((np.log10(stim1+1e-4)-np.log10(stim1_center))**2+(np.log10(stim2+1e-4)-np.log10(stim2_center))**2)
     # a random reduction with a strength of 0.05*exp(-d*distance_attenuation_rate)
     # print(np.exp(-d*distance_attenuation_rate))
-    mask[mask_idx] = mask[mask_idx] - 0.05*distance_attenuation_filter(d)*rng.random(mask_idx.shape[0])
+    # mask[mask_idx] = mask[mask_idx] - 0.05*distance_attenuation_filter(d)*rng.random(mask_idx.shape[0])
+    mask[mask_idx] = mask[mask_idx] - 0.05*distance_attenuation_filter(d)*0.5
     ## we instead make the distance scaling linear to better controll on and off
     return mask
 ## creating groups and subjects
