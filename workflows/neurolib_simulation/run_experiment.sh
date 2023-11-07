@@ -9,6 +9,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 EXPR_NAME='BabySteps'
 cd ${SCRIPT_DIR}
 
+
 ####
 function generateData() {
     python -u ${SCRIPT_DIR}/neurolib_simulation.py
@@ -23,7 +24,7 @@ function execMain() {
     time activeLearn
 }
 timeStart="$(date +'%Y%m%d:%H:%M:%S')"
-WORK_DIR=/labs/mahmoudilab/Nexus_simulation_yusen/${EXPR_NAME}-${timeStart}
+WORK_DIR=./${EXPR_NAME}-${timeStart}
 mkdir -p ${WORK_DIR}
 echo "Main workflow started"
 time execMain

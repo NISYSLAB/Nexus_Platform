@@ -64,8 +64,8 @@
 ### "slurm-<jobID>.out" just remove the two SBATCH commands below. Specifying the -e parameter
 ### will split the stdout and stderr output into different files.
 ### The %A is replaced with the job's ID.
-#SBATCH -o /labs/mahmoudilab/Nexus_simulation_yusen/output-%A.out
-#SBATCH -e /labs/mahmoudilab/Nexus_simulation_yusen/error-%A.err
+#SBATCH -o ./output-%A.out
+#SBATCH -e ./error-%A.err
 
 ### You can specify the number of nodes, number of cpus/threads, and amount of memory per node
 ### you need for your job.
@@ -122,4 +122,4 @@
 hostname
 ## 
 source /home/yzhu382/Nexus_simulation/bin/activate
-source /labs/mahmoudilab/Nexus_simulation_yusen/init_train.sh
+source ./init_train.sh

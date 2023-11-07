@@ -14,6 +14,7 @@ NUM_NEWSUBJECT=20
 GRID_SIZE=7
 cd ${SCRIPT_DIR}
 
+
 function print_info() {
     local msg=$1
     echo "[$(date -u +"%m/%d/%Y:%H:%M:%S")][${SCRIPT_NAME}]: Info: ${msg}"
@@ -116,7 +117,7 @@ function execMain() {
     done
 }
 timeStart="$(date +'%Y%m%d:%H:%M:%S')"
-WORK_DIR=/labs/mahmoudilab/Nexus_simulation_yusen/${EXPR_NAME}-${timeStart}
+WORK_DIR=./${EXPR_NAME}-${timeStart}
 mkdir -p ${WORK_DIR}
 echo "Main workflow started"
 time execMain
