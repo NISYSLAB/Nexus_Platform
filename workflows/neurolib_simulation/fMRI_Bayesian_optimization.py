@@ -60,8 +60,10 @@ N_burn_in = 5 #Number of initial samples
 amp = 0    
 min_amp = -2
 grid_size = 7
-q1_values = np.logspace(min_amp,amp,grid_size)
-q2_values = np.logspace(min_amp,amp,grid_size)
+# q1_values = np.logspace(min_amp,amp,grid_size)
+# q2_values = np.logspace(min_amp,amp,grid_size)
+q1_values = np.linspace(0,2,grid_size)
+q2_values = np.linspace(0,2,grid_size)
 ran_seed = ((os.getpid() * int(time.time())) % 123456789)        # seed for randoms
 rng = np.random.default_rng(ran_seed)
 
