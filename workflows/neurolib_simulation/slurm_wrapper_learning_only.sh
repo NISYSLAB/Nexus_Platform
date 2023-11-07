@@ -121,5 +121,5 @@
 ### Otherwise, you're probably not running everything you think you are in the SCL environment.
 hostname
 ## 
-source /home/yzhu382/Nexus_simulation/bin/activate
+source /labs/mahmoudilab/Nexus_venv_simulation/bin/activate
 source ./run_learner.sh
