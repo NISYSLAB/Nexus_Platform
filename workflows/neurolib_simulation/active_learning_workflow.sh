@@ -53,7 +53,7 @@ function selectStimulus(){
     expr_name=$1
     subject_id=$2
     ## feed the response to the classifier and get the best one and corresponding stimulus
-    local cmd_line="python -u ${SCRIPT_DIR}/classifier_inference.py --acquisition ${expr_name} --subject ${expr_name}-${subject_id}"
+    local cmd_line="python -u ${SCRIPT_DIR}/classifier_inference.py --algorithm ${expr_name} --subject ${expr_name}-${subject_id}"
     print_info "Calling: time ${cmd_line}"
     time ${cmd_line}
     rtn_code=$?
@@ -77,7 +77,7 @@ function modelUpdate(){
     expr_name=$1
     subject_id=$2
     ## classifier update
-    local cmd_line="python -u ${SCRIPT_DIR}/classifier_update.py --subject ${expr_name}-${subject_id}"
+    local cmd_line="python -u ${SCRIPT_DIR}/classifier_update.py --subject ${expr_name}-${subject_id} --algorithm ${expr_name}"
     print_info "Calling: time ${cmd_line}"
     time ${cmd_line}
     rtn_code=$?
@@ -106,7 +106,7 @@ function subjectFlow(){
 }
 
 function execMain() {
-    acqusition="uniform max_entropy BALD"
+    acqusition="bnn knn rf logistic random"
     for subject_id in $(seq 1 ${NUM_NEWSUBJECT}); do
         generateSubject ${EXPR_NAME} ${subject_id}
     done

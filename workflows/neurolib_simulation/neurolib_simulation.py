@@ -59,6 +59,7 @@ def response_mask_healthy(stim1,stim2,num_dims=80):
     ## maybe we just dont mask healthy subjects
     # return np.ones(num_dims)
     return rng.lognormal(0,0.001,num_dims)
+    # return response_mask_patient(stim1,stim2,num_dims)  # temporary
 
 def response_mask_patient(stim1,stim2,num_dims=80):
     mask = rng.lognormal(0,0.001,num_dims)
@@ -67,16 +68,16 @@ def response_mask_patient(stim1,stim2,num_dims=80):
     stim2_center = 0.1
     def distance_attenuation_filter(d):
         ## linear attenuation
-        # on = 0.5
-        # off = 1
-        # f = 0
-        # if d < on:
-        #     f = 1
-        # elif d < off:
-        #     f = (off-d)/(off-on)
+        on = 0.5
+        off = 1
+        f = 0
+        if d < on:
+            f = 1
+        elif d < off:
+            f = (off-d)/(off-on)
         ## gaussian attenuation
-        rate = 2
-        f = np.exp(-d**2*rate)
+        # rate = 2
+        # f = np.exp(-d**2*rate)
         return f
     d = np.sqrt((np.log10(stim1+1e-4)-np.log10(stim1_center))**2+(np.log10(stim2+1e-4)-np.log10(stim2_center))**2)
     # a random reduction with a strength of 0.05*exp(-d*distance_attenuation_rate)
@@ -199,7 +200,10 @@ def mp_new_subject(s,working_directory,stim1,stim2,grid_size,min_amp,amp):
             # we downsample the neuronal trace by 100x to not occupy 300mb per file
             # default time precision is 0.1ms
             l = model.t.shape[0]
-            np.savez('trial_{}'.format(trial_num),stim1_amp=x,stim2_amp=y,bold_trace=bold,output=bold_out,exc_time=model.t[0:l:100],exc_trace=model.output.T[0:l:100])
+            if int(subject_name.split('_')[2]) == 0:
+                np.savez('trial_{}'.format(trial_num),stim1_amp=x,stim2_amp=y,bold_trace=bold,output=bold_out,exc_time=model.t[0:l:100],exc_trace=model.output.T[0:l:100])  
+            else:
+                np.savez('trial_{}'.format(trial_num),stim1_amp=x,stim2_amp=y,output=bold_out)
             trial_num += 1
             del model
     # Seems like memory might be problematic

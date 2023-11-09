@@ -60,10 +60,10 @@ N_burn_in = 5 #Number of initial samples
 amp = 0    
 min_amp = -2
 grid_size = 7
-# q1_values = np.logspace(min_amp,amp,grid_size)
-# q2_values = np.logspace(min_amp,amp,grid_size)
-q1_values = np.linspace(0,2,grid_size)
-q2_values = np.linspace(0,2,grid_size)
+q1_values = np.logspace(min_amp,amp,grid_size)
+q2_values = np.logspace(min_amp,amp,grid_size)
+# q1_values = np.linspace(0,2,grid_size)
+# q2_values = np.linspace(0,2,grid_size)
 ran_seed = ((os.getpid() * int(time.time())) % 123456789)        # seed for randoms
 rng = np.random.default_rng(ran_seed)
 
@@ -88,6 +88,8 @@ def BayesOpt(filename, obj_filename):
             obj = np.load(obj_filename)
             obj = obj['output']
             obj = np.average(obj[15:25])
+        obj = obj*10000 - 600 # scale the objective value to be in the range of the task parameters
+        obj = - obj
         
         
         rows[len(rows)-1][2] = obj

@@ -1,20 +1,17 @@
 import os
 import argparse
 import numpy as np
-from tensorflow.keras.models import load_model
-from tensorflow.keras import backend as K
-from sklearn.preprocessing import StandardScaler
-# from keras.models import load_model
-# from keras import backend as K
-from tensorflow.python.keras.backend import eager_learning_phase_scope  
 
 ## generates classifier_update.npz
 ############## Arguments ############################
 base_path=os.path.abspath(os.path.dirname(__file__))
 parser = argparse.ArgumentParser(description='Arguments for generating simulation')
 parser.add_argument('--subject', type=str, default= None, help="Name of the subject to generate new trial")
+parser.add_argument('--algorithm', type=str, default= None, help="Classifier algorithm to use for classification")
 working_directory = os.getcwd()
 args = parser.parse_args()
+alg = args.algorithm
+n_alg_random = 4
 subject_name = args.subject
 # operate in subject directory
 os.chdir(os.path.join(working_directory,'subjects',subject_name))
@@ -28,22 +25,10 @@ try:
 except:
     stim_history = np.empty((0,2))
     classifier_results = np.empty((0,1))
+    if alg == 'random':
+        classifier_results = np.empty((0,n_alg_random))
     trial_idx = 0
 
-## load the rescaling
-scaler = np.load(os.path.join(working_directory,'classifier_init_scaler.npz'))
-scaler_mean = scaler['scaler_mean']
-scaler_var = scaler['scaler_var']
-scaler_n_fea_in = scaler['scaler_n_fea_in']
-scaler_samp_seen = scaler['scaler_samp_seen']
-newscaler = StandardScaler()
-newscaler.mean_ = scaler_mean
-newscaler.var_ = scaler_var
-newscaler.scale_ = np.sqrt(scaler_var)
-newscaler.n_features_in_ = scaler_n_fea_in
-newscaler.n_samples_seen_ = scaler_samp_seen
-# load the constructed model in base directory
-model = load_model(os.path.join(working_directory,'classifier_init.keras'))
 # load the response
 output = np.load('trial_{}.npz'.format(trial_idx))
 stim1_amp = output['stim1_amp'].reshape(1,-1)
@@ -54,13 +39,45 @@ response = output['output'].reshape(1,-1)
 # print(response.shape)
 X = np.hstack((response,stim1_amp,stim2_amp))
 X = X.reshape(1,-1)
-X = newscaler.transform(X)
-# do we need the uncertainty for the labeling here? probably not
-# f = K.function([model.layers[0].input],
-#                            [model.layers[-1].output])
-# with eager_learning_phase_scope(value=1):
-#     y = f([X])[0]
-new_label = model.predict(X)
+
+if alg == 'bnn':
+    from algorithms.uncertainty_classifier.bayesian_neural_network import BayesianNeuralNetwork as Classifier
+    c = Classifier(alg)
+    c.load_model(working_directory)
+if alg == 'knn':
+    from algorithms.uncertainty_classifier.k_nearest_neighbor import KNearestNeighbor as Classifier
+    c = Classifier(alg)
+    c.load_model(working_directory)
+if alg == 'rf':
+    from algorithms.uncertainty_classifier.random_forest import RandomForest as Classifier
+    c = Classifier(alg)
+    c.load_model(working_directory)
+if alg == 'logistic':
+    from algorithms.uncertainty_classifier.logistic_regression import LogisticRegression as Classifier
+    c = Classifier(alg)
+    c.load_model(working_directory)
+if alg == 'random':
+    from algorithms.uncertainty_classifier.bayesian_neural_network import BayesianNeuralNetwork as Classifier
+    c1 = Classifier(alg)
+    c1.load_model(working_directory)
+    from algorithms.uncertainty_classifier.k_nearest_neighbor import KNearestNeighbor as Classifier
+    c2 = Classifier(alg)
+    c2.load_model(working_directory)
+    from algorithms.uncertainty_classifier.random_forest import RandomForest as Classifier
+    c3 = Classifier(alg)
+    c3.load_model(working_directory)
+    from algorithms.uncertainty_classifier.logistic_regression import LogisticRegression as Classifier
+    c4 = Classifier(alg)
+    c4.load_model(working_directory)
+    
+if alg == 'random':
+    new_label = np.empty((1,n_alg_random))
+    new_label[0] = c1.model.predict(X)
+    new_label[1] = c2.model.predict(X)
+    new_label[2] = c3.model.predict(X)
+    new_label[3] = c4.model.predict(X)
+else:
+    new_label = c.model.predict(X)  # since it is 
 # print(new_label.shape)
 ## save the history
 stim = np.hstack((stim1_amp,stim2_amp))

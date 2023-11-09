@@ -39,3 +39,5 @@ workflows/neurolib_simulation/neurolib_simulation.7z
 workflows/neurolib_simulation/subjects
 workflows/neurolib_simulation/*.npz
 workflows/neurolib_simulation/*.keras
+workflows/neurolib_simulation/*.joblib
+workflows/neurolib_simulation/*_backup
