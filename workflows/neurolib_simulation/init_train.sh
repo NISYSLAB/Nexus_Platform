@@ -62,6 +62,7 @@ cp ${SCRIPT_DIR}/*.npy ${WORK_DIR}
 cp ${SCRIPT_DIR}/*.npz ${WORK_DIR}
 cp ${SCRIPT_DIR}/*.keras ${WORK_DIR}
 mv ${SCRIPT_DIR}/subjects ${WORK_DIR}
+mv ${SCRIPT_DIR}/*.joblib ${WORK_DIR}
 # stdout and error
 cp ${SCRIPT_DIR}/*.out ${WORK_DIR}
 cp ${SCRIPT_DIR}/*.err ${WORK_DIR}
@@ -71,3 +72,4 @@ rm ${SCRIPT_DIR}/*.npz
 rm ${SCRIPT_DIR}/*.keras
 rm ${SCRIPT_DIR}/*.out
 rm ${SCRIPT_DIR}/*.err
+rm ${SCRIPT_DIR}/*.joblib
