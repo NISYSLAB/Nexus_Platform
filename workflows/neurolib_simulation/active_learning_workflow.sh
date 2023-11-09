@@ -110,8 +110,8 @@ function execMain() {
     for subject_id in $(seq 1 ${NUM_NEWSUBJECT}); do
         generateSubject ${EXPR_NAME} ${subject_id}
     done
-    for expr_name in ${acqusition}; do
-        for subject_id in $(seq 1 ${NUM_NEWSUBJECT}); do
+    for subject_id in $(seq 1 ${NUM_NEWSUBJECT}); do
+        for expr_name in ${acqusition}; do
             subjectFlow ${expr_name} ${subject_id}
         done
     done
