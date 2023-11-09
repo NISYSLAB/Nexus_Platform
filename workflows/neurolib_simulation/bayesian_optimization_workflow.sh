@@ -8,9 +8,10 @@
 
 SCRIPT_NAME=$(basename -- "$0")
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-EXPR_NAME='Bayesian_optimization'
+SESSION_NAME='Bayesian_optimization'
 NUM_TRIALS=14
-NUM_NEWSUBJECT=20
+NUM_NEWSUBJECT=1
+NUM_SUBJECTREPEATS=20
 cd ${SCRIPT_DIR}
 
 
@@ -23,8 +24,12 @@ function print_info() {
 function generateSubject(){
     expr_name=$1
     subject_id=$2
-    ## generate the subject with the current model
+    if NUM_NEWSUBJECT -gt 1; then
     local cmd_line="python -u ${SCRIPT_DIR}/neurolib_simulation.py --mode New --subject ${expr_name}-${subject_id} --group patient"
+    else
+    local cmd_line="python -u ${SCRIPT_DIR}/neurolib_simulation.py --mode Dataset --size 1 --gridsize 13 --subject ${expr_name} --subject_repeats ${NUM_SUBJECTREPEATS}"
+    fi
+    ## generate the subject with the current model
     print_info "Calling: time ${cmd_line}"
     time ${cmd_line}
     rtn_code=$?
@@ -34,7 +39,9 @@ function generateSubject(){
 function copySubject(){
     expr_name=$1
     subject_id=$2
-    cp -r ${SCRIPT_DIR}/subjects/${EXPR_NAME}-${subject_id} ${SCRIPT_DIR}/subjects/${expr_name}-${subject_id}
+    # cp -r ${SCRIPT_DIR}/subjects/${SESSION_NAME}-${subject_id} ${SCRIPT_DIR}/subjects/${expr_name}-${subject_id}
+    mkdir -p ${SCRIPT_DIR}/subjects/${expr_name}-${subject_id}
+    cp ${SCRIPT_DIR}/subjects/${SESSION_NAME}-${subject_id}/subject_info.npz ${SCRIPT_DIR}/subjects/${expr_name}-${subject_id}/subject_info.npz
 }
 
 function selectStimulus(){
@@ -82,7 +89,7 @@ function subjectFlow(){
 function execMain() {
     acqusition="bayes_opt random"
     for subject_id in $(seq 1 ${NUM_NEWSUBJECT}); do
-        generateSubject ${EXPR_NAME} ${subject_id}
+        generateSubject ${SESSION_NAME} ${subject_id}
     done
     for expr_name in ${acqusition}; do
         for subject_id in $(seq 1 ${NUM_NEWSUBJECT}); do
@@ -91,7 +98,7 @@ function execMain() {
     done
 }
 timeStart="$(date +'%Y%m%d:%H:%M:%S')"
-WORK_DIR=./${EXPR_NAME}-${timeStart}
+WORK_DIR=./${SESSION_NAME}-${timeStart}
 SUBJECT_DIR=./subjects
 mkdir -p ${WORK_DIR}
 mkdir -p ${SUBJECT_DIR}
