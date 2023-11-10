@@ -319,7 +319,8 @@ def new_trial():
     subject_cmat = subject_info['cmat']
     subject_dmat = subject_info['dmat']
     subject_label = subject_info['label']
-    s = subject(ds.Cmat,ds.Dmat,0,subject_sigma,subject_name)
+    subject_mask_center = subject_info['mask_center']
+    s = subject(ds.Cmat,ds.Dmat,0,subject_sigma,subject_name,subject_mask_center)
     s.load(subject_cmat,subject_dmat,subject_label)
     s.buildmodel()
     model = s.model
