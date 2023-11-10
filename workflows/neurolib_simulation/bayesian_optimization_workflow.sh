@@ -91,8 +91,8 @@ function execMain() {
     # for subject_id in $(seq 1 ${NUM_NEWSUBJECT}); do
     #     generateSubject ${SESSION_NAME} ${subject_id}
     # done
-    for expr_name in ${acqusition}; do
-        for subject_id in $(seq 1 $((${NUM_NEWSUBJECT} * ${NUM_SUBJECTREPEATS}))); do
+    for subject_id in $(seq 1 $((${NUM_NEWSUBJECT} * ${NUM_SUBJECTREPEATS}))); do
+        for expr_name in ${acqusition}; do
             subjectFlow ${expr_name} ${subject_id}
         done
     done
