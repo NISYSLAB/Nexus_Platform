@@ -94,7 +94,7 @@ class BaseClassifier(ABC):
         # X_stim is of shape (stim_size, 2)
         ## load the model updates (history)
         mc_samples = self._MC_sampling(X, stim)
-        print(mc_samples.shape)
+        # print(mc_samples.shape)
         acquisition = self.acquisition(mc_samples)
         penalty = self.penalty(self.stim_history, stim)
         acquisition = acquisition - penalty
@@ -166,11 +166,12 @@ class BaseClassifier(ABC):
             X_stim = np.vstack((out,s))
             X_stim = X_stim.T   # num_MCsamples in mapping by num_dims+2
             X_stim = self.scaler.transform(X_stim)
+            # print(X_stim.shape)
             # with eager_learning_phase_scope(value=1):
             #     MC_samples_stim = [MC_output([X_stim])[0] for _ in range(T)]
-            MC_samples_stim = self._MC_predict([X_stim])[0] # num_MCsamples_classifier * num_MCsamples by modelout_shape
+            MC_samples_stim = self._MC_predict(X_stim)[0] # num_MCsamples_classifier * num_MCsamples by modelout_shape
             MC_samples[:,stim_idx,:] = MC_samples_stim
-        print(MC_samples.shape)
+        # print(MC_samples.shape)
         return MC_samples
 
     @abstractmethod
@@ -196,3 +197,4 @@ class BaseClassifier(ABC):
             history_y = np.log10(stim_history[i,1])
             dist = (out_x - history_x)**2 + (out_y - history_y)**2
             penalty = penalty + self.penalty_weight*np.exp(-dist*self.penalty_decay)
+        return penalty
