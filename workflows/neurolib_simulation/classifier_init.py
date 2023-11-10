@@ -31,7 +31,7 @@ if dataset_size <5:
 else:
     n_splits = 5
 dataset_size = num_groups * dataset_size
-dataset_size_test = 40  # hard coded for now
+dataset_size_test = 20  # hard coded for now
 stim_size = grid_size * grid_size
 num_batch = 1       # batch size
 
@@ -73,10 +73,15 @@ def load_data(subject_header,dataset_size,stim_size):
 
 XX,y,cvgroups,cv = load_data('subject_train',dataset_size,stim_size)
 XXtest,ytest,cvgroupstest,cvtest = load_data('subject_test',dataset_size_test,stim_size)
+dist = (np.log10(XXtest[:,num_dims])+1)**2 + (np.log10(XXtest[:,num_dims+1])+1)**2
+XXtest2 = XXtest[dist<1,:]
+ytest2 = ytest[dist<1]
+cvgroupstest2 = cvgroupstest[dist<1]
+
 # X = np.hstack((X,y))    # just a dumb check to see if model is smart enough if we put label into input - the answer is yes
 # X = np.hstack((X,stim))  # expand X to contain stimuli
 # y = y[:,0]
-
+models = []
 for alg in algorithms:
     if alg == 'bnn':
         from algorithms.uncertainty_classifier.bayesian_neural_network import BayesianNeuralNetwork as Classifier
@@ -84,24 +89,34 @@ for alg in algorithms:
         c.train_init()
         c.model = None
         c.train(XX,y,cvgroups,cv,working_directory)
-        bnn = c.test(XXtest,ytest)
+        # bnn = c.test(XXtest,ytest)
+        models.append(c)
     if alg == 'knn':
         from algorithms.uncertainty_classifier.k_nearest_neighbor import KNearestNeighbor as Classifier
         c = Classifier(alg)
         c.train_init()
         c.train(XX,y,cvgroups,cv,working_directory)
-        knn = c.test(XXtest,ytest)
+        # knn = c.test(XXtest,ytest)
+        models.append(c)
     if alg == 'rf':
         from algorithms.uncertainty_classifier.random_forest import RandomForest as Classifier
         # kind of slow, we implement n_jobs = -1
         c = Classifier(alg)
         c.train_init()
         c.train(XX,y,cvgroups,cv,working_directory)
-        rf = c.test(XXtest,ytest)
+        # rf = c.test(XXtest,ytest)
+        models.append(c)
     if alg == 'logistic':
         from algorithms.uncertainty_classifier.logistic_regression import LogisticRegression as Classifier
         c = Classifier(alg)
         c.train_init()
         c.train(XX,y,cvgroups,cv,working_directory)
-        lr = c.test(XXtest,ytest)
-np.savez('classifier_init_scores',bnn=bnn,knn=knn,rf=rf,lr=lr)
+        # lr = c.test(XXtest,ytest)
+        models.append(c)
+# np.savez('classifier_init_scores',bnn=bnn,knn=knn,rf=rf,lr=lr)
+print('Results on test set:')
+for i in range(len(algorithms)):
+    print('{}: {}'.format(algorithms[i],models[i].test(XXtest,ytest)))
+print('Results on test set 2 (inside the circle):')
+for i in range(len(algorithms)):
+    print('{}: {}'.format(algorithms[i],models[i].test(XXtest2,ytest2)))

@@ -44,14 +44,14 @@ class BayesianNeuralNetwork(BaseClassifier):
     'unit_l2':[64,32],
     'unit_l3':[32,16]
     }
-    default_params = {
-    'nb_epoch':[300 * i + 300 for i in range(1)],
-    'batch_size':[1],
-    'learning_rate':[0.01],
-    'unit_l1':[64],
-    'unit_l2':[64],
-    'unit_l3':[32]
-    }
+    # default_params = {
+    # 'nb_epoch':[300 * i + 300 for i in range(1)],
+    # 'batch_size':[1],
+    # 'learning_rate':[0.01],
+    # 'unit_l1':[64],
+    # 'unit_l2':[64],
+    # 'unit_l3':[32]
+    # }
     def __init__(self, name, noutputs=1, rescale=True, ndims=82):
         super().__init__(name, noutputs, rescale, ndims)
     def train_init(self, hyper_param_space=default_params, **kwargs):

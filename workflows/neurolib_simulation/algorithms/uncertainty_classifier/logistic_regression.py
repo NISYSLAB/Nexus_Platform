@@ -9,7 +9,8 @@ class LogisticRegression(BaseClassifier):
     default_params = {
     'penalty':['l1','l2','elasticnet'],
     'C':[0.1,1,10,100],
-    'l1_ratio':[0.1,0.5,0.9]
+    'l1_ratio':[0.1,0.5,0.9],
+    'max_iter':[1000],
     }
     def __init__(self, name, noutputs=2, rescale=True, ndims=82):
         super().__init__(name, noutputs, rescale, ndims)
