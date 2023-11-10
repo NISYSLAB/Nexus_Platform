@@ -17,7 +17,7 @@ class resample:
         stim_size = stimuli.shape[0] * stimuli.shape[1]
         num_dims = self.ndimsout
         ## load the constructed model in base directory
-        model_init = np.load(path.join(working_directory,'mapping_model_init.npz'))
+        model_init = np.load(path.join(working_directory,'mapping_model_init.npz'),allow_pickle=True)
         saved_response = model_init['response']
         saved_size = saved_response.shape[0]
         saved_stim = model_init['stim']

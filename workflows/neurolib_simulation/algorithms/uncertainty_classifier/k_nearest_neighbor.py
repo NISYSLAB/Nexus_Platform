@@ -26,8 +26,7 @@ class KNearestNeighbor(BaseClassifier):
     def _build_model_from_params(self, **hyper_params):
         # initialize the model with hyper params
         self.model = KNeighborsClassifier(**hyper_params)
-    def acquisition(self, X, X_stim):
-        MC_samples = self._MC_sampling(X, X_stim)
+    def acquisition(self, MC_samples):
         expected_p = np.mean(MC_samples, axis=0)    # stim_size by modelout_shape
         acquisition = - np.sum(expected_p * np.log(expected_p + 1e-10), axis=-1)  # [batch size]
         return acquisition  

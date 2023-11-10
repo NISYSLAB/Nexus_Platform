@@ -78,7 +78,7 @@ class BaseClassifier(ABC):
     ## inference workflow
     def inference_init(self,model_update,acquisition_mode=None,penalty_mode='gaussian',
                        penalty_weight = 0.2,penalty_decay = 4,num_MCsamples=1,**kwargs):
-        self.stim_history = model_update['stim_history']
+        self.stim_history = model_update
         self.acquisition_mode = acquisition_mode
         self.penalty_mode = penalty_mode
         self.penalty_weight = penalty_weight
@@ -89,17 +89,18 @@ class BaseClassifier(ABC):
     @abstractmethod
     def _inference_init_additional(self,**kwargs):
         pass
-    def find_optimal_stimulus(self, X, X_stim, subject_dir):
+    def find_optimal_stimulus(self, X, stim, subject_dir):
         # X is of shape (stim_size, num_samples, num_dims-2)
         # X_stim is of shape (stim_size, 2)
         ## load the model updates (history)
-        mc_samples = self._MC_sampling(X, X_stim)
+        mc_samples = self._MC_sampling(X, stim)
+        print(mc_samples.shape)
         acquisition = self.acquisition(mc_samples)
-        penalty = self.penalty(self.stim_history, X_stim)
+        penalty = self.penalty(self.stim_history, stim)
         acquisition = acquisition - penalty
         optimal_stim_idx = np.argmax(acquisition)  # only one new stim needed
-        stim_x = X_stim[optimal_stim_idx,0]
-        stim_y = X_stim[optimal_stim_idx,1]
+        stim_x = stim[optimal_stim_idx,0]
+        stim_y = stim[optimal_stim_idx,1]
         stim_idx = self.stim_history.shape[0]  # next index
         np.savez(path.join(subject_dir,'next_stimulus'),x=stim_x,y=stim_y,trial_num=stim_idx)
 
@@ -118,12 +119,13 @@ class BaseClassifier(ABC):
     def load_model(self,working_directory):
         if self.rescale:
             self._load_scaler(working_directory)
-        hyper_params = np.load(path.join(self.name+'_hyper_params.npz'))
+        hyper_params = np.load(path.join(working_directory,self.name+'_hyper_params.npz'),allow_pickle=True)
         hyper_params = hyper_params['hyper_params']
+        hyper_params = hyper_params[()]  # convert to dict, otherwise it's a np array
         self._build_model(hyper_params)
         self._load_classifier_model(working_directory)
     def _load_scaler(self,working_directory):
-        scaler = np.load(path.join(working_directory,'classifier_init_scaler.npz'))
+        scaler = np.load(path.join(working_directory,'classifier_init_scaler.npz'),allow_pickle=True)
         scaler_mean = scaler['scaler_mean']
         scaler_var = scaler['scaler_var']
         scaler_n_fea_in = scaler['scaler_n_fea_in']
@@ -147,27 +149,28 @@ class BaseClassifier(ABC):
         pass
     
     @abstractmethod
-    def acquisition(self, X, X_stim):
+    def acquisition(self, MC_samples):
         # return the acquisition function
         pass
 
-    def _MC_sampling(self, X, X_stim):
+    def _MC_sampling(self, X, stim):
         modelout_shape = self.noutputs
-        stim_size = X_stim.shape[0]
+        stim_size = stim.shape[0]
         num_MCsamples_mapping = X.shape[2]
         # group the inference by stimuli used
         MC_samples = np.empty((self.num_MCsamples*num_MCsamples_mapping,stim_size,modelout_shape))
         for stim_idx in range(stim_size):
             out = X[stim_idx,:,:]  # num_dims by num_MCsamples in mapping
-            stim = X_stim[stim_idx,:]  # (2,)
-            stim = np.tile(stim,(out.shape[1],1)).T     # 2 by num_MCsamples in mapping
-            X_stim = np.vstack((out,stim))
+            s = stim[stim_idx,:]  # (2,)
+            s = np.tile(s,(out.shape[1],1)).T     # 2 by num_MCsamples in mapping
+            X_stim = np.vstack((out,s))
             X_stim = X_stim.T   # num_MCsamples in mapping by num_dims+2
             X_stim = self.scaler.transform(X_stim)
             # with eager_learning_phase_scope(value=1):
             #     MC_samples_stim = [MC_output([X_stim])[0] for _ in range(T)]
             MC_samples_stim = self._MC_predict([X_stim])[0] # num_MCsamples_classifier * num_MCsamples by modelout_shape
             MC_samples[:,stim_idx,:] = MC_samples_stim
+        print(MC_samples.shape)
         return MC_samples
 
     @abstractmethod

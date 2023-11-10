@@ -7,6 +7,6 @@ class RandomSample(BaseClassifier):
     # noutputs is the number of outputs of the model
     def __init__(self, name, noutputs=2, rescale=True, ndims=82):
         super().__init__(name, noutputs, rescale, ndims)
-    def acquisition(self, X, X_stim):
-        acquisition = np.random.normal(X_stim.shape[0])/2
+    def acquisition(self, MC_samples):
+        acquisition = np.random.normal(MC_samples.shape[1])/2
         return acquisition  

@@ -25,7 +25,7 @@ os.chdir(subject_dir)
 input_data = np.load('mapping_model_inference.npz')
 X = input_data['output']
 X_stim = input_data['output_stim']
-
+# print(X.shape)
 ## load the model updates (history)
 model_update = np.load('classifier_update.npz')
 stim_history = model_update['stim_history']

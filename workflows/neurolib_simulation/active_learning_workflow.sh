@@ -12,6 +12,7 @@ EXPR_NAME='Active_learning'
 NUM_TRIALS=7
 NUM_NEWSUBJECT=20
 GRID_SIZE=7
+MAPPING_MODEL='resample'
 cd ${SCRIPT_DIR}
 
 
@@ -42,7 +43,7 @@ function modelResponse(){
     expr_name=$1
     subject_id=$2
     ## generate the stimuli pool, map to the response space and output
-    local cmd_line="python -u ${SCRIPT_DIR}/mapping_model_inference.py --gridsize ${GRID_SIZE} --subject ${expr_name}-${subject_id}"
+    local cmd_line="python -u ${SCRIPT_DIR}/mapping_model_inference.py --gridsize ${GRID_SIZE} --subject ${expr_name}-${subject_id} --model ${MAPPING_MODEL}"
     print_info "Calling: time ${cmd_line}"
     time ${cmd_line}
     rtn_code=$?
@@ -83,7 +84,7 @@ function modelUpdate(){
     rtn_code=$?
     print_info "classifier_update.py returned code=${rtn_code}"
     ## mapping model update
-    local cmd_line="python -u ${SCRIPT_DIR}/mapping_model_update.py --subject ${expr_name}-${subject_id}"
+    local cmd_line="python -u ${SCRIPT_DIR}/mapping_model_update.py --subject ${expr_name}-${subject_id} --model ${MAPPING_MODEL}"
     print_info "Calling: time ${cmd_line}"
     time ${cmd_line}
     rtn_code=$?

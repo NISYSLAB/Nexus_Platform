@@ -90,7 +90,7 @@ def response_mask_patient(stim1,stim2,center,num_dims=80):
     return mask
 ## creating groups and subjects
 class subject:
-    def __init__(self,cmat_base,dmat_base,label,subject_sigma,subject_name,mask_center=np.sqrt(np.array([0.1,0.1]))):
+    def __init__(self,cmat_base,dmat_base,label,subject_sigma,subject_name,mask_center=np.array([0.1,0.1])):
         self.cmat = cmat_base.copy()
         self.dmat = dmat_base.copy()
         self.label = label

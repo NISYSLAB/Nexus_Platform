@@ -58,8 +58,9 @@ class BayesianNeuralNetwork(BaseClassifier):
         return super().train_init(hyper_param_space, **kwargs)
     def _train_init_additional(self,**kwargs):
         self.sklclassifier = KerasClassifier(build_fn=build_model)
-    def inference_init(self, acquisition_mode=None, penalty_mode='gaussian', num_MCsamples=100, **kwargs):
-        return super().inference_init(acquisition_mode, penalty_mode, num_MCsamples, **kwargs)
+    # purely for setting default acquisition mode
+    def inference_init(self, model_update, acquisition_mode='BALD', **kwargs):
+        return super().inference_init(model_update,acquisition_mode=acquisition_mode, **kwargs)
     def _inference_init_additional(self,**kwargs):
         pass
     def _save_classifier_model(self,working_directory):
@@ -76,14 +77,12 @@ class BayesianNeuralNetwork(BaseClassifier):
         # print("Received Hyperparameters:", hyper_params)
         self.model = build_model(**hyper_params)
         # print(self.model.summary())
-    def acquisition(self, X, X_stim):
-        # return the acquisition function
-        MC_samples = self._MC_sampling(X, X_stim)
-        if self.mode == 'uniform':
+    def acquisition(self, MC_samples):
+        if self.acquisition_mode == 'uniform':
             return self._acquisition_uniform(MC_samples)
-        elif self.mode == 'max_entropy':
+        elif self.acquisition_mode == 'max_entropy':
             return self._acquisition_max_entropy(MC_samples)
-        elif self.mode == 'BALD':
+        elif self.acquisition_mode == 'BALD':
             return self._acquisition_bald(MC_samples)
     
     def _acquisition_uniform(self,MC_samples):
@@ -111,7 +110,7 @@ class BayesianNeuralNetwork(BaseClassifier):
     def _MC_sampling(self, output, output_stim):
         self._MC_fun = K.function([self.model.layers[0].input],
                            [self.model.layers[-1].output])
-        super._MC_sampling(output, output_stim)
+        return super()._MC_sampling(output, output_stim)
 
     def test(self,Xtest,ytest):
         if self.rescale:

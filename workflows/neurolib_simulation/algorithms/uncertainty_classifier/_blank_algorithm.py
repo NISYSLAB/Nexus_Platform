@@ -25,7 +25,7 @@ class Blank(BaseClassifier):
     def _build_model_from_params(self, hyper_params):
         # initialize the model with hyper params
         pass
-    def acquisition(self, X, X_stim):
+    def acquisition(self, MC_samples):
         # return the acquisition function
         pass
     def _MC_predict(self, X):

@@ -27,9 +27,8 @@ class RandomForest(BaseClassifier):
     def _build_model_from_params(self, **hyper_params):
         # initialize the model with hyper params
         self.model = RandomForestClassifier(**hyper_params)
-    def acquisition(self, X, X_stim):
+    def acquisition(self, MC_samples):
         # note that the probability returned by random forest is disagreement - each tree is 1 or 0
-        MC_samples = self._MC_sampling(X, X_stim)
         expected_p = np.mean(MC_samples, axis=0)    # stim_size by modelout_shape
         acquisition = - np.sum(expected_p * np.log(expected_p + 1e-10), axis=-1)  # [batch size]
         return acquisition  

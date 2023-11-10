@@ -28,7 +28,7 @@ class LogisticRegression(BaseClassifier):
         n_iter_ = self.model.n_iter_
         np.savez(path.join(working_directory,'classifier_init_{}.npz'.format(self.name)),classes_=classes_,coef_=coef_,intercept_=intercept_,n_features_in_=n_features_in_,n_iter_=n_iter_)
     def _load_classifier_model(self,working_directory):
-        data = np.load(path.join(working_directory,'classifier_init_{}.npz'.format(self.name)))
+        data = np.load(path.join(working_directory,'classifier_init_{}.npz'.format(self.name)),allow_pickle=True)
         classes_ = data['classes_']
         coef_ = data['coef_']
         intercept_ = data['intercept_']
@@ -49,8 +49,7 @@ class LogisticRegression(BaseClassifier):
         MC_samples = MC_samples[:,1]  # binary classification
         MC_samples = MC_samples[:,np.newaxis]
         return MC_samples
-    def acquisition(self, X, X_stim):
-        MC_samples = self._MC_sampling(X, X_stim)
+    def acquisition(self, MC_samples):
         expected_p = np.mean(MC_samples, axis=0)    # stim_size by modelout_shape
         acquisition = - np.sum(expected_p * np.log(expected_p + 1e-10), axis=-1)  # [batch size]
         return acquisition  

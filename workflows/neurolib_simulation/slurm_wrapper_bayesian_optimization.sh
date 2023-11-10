@@ -57,7 +57,7 @@
 ###
 ### The format can be "minutes", "hours:minutes:seconds", "days-hours", or "days-hours:minutes:seconds".
 ### By default, jobs will run for 8 hours if this isn't specified.
-#SBATCH -t 1-4
+#SBATCH -t 10:00:00
 
 
 ### (optional) Output and error file definitions. To have all output in a file named

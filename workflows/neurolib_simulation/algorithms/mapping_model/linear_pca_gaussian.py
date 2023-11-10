@@ -88,7 +88,7 @@ class LinearPCA:
         stim_size = stimuli.shape[0] * stimuli.shape[1]
         num_dims = self.ndimsout
         ## load the constructed model in base directory
-        model_init = np.load(path.join(working_directory,'mapping_model_init.npz'))
+        model_init = np.load(path.join(working_directory,'mapping_model_init.npz'),allow_pickle=True)
         data_mean = model_init['data_mean']
         linreg_coeff = model_init['linreg_coeff']
         components = model_init['components']
@@ -96,7 +96,7 @@ class LinearPCA:
         err = model_init['err']
         linreg_intercept=model_init["linreg_intercept"]
         ## load the model updates (bias for now)
-        model_update = np.load(path.join(subject_directory,'mapping_model_update.npz'))
+        model_update = np.load(path.join(subject_directory,'mapping_model_update.npz'),allow_pickle=True)
         subject_bias = model_update['subject_bias']     # size is (num_dims,)
         ############## Mapping model #########################
         ## reconstruction of bias: need to maintain a moving average of bias of data collected so far, subtracting the stimuli effect
@@ -133,7 +133,7 @@ class LinearPCA:
     def update(self,working_directory,subject_directory):
         num_dims = self.ndimsout
         ## load the constructed model in base directory
-        model_init = np.load(path.join(working_directory,'mapping_model_init.npz'))
+        model_init = np.load(path.join(working_directory,'mapping_model_init.npz'),allow_pickle=True)
         data_mean = model_init['data_mean']
         linreg_coeff = model_init['linreg_coeff']
         components = model_init['components']
@@ -141,14 +141,14 @@ class LinearPCA:
         err = model_init['err']
         ## load history model update
         try:
-            model_update = np.load(path.join(subject_directory,'mapping_model_update.npz'))
+            model_update = np.load(path.join(subject_directory,'mapping_model_update.npz'),allow_pickle=True)
             subject_bias_history = model_update['subject_bias_history']     # size is (num_trials,num_dims)
             trial_idx = subject_bias_history.shape[0]
         except:
             subject_bias_history = np.empty((0,num_dims))
             trial_idx = 0
         # load the response
-        output = np.load('trial_{}.npz'.format(trial_idx))
+        output = np.load('trial_{}.npz'.format(trial_idx),allow_pickle=True)
         stim1_amp = output['stim1_amp']
         stim2_amp = output['stim2_amp']
         stimulus = np.array([stim1_amp,stim2_amp])
