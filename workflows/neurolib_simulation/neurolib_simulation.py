@@ -57,17 +57,17 @@ else:
 ####################################################################################
 
 ## directly masking the BOLD signal based on the stimuli
-def response_mask_healthy(stim1,stim2,num_dims=80):
+def response_mask_healthy(stim1,stim2,center,num_dims=80):
     ## maybe we just dont mask healthy subjects
     # return np.ones(num_dims)
     # return rng.lognormal(0,0.001,num_dims)
-    return response_mask_patient(stim1,stim2,num_dims)  # temporary
+    return response_mask_patient(stim1,stim2,center,num_dims)  # temporary
 
-def response_mask_patient(stim1,stim2,num_dims=80):
+def response_mask_patient(stim1,stim2,center,num_dims=80):
     mask = rng.lognormal(0,0.001,num_dims)
     mask_idx = np.array(list(range(15,25)))
-    stim1_center = 0.1
-    stim2_center = 0.1
+    stim1_center = center[0]
+    stim2_center = center[1]
     def distance_attenuation_filter(d):
         ## linear attenuation
         # on = 0.5
@@ -90,11 +90,13 @@ def response_mask_patient(stim1,stim2,num_dims=80):
     return mask
 ## creating groups and subjects
 class subject:
-    def __init__(self,cmat_base,dmat_base,label,subject_sigma,subject_name):
+    def __init__(self,cmat_base,dmat_base,label,subject_sigma,subject_name,mask_center=np.sqrt(np.array([0.1,0.1]))):
         self.cmat = cmat_base.copy()
         self.dmat = dmat_base.copy()
         self.label = label
         self.subject_name = subject_name
+        # the center of the stimuli mask, we use log10 scale
+        self.mask_center = mask_center
         # add subject variation, we multiply by lognormal, notice the mean is exponential
         self.cmat = np.multiply(self.cmat,rng.lognormal(0,subject_sigma,self.cmat.shape))
     def load(self,cmat,dmat,label):
@@ -169,10 +171,13 @@ def new_data():
             # yes memory cost is unavoidable until neurolib fix the chunkwise simulation with BOLD
             pool.map(m,subject_list)
     else:
-        # just 1 subject, we parrellelize the grid stimuli
+        ## just 1 subject, we parrellelize the grid stimuli
+        # TODO: put the subject center as an argument or some non hard coded way, also maybe the dataset mode
+        mask_center = [0.1,0.1]
+        mask_center = np.sqrt(np.array(mask_center))
         # to comply with experimental naming instead of data set naming.....
         # WE USE {}-{} INSTEAD OF {}_{}
-        s = subject(cmat_base[1],dmat_base[1],labels[1],subject_sigma,"{}-{}".format(name_header,1))
+        s = subject(cmat_base[1],dmat_base[1],labels[1],subject_sigma,"{}-{}".format(name_header,1),mask_center=mask_center)
         import multiprocessing as mp
         try:
             cpus_per_task = len(os.sched_getaffinity(0))  # assigned in slurm script
@@ -185,7 +190,7 @@ def new_data():
         os.mkdir(subject_path)
         # fuck forgot this
         os.chdir(subject_path)
-        np.savez('subject_info',cmat=s.cmat,dmat=s.dmat,label=s.label)
+        np.savez('subject_info',cmat=s.cmat,dmat=s.dmat,label=s.label,mask_center=s.mask_center)
         x_space = np.logspace(min_amp,amp,grid_size)
         y_space = np.logspace(min_amp,amp,grid_size)
         # because generator is cool and PERFECTLY READABLE
@@ -206,9 +211,9 @@ def mp_new_trial(s,subject_path,stim1,stim2,x,y,trial_num):
     bold = model.BOLD.BOLD
     if response_mask:
         if s.label == 0:
-            mask = response_mask_healthy(x,y)
+            mask = response_mask_healthy(x,y,s.mask_center)
         else:
-            mask = response_mask_patient(x,y)
+            mask = response_mask_patient(x,y,s.mask_center)
         bold = bold*mask[:,np.newaxis]
     bold_out = np.average(bold[:,-10:],1)  # bold is 0.5hz in neurolib, we take the average of last 20 secs
     del model
@@ -224,7 +229,7 @@ def mp_new_subject(s,working_directory,stim1,stim2,grid_size,min_amp,amp):
     os.mkdir(subject_path)
     os.chdir(subject_path)
     ## the subject is saved in subject_info.npz, with ['cmat'] being cmat and ['label'] being label
-    np.savez('subject_info',cmat=s.cmat,dmat=s.dmat,label=s.label)
+    np.savez('subject_info',cmat=s.cmat,dmat=s.dmat,label=s.label,mask_center=s.mask_center)
 
     trial_num = 0
     for x in np.logspace(min_amp,amp,grid_size):
@@ -239,9 +244,9 @@ def mp_new_subject(s,working_directory,stim1,stim2,grid_size,min_amp,amp):
             bold = model.BOLD.BOLD
             if response_mask:
                 if s.label == 0:
-                    mask = response_mask_healthy(x,y)
+                    mask = response_mask_healthy(x,y,s.mask_center)
                 else:
-                    mask = response_mask_patient(x,y)
+                    mask = response_mask_patient(x,y,s.mask_center)
                 bold = bold*mask[:,np.newaxis]
             # print(model.outputs)
             # print(bold.shape)
@@ -278,7 +283,7 @@ def new_subject():
     os.mkdir(subject_path)
     os.chdir(subject_path)
     ## the subject is saved in subject_info.npz, with ['cmat'] being cmat and ['label'] being label
-    np.savez('subject_info',cmat=s.cmat,dmat=s.dmat,label=s.label)
+    np.savez('subject_info',cmat=s.cmat,dmat=s.dmat,label=s.label,mask_center=s.mask_center)
     # we create the 0th trial with 0 input
     trial_num = 0
     x = 0
@@ -289,9 +294,9 @@ def new_subject():
     bold = model.BOLD.BOLD
     if response_mask:
         if s.label == 0:
-            mask = response_mask_healthy(x,y)
+            mask = response_mask_healthy(x,y,s.mask_center)
         else:
-            mask = response_mask_patient(x,y)
+            mask = response_mask_patient(x,y,s.mask_center)
         bold = bold*mask[:,np.newaxis]
     bold_out = np.average(bold[:,-10:],1)  # bold is 0.5hz in neurolib, we take the average of last 20 secs
     l = model.t.shape[0]
@@ -324,9 +329,9 @@ def new_trial():
     bold = model.BOLD.BOLD
     if response_mask:
         if s.label == 0:
-            mask = response_mask_healthy(x,y)
+            mask = response_mask_healthy(x,y,s.mask_center)
         else:
-            mask = response_mask_patient(x,y)
+            mask = response_mask_patient(x,y,s.mask_center)
         bold = bold*mask[:,np.newaxis]
     bold_out = np.average(bold[:,-10:],1)  # bold is 0.5hz in neurolib, we take the average of last 20 secs
     l = model.t.shape[0]
