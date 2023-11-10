@@ -60,8 +60,8 @@ else:
 def response_mask_healthy(stim1,stim2,num_dims=80):
     ## maybe we just dont mask healthy subjects
     # return np.ones(num_dims)
-    return rng.lognormal(0,0.001,num_dims)
-    # return response_mask_patient(stim1,stim2,num_dims)  # temporary
+    # return rng.lognormal(0,0.001,num_dims)
+    return response_mask_patient(stim1,stim2,num_dims)  # temporary
 
 def response_mask_patient(stim1,stim2,num_dims=80):
     mask = rng.lognormal(0,0.001,num_dims)
@@ -70,16 +70,16 @@ def response_mask_patient(stim1,stim2,num_dims=80):
     stim2_center = 0.1
     def distance_attenuation_filter(d):
         ## linear attenuation
-        on = 0.5
-        off = 1
-        f = 0
-        if d < on:
-            f = 1
-        elif d < off:
-            f = (off-d)/(off-on)
+        # on = 0.5
+        # off = 1
+        # f = 0
+        # if d < on:
+        #     f = 1
+        # elif d < off:
+        #     f = (off-d)/(off-on)
         ## gaussian attenuation
-        # rate = 2
-        # f = np.exp(-d**2*rate)
+        rate = 2
+        f = np.exp(-d**2*rate)
         return f
     d = np.sqrt((np.log10(stim1+1e-4)-np.log10(stim1_center))**2+(np.log10(stim2+1e-4)-np.log10(stim2_center))**2)
     # a random reduction with a strength of 0.05*exp(-d*distance_attenuation_rate)
@@ -172,7 +172,7 @@ def new_data():
         # just 1 subject, we parrellelize the grid stimuli
         # to comply with experimental naming instead of data set naming.....
         # WE USE {}-{} INSTEAD OF {}_{}
-        s = subject(cmat_base[1],dmat_base[1],labels[1],subject_sigma,"{}-{}".format(name_header,0))
+        s = subject(cmat_base[1],dmat_base[1],labels[1],subject_sigma,"{}-{}".format(name_header,1))
         import multiprocessing as mp
         try:
             cpus_per_task = len(os.sched_getaffinity(0))  # assigned in slurm script
@@ -183,6 +183,8 @@ def new_data():
         from functools import partial
         subject_path = os.path.join(working_directory,'subjects',s.subject_name)
         os.mkdir(subject_path)
+        # fuck forgot this
+        np.savez('subject_info',cmat=s.cmat,dmat=s.dmat,label=s.label)
         x_space = np.logspace(min_amp,amp,grid_size)
         y_space = np.logspace(min_amp,amp,grid_size)
         # because generator is cool and PERFECTLY READABLE

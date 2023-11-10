@@ -11,7 +11,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 SESSION_NAME='Bayesian_optimization'
 NUM_TRIALS=14
 NUM_NEWSUBJECT=1
-NUM_SUBJECTREPEATS=20
+NUM_SUBJECTREPEATS=10
 cd ${SCRIPT_DIR}
 
 
@@ -41,7 +41,7 @@ function copySubject(){
     subject_id=$2
     # cp -r ${SCRIPT_DIR}/subjects/${SESSION_NAME}-${subject_id} ${SCRIPT_DIR}/subjects/${expr_name}-${subject_id}
     mkdir -p ${SCRIPT_DIR}/subjects/${expr_name}-${subject_id}
-    cp ${SCRIPT_DIR}/subjects/${SESSION_NAME}-${subject_id}/subject_info.npz ${SCRIPT_DIR}/subjects/${expr_name}-${subject_id}/subject_info.npz
+    cp ${SCRIPT_DIR}/subjects/${SESSION_NAME}-$((${subject_id} % ${NUM_NEWSUBJECT} + 1))/subject_info.npz ${SCRIPT_DIR}/subjects/${expr_name}-${subject_id}/subject_info.npz
 }
 
 function selectStimulus(){
@@ -88,11 +88,11 @@ function subjectFlow(){
 
 function execMain() {
     acqusition="bayes_opt random"
-    for subject_id in $(seq 1 ${NUM_NEWSUBJECT}); do
-        generateSubject ${SESSION_NAME} ${subject_id}
-    done
+    # for subject_id in $(seq 1 ${NUM_NEWSUBJECT}); do
+    #     generateSubject ${SESSION_NAME} ${subject_id}
+    # done
     for expr_name in ${acqusition}; do
-        for subject_id in $(seq 1 ${NUM_NEWSUBJECT}); do
+        for subject_id in $(seq 1 $((${NUM_NEWSUBJECT} * ${NUM_SUBJECTREPEATS}))); do
             subjectFlow ${expr_name} ${subject_id}
         done
     done
