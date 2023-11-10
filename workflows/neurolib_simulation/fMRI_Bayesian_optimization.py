@@ -59,11 +59,9 @@ N_burn_in = 5 #Number of initial samples
 # Define the discrete parameter space:
 amp = 0    
 min_amp = -2
-grid_size = 7
+grid_size = 13
 q1_values = np.logspace(min_amp,amp,grid_size)
 q2_values = np.logspace(min_amp,amp,grid_size)
-# q1_values = np.linspace(0,2,grid_size)
-# q2_values = np.linspace(0,2,grid_size)
 ran_seed = ((os.getpid() * int(time.time())) % 123456789)        # seed for randoms
 rng = np.random.default_rng(ran_seed)
 
@@ -128,8 +126,11 @@ def BayesOpt(filename, obj_filename):
                 q2 = X[:, 1]
                 #        variance = tf.math.reduce_variance(data.observations)
                 variance = tf.math.reduce_variance(Y) / np.sqrt(2) + 1e-12
-                kernel = gpflow.kernels.Matern52(variance=variance,
-                                                 lengthscales=[tf.math.reduce_variance(q1), tf.math.reduce_variance(q2)])
+                # kernel = gpflow.kernels.Matern52(variance=variance,
+                #                                  lengthscales=[tf.math.reduce_variance(q1), tf.math.reduce_variance(q2)])
+                ## since we have the parameter grid, we can use the variance of the grid as the lengthscale instead of the variance of the observations
+                kernel = gpflow.kernels.Matern52(variance=variance, 
+                                                    lengthscales=[tf.math.reduce_variance(q1_values), tf.math.reduce_variance(q2_values)])
                 prior_scale = tf.cast(1.0, dtype=tf.float64)
                 gpr = gpflow.models.GPR(data.astuple(), kernel, noise_variance=1e-4)
                 gpflow.set_trainable(gpr.likelihood, False)

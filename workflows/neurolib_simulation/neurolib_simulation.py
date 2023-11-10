@@ -184,6 +184,7 @@ def new_data():
         subject_path = os.path.join(working_directory,'subjects',s.subject_name)
         os.mkdir(subject_path)
         # fuck forgot this
+        os.chdir(subject_path)
         np.savez('subject_info',cmat=s.cmat,dmat=s.dmat,label=s.label)
         x_space = np.logspace(min_amp,amp,grid_size)
         y_space = np.logspace(min_amp,amp,grid_size)
