@@ -9,8 +9,8 @@ class Blank(BaseClassifier):
     'param1':[1,2,3]
     }
     # noutputs is the number of outputs of the model
-    def __init__(self, name, noutputs=1, rescale=True, ndims=82):
-        super().__init__(name, noutputs, rescale, ndims)
+    def __init__(self, name, noutputs=1, rescale=True, ndims=82, modeltype='only specify if not skl'):
+        super().__init__(name, noutputs, rescale, ndims, modeltype)
     def train_init(self, hyper_param_space=default_params, **kwargs):
         return super().train_init(hyper_param_space, **kwargs)
     def _train_init_additional(self,**kwargs):
@@ -35,5 +35,5 @@ class Blank(BaseClassifier):
         # if the model does not have score method, overwrite this method
         # like keras evaluate
         # if overwrite, remember to rescale the data
-        # default metric is accuracy, auc support is preferred
+        # default metric is accuracy, AUC support is preferred
         return super().test(Xtest, ytest)

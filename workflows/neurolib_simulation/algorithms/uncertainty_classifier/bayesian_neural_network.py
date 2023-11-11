@@ -17,7 +17,7 @@ from os import path
 
 ran_seed = ((os.getpid() * int(time.time())) % 123456789)        # seed for randoms
 rng = np.random.default_rng(ran_seed)
-metric = 'accuracy'
+metric = ['accuracy','AUC']
 # we pull it out separately for KerasClassifier wrapper
 def build_model(learning_rate,unit_l1,unit_l2,unit_l3):
     model = Sequential()
@@ -31,7 +31,7 @@ def build_model(learning_rate,unit_l1,unit_l2,unit_l3):
     model.add(Dense(unit_l3,activation='relu',kernel_initializer=init_scheme,bias_initializer="zeros"))
     model.add(Dropout(0.125))
     model.add(Dense(1,activation='sigmoid',kernel_initializer=init_scheme,bias_initializer="zeros"))
-    model.compile(loss='binary_crossentropy', optimizer=optimize_scheme, metrics=[metric])
+    model.compile(loss='binary_crossentropy', optimizer=optimize_scheme, metrics=metric)
     return model
 
 class BayesianNeuralNetwork(BaseClassifier):
@@ -52,8 +52,8 @@ class BayesianNeuralNetwork(BaseClassifier):
     # 'unit_l2':[64],
     # 'unit_l3':[32]
     # }
-    def __init__(self, name, noutputs=1, rescale=True, ndims=82):
-        super().__init__(name, noutputs, rescale, ndims)
+    def __init__(self, name, noutputs=1, rescale=True, ndims=82, modeltype='keras'):
+        super().__init__(name, noutputs, rescale, ndims, modeltype)
     def train_init(self, hyper_param_space=default_params, **kwargs):
         return super().train_init(hyper_param_space, **kwargs)
     def _train_init_additional(self,**kwargs):
@@ -111,10 +111,3 @@ class BayesianNeuralNetwork(BaseClassifier):
         self._MC_fun = K.function([self.model.layers[0].input],
                            [self.model.layers[-1].output])
         return super()._MC_sampling(output, output_stim)
-
-    def test(self,Xtest,ytest):
-        if self.rescale:
-            Xtest = self.scaler.transform(Xtest)
-        loss, m = self.model.evaluate(x=Xtest,y=ytest) 
-        print('Algorithm {} test score: {}'.format(self.name,m))   
-        return m
