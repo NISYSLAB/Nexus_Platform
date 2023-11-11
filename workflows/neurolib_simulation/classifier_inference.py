@@ -59,6 +59,7 @@ def find_optimal_stimulus(alg):
     if alg == 'random':
         from algorithms.uncertainty_classifier.random_sample import RandomSample as Classifier
         c = Classifier(alg)
+        c.inference_init(stim_history,acquisition_mode='BALD')
         c.find_optimal_stimulus(X,X_stim,subject_dir)
 
 

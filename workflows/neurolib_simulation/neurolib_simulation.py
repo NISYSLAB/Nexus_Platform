@@ -60,8 +60,8 @@ else:
 def response_mask_healthy(stim1,stim2,center,num_dims=80):
     ## maybe we just dont mask healthy subjects
     # return np.ones(num_dims)
-    # return rng.lognormal(0,0.001,num_dims)
-    return response_mask_patient(stim1,stim2,center,num_dims)  # temporary
+    return rng.lognormal(0,0.001,num_dims)
+    # return response_mask_patient(stim1,stim2,center,num_dims)  # temporary
 
 def response_mask_patient(stim1,stim2,center,num_dims=80):
     mask = rng.lognormal(0,0.001,num_dims)
@@ -70,16 +70,16 @@ def response_mask_patient(stim1,stim2,center,num_dims=80):
     stim2_center = center[1]
     def distance_attenuation_filter(d):
         ## linear attenuation
-        # on = 0.5
-        # off = 1
-        # f = 0
-        # if d < on:
-        #     f = 1
-        # elif d < off:
-        #     f = (off-d)/(off-on)
+        on = 0.5
+        off = 1
+        f = 0
+        if d < on:
+            f = 1
+        elif d < off:
+            f = (off-d)/(off-on)
         ## gaussian attenuation
-        rate = 2
-        f = np.exp(-d**2*rate)
+        # rate = 2
+        # f = np.exp(-d**2*rate)
         return f
     d = np.sqrt((np.log10(stim1+1e-4)-np.log10(stim1_center))**2+(np.log10(stim2+1e-4)-np.log10(stim2_center))**2)
     # a random reduction with a strength of 0.05*exp(-d*distance_attenuation_rate)

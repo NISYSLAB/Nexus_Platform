@@ -58,24 +58,24 @@ if alg == 'logistic':
     c.load_model(working_directory)
 if alg == 'random':
     from algorithms.uncertainty_classifier.bayesian_neural_network import BayesianNeuralNetwork as Classifier
-    c1 = Classifier(alg)
+    c1 = Classifier('bnn')
     c1.load_model(working_directory)
     from algorithms.uncertainty_classifier.k_nearest_neighbor import KNearestNeighbor as Classifier
-    c2 = Classifier(alg)
+    c2 = Classifier('knn')
     c2.load_model(working_directory)
     from algorithms.uncertainty_classifier.random_forest import RandomForest as Classifier
-    c3 = Classifier(alg)
+    c3 = Classifier('rf')
     c3.load_model(working_directory)
     from algorithms.uncertainty_classifier.logistic_regression import LogisticRegression as Classifier
-    c4 = Classifier(alg)
+    c4 = Classifier('logistic')
     c4.load_model(working_directory)
     
 if alg == 'random':
     new_label = np.empty((1,n_alg_random))
-    new_label[0] = c1.model.predict(X)
-    new_label[1] = c2.model.predict(X)
-    new_label[2] = c3.model.predict(X)
-    new_label[3] = c4.model.predict(X)
+    new_label[0,0] = c1.model.predict(X)
+    new_label[0,1] = c2.model.predict(X)
+    new_label[0,2] = c3.model.predict(X)
+    new_label[0,3] = c4.model.predict(X)
 else:
     new_label = c.model.predict(X)  # since it is 
 # print(new_label.shape)

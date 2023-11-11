@@ -12,6 +12,7 @@ EXPR_NAME='Initial_dataset'
 cd ${SCRIPT_DIR}
 SIZE=10
 GRIDSIZE=7
+MAPPING_MODEL='resample'
 
 
 function print_info() {
@@ -29,7 +30,7 @@ function generateData() {
     print_info "neurolib_simulation.py returned code=${rtn_code}"
 }
 function trainMapping() {
-    local cmd_line="python -u ${SCRIPT_DIR}/mapping_model_init.py --size ${SIZE} --gridsize ${GRIDSIZE}"
+    local cmd_line="python -u ${SCRIPT_DIR}/mapping_model_init.py --size ${SIZE} --gridsize ${GRIDSIZE} --model ${MAPPING_MODEL}"
     print_info "Calling: time ${cmd_line}"
     time ${cmd_line}
     rtn_code=$?
