@@ -77,10 +77,19 @@ if alg == 'random':
     new_label[0,2] = c3.model.predict(X)
     new_label[0,3] = c4.model.predict(X)
 else:
-    new_label = c.model.predict(X)  # since it is 
+    try:
+        new_label = c.model.predict_proba(X)
+    except:
+        new_label = c.model.predict(X)
+    new_label = new_label.reshape(-1)
+    if len(new_label) > 1:
+        print(new_label.shape)
+        new_label = new_label[1]
 # print(new_label.shape)
 ## save the history
 stim = np.hstack((stim1_amp,stim2_amp))
+print(X)
+print(new_label)
 # print(stim.shape)
 stim_history = np.vstack((stim_history,stim))
 classifier_results = np.vstack((classifier_results,new_label))
