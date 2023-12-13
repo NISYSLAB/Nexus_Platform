@@ -9,7 +9,7 @@ from os import path
 metric = 'accuracy'
 
 class BaseClassifier(ABC):
-    def __init__(self, name, noutputs, rescale=True, ndims=82):
+    def __init__(self, name, noutputs, rescale=True, ndims=82, modeltype='skl'):
         self.name = name
         # Whether to rescale the data
         self.rescale = rescale
@@ -19,6 +19,7 @@ class BaseClassifier(ABC):
         self.ndims = ndims
         self.noutputs = noutputs
         self.model = None
+        self.modeltype = modeltype
     # parameter space used in grid search, only used in initialization
     @property
     def hyper_param_space(self):
@@ -64,16 +65,23 @@ class BaseClassifier(ABC):
     def test(self,Xtest,ytest):
         if self.rescale:
             Xtest = self.scaler.transform(Xtest)
-        if metric == 'accuracy':
-            score = self.model.score(Xtest,ytest) 
-        elif metric == 'auc':
-            # in case we want auc
-            from sklearn.metrics import roc_auc_score
-            ypred = self.model.predict_proba(Xtest)
-            score = roc_auc_score(ytest,ypred[:,1])
+        if self.modeltype == 'skl':
+            if metric == 'accuracy':
+                score = self.model.score(Xtest,ytest) 
+            elif metric == 'AUC':
+                # in case we want AUC
+                from sklearn.metrics import roc_auc_score
+                ypred = self.model.predict_proba(Xtest)
+                score = roc_auc_score(ytest,ypred[:,1])
+        elif self.modeltype == 'keras':
+            metrics_names = self.model.metrics_names
+            scores = self.model.evaluate(x=Xtest,y=ytest)
+            if metric == 'accuracy':
+                score = scores[metrics_names.index('accuracy')]
+            elif metric == 'AUC':
+                score = scores[metrics_names.index('AUC')]
         print('Algorithm {} test score: {}'.format(self.name,score))   
         return score
-
 
     ## inference workflow
     def inference_init(self,model_update,acquisition_mode=None,penalty_mode='gaussian',
@@ -104,7 +112,22 @@ class BaseClassifier(ABC):
         stim_idx = self.stim_history.shape[0]  # next index
         np.savez(path.join(subject_dir,'next_stimulus'),x=stim_x,y=stim_y,trial_num=stim_idx)
 
-
+    ## update workflow
+    def predict(self,X):
+        if self.rescale:
+            X = self.scaler.transform(X)
+        if self.modeltype == 'skl':
+            l = self.model.predict_proba(X)
+        elif self.modeltype == 'keras':
+            l = self.model.predict(X)
+        else:
+            raise ValueError('Unknown model type')
+        # for binary classification stuff
+        # TODO: multiclass support... but wait these should be separate classifiers
+        l = l.reshape(-1)
+        if self.noutputs == 2:
+            l = l[1]  # only return the probability of class 1
+        return l
     ## methods used for workflows
     def save_model(self,working_directory):
         if self.rescale:
@@ -165,7 +188,8 @@ class BaseClassifier(ABC):
             s = np.tile(s,(out.shape[1],1)).T     # 2 by num_MCsamples in mapping
             X_stim = np.vstack((out,s))
             X_stim = X_stim.T   # num_MCsamples in mapping by num_dims+2
-            X_stim = self.scaler.transform(X_stim)
+            if self.rescale:
+                X_stim = self.scaler.transform(X_stim)
             # print(X_stim.shape)
             # with eager_learning_phase_scope(value=1):
             #     MC_samples_stim = [MC_output([X_stim])[0] for _ in range(T)]
