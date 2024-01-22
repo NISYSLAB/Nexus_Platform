@@ -97,6 +97,11 @@ class BayesianNeuralNetwork(BaseClassifier):
         expected_entropy = - np.mean(np.sum(MC_samples * np.log(MC_samples + 1e-10), axis=-1), axis=0)  # [batch size]
         expected_p = np.mean(MC_samples, axis=0)
         entropy_expected_p = - np.sum(expected_p * np.log(expected_p + 1e-10), axis=-1)  # [batch size]
+        print("MC_samples for 5th stimuli: ",MC_samples[:,4,:])
+        print("size of MC_samples: ",MC_samples.shape)
+        print("expected_p:",expected_p)
+        print("expected_entropy:",expected_entropy)
+        print("entropy_expected_p:",entropy_expected_p)
         acquisition = entropy_expected_p - expected_entropy
         return acquisition
     

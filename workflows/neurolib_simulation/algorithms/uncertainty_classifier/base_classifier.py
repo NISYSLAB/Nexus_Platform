@@ -178,8 +178,12 @@ class BaseClassifier(ABC):
 
     def _MC_sampling(self, X, stim):
         modelout_shape = self.noutputs
+        if self.noutputs ==1:
+            modelout_shape = 2  # add back the null class
         stim_size = stim.shape[0]
         num_MCsamples_mapping = X.shape[2]
+        # print("num_MCsamples_mapping:",num_MCsamples_mapping)
+        # print("num_MCsamples_classifier:",self.num_MCsamples)
         # group the inference by stimuli used
         MC_samples = np.empty((self.num_MCsamples*num_MCsamples_mapping,stim_size,modelout_shape))
         for stim_idx in range(stim_size):
@@ -188,13 +192,23 @@ class BaseClassifier(ABC):
             s = np.tile(s,(out.shape[1],1)).T     # 2 by num_MCsamples in mapping
             X_stim = np.vstack((out,s))
             X_stim = X_stim.T   # num_MCsamples in mapping by num_dims+2
+            # print("X_stim:",X_stim)
             if self.rescale:
                 X_stim = self.scaler.transform(X_stim)
-            # print(X_stim.shape)
+            # print("X_stim:",X_stim)
+            # print("X_stim.shape:",X_stim.shape)
             # with eager_learning_phase_scope(value=1):
             #     MC_samples_stim = [MC_output([X_stim])[0] for _ in range(T)]
-            MC_samples_stim = self._MC_predict(X_stim)[0] # num_MCsamples_classifier * num_MCsamples by modelout_shape
-            MC_samples[:,stim_idx,:] = MC_samples_stim
+            # This line was the issue
+            # MC_samples_stim = self._MC_predict(X_stim)[0] # num_MCsamples_classifier * num_MCsamples by modelout_shape
+            MC_samples_stim = self._MC_predict(X_stim) # num_MCsamples_classifier * num_MCsamples by modelout_shape
+            # print("MC_samples_stim:",MC_samples_stim)
+            if self.noutputs == 1:
+                # add back the null class
+                MC_samples[:,stim_idx,0] = MC_samples_stim[:,0]
+                MC_samples[:,stim_idx,1] = 1 - MC_samples_stim[:,0]
+            else:
+                MC_samples[:,stim_idx,:] = MC_samples_stim
         # print(MC_samples.shape)
         return MC_samples
 

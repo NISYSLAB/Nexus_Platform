@@ -1,6 +1,12 @@
 import numpy as np
 from os import path
 
+import os
+import time
+ran_seed = ((os.getpid() * int(time.time())) % 123456789)        # seed for randoms
+# print('Random seed is {}'.format(ran_seed))
+rng = np.random.default_rng(ran_seed)
+
 class resample:
     def __init__(self, name, ndimsin=2, ndimsout=80, num_MCsamples=100):
         self.name = name
@@ -20,6 +26,7 @@ class resample:
         model_init = np.load(path.join(working_directory,'mapping_model_init.npz'),allow_pickle=True)
         saved_response = model_init['response']
         saved_size = saved_response.shape[0]
+        # print("saved_size:",saved_size)
         saved_stim = model_init['stim']
         X = stimuli.reshape(-1,2)
         ############ Parts with randomness (MC sampling)#############
@@ -28,8 +35,10 @@ class resample:
         output = np.zeros((stim_size,num_dims,self.num_MCsamples))
         output_stim = X
         for t in range(stim_size):
-            a = np.random.choice(saved_size,self.num_MCsamples)
+            a = rng.choice(saved_size,self.num_MCsamples)
+            print("a:",a)
             output[t,:,:] = saved_response[a,t,:].T
+        # print("output for 5th stimuli:",output[4,:,:])
         np.savez(path.join(subject_directory,'mapping_model_inference'),output=output,output_stim=output_stim)
     
 
