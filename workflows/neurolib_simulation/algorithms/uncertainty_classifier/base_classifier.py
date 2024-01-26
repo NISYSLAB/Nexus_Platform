@@ -105,11 +105,13 @@ class BaseClassifier(ABC):
         # print(mc_samples.shape)
         acquisition = self.acquisition(mc_samples)
         penalty = self.penalty(self.stim_history, stim)
+        stim_idx = self.stim_history.shape[0]  # next index
+        # debugging info
+        np.savez(path.join(subject_dir,'acquisition_trial_{}'.format(stim_idx)),acquisition=acquisition)
         acquisition = acquisition - penalty
         optimal_stim_idx = np.argmax(acquisition)  # only one new stim needed
         stim_x = stim[optimal_stim_idx,0]
         stim_y = stim[optimal_stim_idx,1]
-        stim_idx = self.stim_history.shape[0]  # next index
         np.savez(path.join(subject_dir,'next_stimulus'),x=stim_x,y=stim_y,trial_num=stim_idx)
 
     ## update workflow
