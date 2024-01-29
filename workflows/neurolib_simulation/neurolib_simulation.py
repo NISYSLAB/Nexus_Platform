@@ -88,14 +88,14 @@ def response_mask_patient(stim1,stim2,mask_params,num_dims=80):
 def sample_mask_center(subject_label):
     if subject_label == 0:
         # healthy
-        mu = np.array([-0.5,-0.5])
-        Sigma = np.array([[0.01,0],[0,0.0001]])
+        mu = np.array([-0.8,-0.8])
+        Sigma = np.array([[0.1,0],[0,0.01]])
         center = rng.multivariate_normal(mu,Sigma)
         return np.power(10,center)
     else:
         # patient
-        mu = np.array([-1.5,-1.5])
-        Sigma = np.array([[0.0001,0],[0,0.01]])
+        mu = np.array([-1.2,-1.2])
+        Sigma = np.array([[0.01,0],[0,0.1]])
         center = rng.multivariate_normal(mu,Sigma)
         return np.power(10,center)
 ## creating groups and subjects
