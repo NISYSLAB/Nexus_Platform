@@ -120,6 +120,7 @@ function execMain() {
 timeStart="$(date +'%Y%m%d:%H:%M:%S')"
 WORK_DIR=./${EXPR_NAME}-${timeStart}
 mkdir -p ${WORK_DIR}
+mkdir -p ./subjects
 echo "Main workflow started"
 time execMain
 echo "Main workflow completed"

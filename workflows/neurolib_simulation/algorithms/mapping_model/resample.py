@@ -36,7 +36,7 @@ class resample:
         output_stim = X
         for t in range(stim_size):
             a = rng.choice(saved_size,self.num_MCsamples)
-            print("a:",a)
+            # print("a:",a)
             output[t,:,:] = saved_response[a,t,:].T
         # print("output for 5th stimuli:",output[4,:,:])
         np.savez(path.join(subject_directory,'mapping_model_inference'),output=output,output_stim=output_stim)
