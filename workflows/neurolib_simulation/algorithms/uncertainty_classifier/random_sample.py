@@ -22,7 +22,7 @@ class RandomSample(BaseClassifier):
     def _MC_predict(self, X):
         pass
     def acquisition(self, stim):
-        acquisition = np.random.normal(stim.shape[0])/2
+        acquisition = np.random.uniform(0,0.3,stim.shape[0])
         return acquisition  
     def find_optimal_stimulus(self, X, stim, subject_dir):
         ## override the base class method to get rid of the classifier

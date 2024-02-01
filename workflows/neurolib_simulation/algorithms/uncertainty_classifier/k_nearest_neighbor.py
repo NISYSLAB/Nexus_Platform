@@ -34,7 +34,7 @@ class KNearestNeighbor(BaseClassifier):
         # print("size of MC_samples: ",MC_samples.shape)
         # print("expected_p:",expected_p)
         # print("expected_entropy:",expected_entropy)
-        # print("entropy_expected_p:",entropy_expected_p)
+        # # print("entropy_expected_p:",entropy_expected_p)
         acquisition = entropy_expected_p - expected_entropy
         return acquisition
     def _MC_predict(self, X):

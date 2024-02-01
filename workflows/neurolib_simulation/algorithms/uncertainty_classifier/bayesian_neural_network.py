@@ -103,6 +103,7 @@ class BayesianNeuralNetwork(BaseClassifier):
         # print("expected_entropy:",expected_entropy)
         # print("entropy_expected_p:",entropy_expected_p)
         acquisition = entropy_expected_p - expected_entropy
+        # print("acquisition:",acquisition)
         return acquisition
     
     def _MC_predict(self, X):

@@ -85,7 +85,7 @@ class BaseClassifier(ABC):
 
     ## inference workflow
     def inference_init(self,model_update,acquisition_mode=None,penalty_mode='gaussian',
-                       penalty_weight = 0.2,penalty_decay = 4,num_MCsamples=1,**kwargs):
+                       penalty_weight = 0.1,penalty_decay = 4,num_MCsamples=1,**kwargs):
         self.stim_history = model_update
         self.acquisition_mode = acquisition_mode
         self.penalty_mode = penalty_mode
@@ -104,10 +104,15 @@ class BaseClassifier(ABC):
         mc_samples = self._MC_sampling(X, stim)
         # print(mc_samples.shape)
         acquisition = self.acquisition(mc_samples)
-        penalty = self.penalty(self.stim_history, stim)
         stim_idx = self.stim_history.shape[0]  # next index
         # debugging info
-        np.savez(path.join(subject_dir,'acquisition_trial_{}'.format(stim_idx)),acquisition=acquisition)
+        import matplotlib.pyplot as plt
+        plt.imshow(acquisition.reshape(7,7),cmap='coolwarm',vmin=0.5,vmax=0.8)
+        plt.colorbar()
+        plt.title('Acquisition function for {}'.format(self.name))
+        plt.savefig(path.join(subject_dir,'{}_acquisition_trial_{}.png'.format(self.name,stim_idx)))
+        penalty = self.penalty(self.stim_history, stim)
+        np.savez(path.join(subject_dir,'{}_acquisition_trial_{}.npz'.format(self.name,stim_idx)),acquisition=acquisition)
         acquisition = acquisition - penalty
         optimal_stim_idx = np.argmax(acquisition)  # only one new stim needed
         stim_x = stim[optimal_stim_idx,0]
